@@ -2,11 +2,9 @@
 
 ## Authors
 
-* **Curt Toppel** - [PurpleBooth](https://github.com/ctoppel)
-* **Rodrigo Leme de Mello** - [PurpleBooth](https://github.com/lemerodrigo)
-* **Trung Dinh** - [PurpleBooth](https://github.com/skykeeper0)
-
-See also the list of [contributors](https://github.com/YouDescribe/contributors) who participated in this project.
+* **Curt Toppel** - [https://github.com/ctoppel](https://github.com/ctoppel)
+* **Rodrigo Leme de Mello** - [https://github.com/lemerodrigo](https://github.com/lemerodrigo)
+* **Trung Dinh** - [https://github.com/skykeeper0](https://github.com/skykeeper0)
 
 ## License
 
