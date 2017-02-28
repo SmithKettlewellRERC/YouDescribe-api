@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const audioClips = require('./routes/audioClips');
 
 // Logs library.
-const morgan = require('morgan')
+const morgan = require('morgan');
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;

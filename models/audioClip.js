@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const schema = mongoose.Schema;
 
-const audioClipSchema = new schema({
+const Schema = mongoose.Schema;
+
+const audioClipSchema = new Schema({
   start_time: Number,
   duration: Number,
   download_counter: Number,
@@ -10,7 +11,7 @@ const audioClipSchema = new schema({
   path: String,
   created_at: Number,
   updated_at: Number,
-})
+});
 
 const audioClip = mongoose.model('audioClip', audioClipSchema);
 
