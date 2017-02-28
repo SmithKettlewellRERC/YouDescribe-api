@@ -1,0 +1,27 @@
+{
+  "name": "youdescribeapi",
+  "version": "1.0.0",
+  "description": "A RestFul API to handle all data for YouDescribe Platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YouDescribe/api"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YouDescribe/api/issues"
+  },
+  "homepage": "https://github.com/YouDescribe/api",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "^4.14.1",
+    "install": "^0.8.7",
+    "mongoose": "^4.8.5",
+    "morgan": "^1.8.1",
+    "node": "0.0.0"
+  }
+}
