@@ -1,27 +1,35 @@
+// General imports.
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
-const morgan = require('morgan')
-const port = process.env.PORT || 8080;
-const app = express();
-app.use(morgan('combined'));
+
+// Our server routes.
 const audioClips = require('./routes/audioClips');
 
+// Logs library.
+const morgan = require('morgan')
+
+// Server HTTP port setup.
+const port = process.env.PORT || 8080;
+
+// Our web framework itself.
+const app = express();
+
+// Apache format logs.
+app.use(morgan('combined'));
+
+// Body parser middleware setup.
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 
+// Middleware for routes.
 app.use('/audioClips', audioClips);
 
-// app.use((err, req, res, next) => {
-//   res.status(err.status || 500).json(err);
-// });
-
+// The Restful API drain.
 app.get('*', (req, res) => {
-  // res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
   res.status(200).json('{"status":"ok"}');
 });
 
+// Starting the port listener.
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}...`);
 });
