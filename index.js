@@ -1,9 +1,7 @@
 // General imports.
 const express = require('express');
 const bodyParser = require('body-parser');
-
-// Our server routes.
-const audioClips = require('./routes/audioClips');
+const db = require('./db/connection');
 
 // Logs library.
 const morgan = require('morgan');
@@ -18,11 +16,14 @@ const app = express();
 app.use(morgan('combined'));
 
 // Body parser middleware setup.
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+
+// Our server routes.
+const videos = require('./routes/videos');
 
 // Middleware for routes.
-app.use('/audioClips', audioClips);
+app.use('/videos', videos);
 
 // The Restful API drain.
 app.get('*', (req, res) => {
