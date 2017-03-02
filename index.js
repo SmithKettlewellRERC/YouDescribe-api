@@ -16,13 +16,18 @@ const app = express();
 app.use(morgan('combined'));
 
 // Body parser middleware setup.
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+// app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
 
 // Our server routes.
+const wishList = require('./routes/wishList');
 const videos = require('./routes/videos');
 
 // Middleware for routes.
+app.use('/wishlist', wishList);
 app.use('/videos', videos);
 
 // The Restful API drain.

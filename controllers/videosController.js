@@ -1,30 +1,30 @@
-const constants = require('./../config/constants');
+// System modules.
+const fs = require('fs');
+
+// Application modules.
+const apiMessages = require('./../shared/apiMessages');
 const Video = require('./../models/video');
 
+// The controller itself.
 const videosController = {
-  addOne: () => {
-  },
+  addOne: (req, res) => {},
 
-  findOne: (req, res) => {
+  getOne: (req, res) => {
     const id = req.params.id;
-
     Video.findOne({ external_media_id: id })
-
-    .then((doc) => {
-      if (doc) {
-        const ret = constants.RESPONSE_SUCCESS_WITH_DATA;
-        ret.data = doc;
+    .then((video) => {
+      if (video) {
+        const ret = apiMessages.getResponseByCode(1000);
+        ret.result = video;
         res.status(ret.status).json(ret);
       } else {
-        const ret = constants.RESPONSE_ERROR_DATA_NOT_FOUND;
-        ret.requested_id = id;
+        const ret = apiMessages.getResponseByCode(53);
         res.status(ret.status).json(ret);
       }
     })
-
     .catch((err) => {
       console.log(err);
-      const ret = constants.RESPONSE_ERROR_INTERNAL_SERVER_ERROR;
+      const ret = apiMessages.getResponseByCode(1);
       res.status(ret.status).json(ret);
     });
   },

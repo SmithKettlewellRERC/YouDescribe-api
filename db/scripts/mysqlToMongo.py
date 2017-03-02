@@ -17,7 +17,7 @@ def importCountries():
         db.countries.insert_one({
             "id": country_id,
             "name": country_name,
-            "country_code": country_name_short
+            "code": country_name_short
         })
     cursor.close()
     print '{} countries imported.'.format(counter)
