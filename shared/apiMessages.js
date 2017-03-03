@@ -38,9 +38,38 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-
-    52: {
-      message: '',
+    52: { // wishListController
+      message: 'The requested wish list item does not exist',
+      status: 400,
+      type: 'error',
+    },
+    53: { // audioClipController
+      message: 'You are trying to add an audio clip to an existent video',
+      status: 400,
+      type: 'error',
+    },
+    54: { // wishListController, audioClipController
+      message: 'Error saving data',
+      status: 400,
+      type: 'error',
+    },
+    55: { // videoController
+      message: 'The requested video was not found',
+      status: 400,
+      type: 'error',
+    },
+    56: { // videoController
+      message: 'The video you are trying to save already exists',
+      status: 400,
+      type: 'error',
+    },
+    57: { // videoController
+      message: 'You are trying to update a video that does not exist',
+      status: 400,
+      type: 'error',
+    },
+    58: { // audioClipsController
+      message: 'You are trying to add a audio clip to a video that does not exist',
       status: 400,
       type: 'error',
     },
@@ -51,6 +80,26 @@ module.exports = {
     },
     1001: { // wishListController
       message: 'Wish list item was saved successfully',
+      status: 200,
+      type: 'success',
+    },
+    1002: { // wishListController
+      message: 'Wish list item successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1003: { // videoController
+      message: 'Video metadata was successfully saved',
+      status: 200,
+      type: 'success',
+    },
+    1004: { // videoController
+      message: 'Video metadata was successfully updated',
+      status: 200,
+      type: 'success',
+    },
+    1005: { // audioClipsController
+      message: 'Audio clip was successfully saved',
       status: 200,
       type: 'success',
     },

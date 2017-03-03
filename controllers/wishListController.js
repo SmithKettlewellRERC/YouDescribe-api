@@ -1,5 +1,3 @@
-// System modules.
-
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
@@ -8,10 +6,11 @@ const WishList = require('./../models/wishList');
 
 // The controller itself.
 const wishListController = {
+
   addOne: (req, res) => {
     const externalMediaId = req.body.externalMediaId;
 
-    // Let's first search at videos collection.
+    // Let's first search on videos collection.
     Video.findOne({ external_media_id: externalMediaId }, (err1, video) => {
       if (err1) {
         console.log(err1);
@@ -25,7 +24,7 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         // Let's now search at wishlist collection.
-        WishList.findOne({ external_media_id: externalMediaId }, (err2, wishListItem) => {
+        WishList.findOne({ _id: externalMediaId }, (err2, wishListItem) => {
 
           // Error handling.
           if (err2) {
@@ -34,19 +33,24 @@ const wishListController = {
             res.status(ret.status).json(ret);
           }
 
-          // We already have in the database the video requested..
+          // We already have in the database the video requested.
           if (wishListItem) {
             // Let's increment the requested cunter.
-            wishListItem.request_counter.$inc();
-            wishListItem.save();
+            wishListItem.request_counter += 1;
+            wishListItem.save()
+            .catch((errSave) => {
+              console.log(errSave);
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
+            });
             const ret = apiMessages.getResponseByCode(51);
             res.status(ret.status).json(ret);
           } else {
             // Let's create.
             const wishListReq = {
+              _id: externalMediaId,
               video_title: req.body.videoTitle,
-              external_media_id: externalMediaId,
-              requested_counter: 1,
+              request_counter: 1,
               created_at: nowUtc(),
               updated_at: nowUtc(),
             };
@@ -72,11 +76,24 @@ const wishListController = {
   },
 
   getOne: (req, res) => {
+    const id = req.params.id;
+    WishList.findOne({ _id: id })
+    .then((wishListItem) => {
+      if (wishListItem) {
+        const ret = apiMessages.getResponseByCode(1002);
+        ret.result = wishListItem;
+        res.status(ret.status).json(ret);
+      } else {
+        const ret = apiMessages.getResponseByCode(52);
+        res.status(ret.status).json(ret);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      const ret = apiMessages.getResponseByCode(1);
+      res.status(ret.status).json(ret);
+    });
   },
-  
-  getAll: (req, res) => {
-  },
-
 };
 
 module.exports = wishListController;

@@ -20,15 +20,17 @@ app.use(morgan('combined'));
 // app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 // Our server routes.
 const wishList = require('./routes/wishList');
 const videos = require('./routes/videos');
+const audioClips = require('./routes/audioClips');
 
 // Middleware for routes.
 app.use('/wishlist', wishList);
 app.use('/videos', videos);
+app.use('/audioclips', audioClips);
 
 // The Restful API drain.
 app.get('*', (req, res) => {
