@@ -66,7 +66,7 @@ def importVideos():
                 'old_id': clip_id,
                 'created_at': clip_created,
                 'updated_at': clip_modified,
-                'title': '',
+                # 'title': '',
                 # 'downloads': clip_download_count,
                 'type': clip_function.split('_')[1],
                 'start_time': str(clip_start_time),
@@ -74,7 +74,7 @@ def importVideos():
                 'duration': 0,
                 'filename': clip_filename,
             }
-            movie['audio_descriptions'][0]['clips'].append(clip)
+            movie['audio_descriptions']['1']['clips'][clip_id_counter] = clip
             clip_id_counter = clip_id_counter + 1
         print movie
         try:

@@ -8,8 +8,20 @@ const Video = require('./../models/video');
 
 const audioClipController = {
   addOne: (req, res) => {
+    console.log(req.fields);
+    // console.log(req.files);
+
+
+
+
+    console.log('DEBUGGGGG');
+
+    res.status(200).json({debug:1});
+
+
+
+
     const videoId = req.params.videoId;
-    let audioDescriptionId = req.params.audioDescriptionId;
 
     Video.findOne({ _id: videoId }, (err, video) => {
       if (err) {
@@ -19,29 +31,32 @@ const audioClipController = {
       }
       if (video) {
         const newAudioClip = {
-          title: 'opa',
-          type: 'inline',
-          start_time: 1,
-          end_time: 2,
-          duration: 105,
+          title: req.body.title,
+          type: req.body.title,
+          start_time: req.body.start_time,
+          end_time: req.body.end_time,
+          duration: req.body.duration,
           filename: 'clip_filename.wav',
           created_at: nowUtc(),
           updated_at: nowUtc(),
         };
 
-        if (video.audio_descriptions) {
-          const ad = video.audio_descriptions[audioDescriptionId];
-          const newAudioClipId = Object.keys(ad.clips).sort().slice(-1) + 1;
-          ad.clips[newAudioClipId] = newAudioClipId;
-        } else {
-          video.audio_descriptions = {
-            1: {
-              clips: {
-                1: newAudioClip,
-              }
-            }
+        // Int he future we will have to fix this to allow multiple ADs.
+        if (!video.audio_descriptions) {
+          video.audio_descriptions = {};
+          video.audio_descriptions[1] = {
+            likes: 0,
+            clips: {},
           };
         }
+
+        let newAudioClipId = 1;
+        const clipsKeys = Object.keys(video.audio_descriptions[1].clips);
+        if (clipsKeys.length > 0) {
+          newAudioClipId = parseInt(clipsKeys.sort().slice(-1)) + 1;
+        }
+        video.audio_descriptions[1].clips[newAudioClipId] = newAudioClip;
+        video.markModified('audio_descriptions');
         video.save()
         .then((videoSaved) => {
           const ret = apiMessages.getResponseByCode(1002);

@@ -59,7 +59,7 @@ module.exports = {
       type: 'error',
     },
     56: { // videoController
-      message: 'The video you are trying to save already exists',
+      message: 'The video you are trying to create already exists',
       status: 400,
       type: 'error',
     },
@@ -70,6 +70,11 @@ module.exports = {
     },
     58: { // audioClipsController
       message: 'You are trying to add a audio clip to a video that does not exist',
+      status: 400,
+      type: 'error',
+    },
+    59: { // videoController
+      message: 'We do not have videos which satisfies your query',
       status: 400,
       type: 'error',
     },
@@ -100,6 +105,11 @@ module.exports = {
     },
     1005: { // audioClipsController
       message: 'Audio clip was successfully saved',
+      status: 200,
+      type: 'success',
+    },
+    1006: { // videoController
+      message: 'Videos metadata successfully retrieved',
       status: 200,
       type: 'success',
     },

@@ -1,7 +1,10 @@
 // General imports.
 const express = require('express');
+const formidable = require('express-formidable');
 const bodyParser = require('body-parser');
 const db = require('./db/connection');
+const compression = require('compression');
+
 
 // Logs library.
 const morgan = require('morgan');
@@ -12,6 +15,19 @@ const port = process.env.PORT || 8080;
 // Our web framework itself.
 const app = express();
 
+// Compression.
+app.use(compression());
+
+// CORS.
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  // res.header('Access-Control-Allow-Headers', 'Content-Type');
+  // res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+
 // Apache format logs.
 app.use(morgan('combined'));
 
@@ -21,6 +37,9 @@ app.use(morgan('combined'));
 
 // parse application/json
 app.use(bodyParser.json());
+
+// Body parser does not know how to handle multipart. :(
+app.use(formidable());
 
 // Our server routes.
 const wishList = require('./routes/wishList');

@@ -86,6 +86,29 @@ const videosController = {
       res.status(ret.status).json(ret);
     });
   },
+
+  getAll: (req, res) => {
+    Video.find({})
+    // Video.find({}).limit(30)
+    .then((videos) => {
+      if (videos) {
+        const ret = apiMessages.getResponseByCode(1006);
+        videos = videos.filter((video) => {
+          return video._id.length === 11 && video.title.length > 10;
+        });
+        ret.result = videos.slice(0,30);
+        res.status(ret.status).json(ret);
+      } else {
+        const ret = apiMessages.getResponseByCode(59);
+        res.status(ret.status).json(ret);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      const ret = apiMessages.getResponseByCode(1);
+      res.status(ret.status).json(ret);
+    });
+  },
 };
 
 module.exports = videosController;
