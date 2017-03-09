@@ -78,6 +78,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    60: { // audioClipsController
+      message: 'The audioclip just accepts requests with a file attached',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,

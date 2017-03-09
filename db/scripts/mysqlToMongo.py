@@ -25,63 +25,80 @@ def importVideos():
     db.drop_collection("videos")
     cursor = conn.cursor(buffered=True)
     cursor2 = conn.cursor()
+    cursor3 = conn.cursor()
     cursor.execute("SELECT movie_id, movie_name, movie_active, movie_media_id, movie_author, movie_created, movie_modified FROM movie")
-    coll = db['movies']
-    counter = 1
+    coll = db['videos']
+    counter = 0
     for movie_id,movie_name,movie_active,movie_media_id,movie_author,movie_created,movie_modified in cursor:
-        print 'Importing {}'.format(movie_id)
-        status = 'published'
-        if movie_active == 1:
-            status = 'removed'
+        counter = counter + 1
+        if counter > 5000:
+            break
+        if movie_media_id and len(movie_media_id) == 11 and movie_active == 1:
+            pass
+        else:
+            continue
+        author_name = ''
+        author_email = ''
+        if movie_author:
+            cursor3.execute("Select user_email, user_handle from user where user_id={}".format(movie_author))
+            row = cursor3.fetchone()
+            if row and len(row) == 2:
+                author_email = row[0]
+                author_name = row[1]
         movie = {
             '_id': movie_media_id,
-            'old_id': movie_id,
+            'legacy_id': str(movie_id),
             'title': movie_name,
             'created_at': movie_created,
             'updated_at': movie_modified,
             'views': 0,
             'language': 1,
-            'status': status, #draft, #removed
+            'status': 'published',
             'audio_descriptions': {
                 '1': {
-                    'author': movie_author,
+                    'legacy_author_name': author_name,
+                    'legacy_author_email': author_email,
                     'likes': 0,
                     'clips': {}
                 }
             },
             'notes': ''
         }
-        # if counter > 2:
-        #     break
-        counter = counter + 1
         # print movie_name
         query = "select clip_id,clip_active,clip_filename,clip_start_time,clip_filename,clip_created,clip_modified,clip_download_count,clip_function from clip where movie_fk={}".format(movie_id)
         # print query
         cursor2.execute(query)
         clip_id_counter = 1
         for clip_id,clip_active,clip_filename,clip_start_time,clip_filename,clip_created,clip_modified,clip_download_count,clip_function in cursor2:
-            print '--- clip: {}'.format(clip_id)
             clip = {
                 'id': str(clip_id_counter), 
-                'old_id': clip_id,
+                'legacy_id': str(clip_id),
                 'created_at': clip_created,
                 'updated_at': clip_modified,
-                # 'title': '',
+                'title': '',
                 # 'downloads': clip_download_count,
                 'type': clip_function.split('_')[1],
                 'start_time': str(clip_start_time),
                 'end_time': 0,
                 'duration': 0,
+                'path': '/legacy',
                 'filename': clip_filename,
             }
-            movie['audio_descriptions']['1']['clips'][clip_id_counter] = clip
+            movie['audio_descriptions']['1']['clips'][str(clip_id_counter)] = clip
             clip_id_counter = clip_id_counter + 1
-        print movie
-        try:
+
+        if len(movie['audio_descriptions']['1']['clips'].keys()) > 0:
+            print '{}. Importing movie_id: {}, youtube_id: {}, movie_active: {}'.format(counter, movie_id, 
+            movie_media_id, movie_active)
+            print
+            print 'ID: {}'.format(movie['_id'])
+            print
+            # try:
             db.videos.insert_one(movie)
-        except:
-            print 'duplicate'
+            # except:
+            #     print 'ERROR ###'
     cursor2.close()
+    cursor3.close()
     cursor.close()
 
 if __name__ == '__main__':
@@ -96,7 +113,7 @@ if __name__ == '__main__':
     db = client['youdescribe']
 
     importVideos()
-    importCountries()
+    # importCountries()
 
     conn.close()
     print

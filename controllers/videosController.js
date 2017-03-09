@@ -43,6 +43,7 @@ const videosController = {
       console.log(err);
       const ret = apiMessages.getResponseByCode(1);
       res.status(ret.status).json(ret);
+      return;
     });    
   },
 
@@ -55,6 +56,7 @@ const videosController = {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
+        return;
       }
       if (video) {
         const ret = apiMessages.getResponseByCode(1004);
@@ -93,10 +95,8 @@ const videosController = {
     .then((videos) => {
       if (videos) {
         const ret = apiMessages.getResponseByCode(1006);
-        videos = videos.filter((video) => {
-          return video._id.length === 11 && video.title.length > 10;
-        });
-        ret.result = videos.slice(0,30);
+        // ret.result = videos.slice(0,30);
+        ret.result = videos;
         res.status(ret.status).json(ret);
       } else {
         const ret = apiMessages.getResponseByCode(59);

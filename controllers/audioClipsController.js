@@ -8,18 +8,15 @@ const Video = require('./../models/video');
 
 const audioClipController = {
   addOne: (req, res) => {
-    console.log(req.fields);
-    // console.log(req.files);
+    console.log('BODY', req.body);
+    console.log('FILES', req.files);
 
-
-
-
-    console.log('DEBUGGGGG');
-
-    res.status(200).json({debug:1});
-
-
-
+    // We only accept requests with files attached.
+    if (!req.files.wavfile) {
+      const ret = apiMessages.getResponseByCode(60);
+      res.status(ret.status).json(ret);
+      return;
+    }
 
     const videoId = req.params.videoId;
 
@@ -28,6 +25,7 @@ const audioClipController = {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
+        return;
       }
       if (video) {
         const newAudioClip = {
@@ -70,7 +68,7 @@ const audioClipController = {
         });
       } else {
         const ret = apiMessages.getResponseByCode(58);
-        res.status(ret.status).json(ret);
+        res.status(ret.status).json(ret)
       }
     });
   }

@@ -1,10 +1,10 @@
 // General imports.
 const express = require('express');
-const formidable = require('express-formidable');
-const bodyParser = require('body-parser');
+const path = require('path');
+const bb = require('express-busboy');
 const db = require('./db/connection');
 const compression = require('compression');
-
+const conf = require('./shared/config')();
 
 // Logs library.
 const morgan = require('morgan');
@@ -15,8 +15,17 @@ const port = process.env.PORT || 8080;
 // Our web framework itself.
 const app = express();
 
+const bbOptions = {
+  upload: true,
+  path: path.join(__dirname, 'uploads'),
+  // allowedPath: /^\/uploads$/,
+  // allowedPath: /./,
+  restrictMultiple: false,
+};
+bb.extend(app, bbOptions);
+
 // Compression.
-app.use(compression());
+// app.use(compression());
 
 // CORS.
 app.use((req, res, next) => {
@@ -31,29 +40,21 @@ app.use((req, res, next) => {
 // Apache format logs.
 app.use(morgan('combined'));
 
-// Body parser middleware setup.
-// parse application/x-www-form-urlencoded
-// app.use(bodyParser.urlencoded({ extended: false }))
-
-// parse application/json
-app.use(bodyParser.json());
-
-// Body parser does not know how to handle multipart. :(
-app.use(formidable());
-
 // Our server routes.
 const wishList = require('./routes/wishList');
 const videos = require('./routes/videos');
 const audioClips = require('./routes/audioClips');
 
 // Middleware for routes.
-app.use('/wishlist', wishList);
-app.use('/videos', videos);
-app.use('/audioclips', audioClips);
+app.use(`/${conf.apiVersion}/wishlist`, wishList);
+app.use(`/${conf.apiVersion}/videos`, videos);
+app.use(`/${conf.apiVersion}/audioclips`, audioClips);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // The Restful API drain.
 app.get('*', (req, res) => {
-  res.status(200).json('{"status":"ok"}');
+  res.status(200).json('{"status":"not found"}');
 });
 
 // Starting the port listener.
