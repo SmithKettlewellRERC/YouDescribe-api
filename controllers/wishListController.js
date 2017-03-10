@@ -8,7 +8,7 @@ const WishList = require('./../models/wishList');
 const wishListController = {
 
   addOne: (req, res) => {
-    const externalMediaId = req.body.externalMediaId;
+    const externalMediaId = req.fields.id;
 
     // Let's first search on videos collection.
     Video.findOne({ external_media_id: externalMediaId }, (err1, video) => {
@@ -49,8 +49,8 @@ const wishListController = {
             // Let's create.
             const wishListReq = {
               _id: externalMediaId,
-              video_title: req.body.videoTitle,
-              request_counter: 1,
+              title: req.fields.videoTitle,
+              votes: 0,
               created_at: nowUtc(),
               updated_at: nowUtc(),
             };

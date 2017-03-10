@@ -74,7 +74,7 @@ module.exports = {
       type: 'error',
     },
     59: { // videoController
-      message: 'We do not have videos which satisfies your query',
+      message: 'No videos to delivery at this time',
       status: 400,
       type: 'error',
     },
@@ -115,6 +115,11 @@ module.exports = {
     },
     1006: { // videoController
       message: 'Videos metadata successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1007: { // videoController
+      message: 'Videos metadata matching you query successfully retrieved',
       status: 200,
       type: 'success',
     },

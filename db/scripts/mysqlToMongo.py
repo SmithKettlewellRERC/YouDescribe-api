@@ -73,16 +73,19 @@ def importVideos():
             clip = {
                 'id': str(clip_id_counter), 
                 'legacy_id': str(clip_id),
-                'created_at': clip_created,
-                'updated_at': clip_modified,
-                'title': '',
+                # 'created_at': clip_created,
+                # 'updated_at': clip_modified,
+                'label': '',
                 # 'downloads': clip_download_count,
-                'type': clip_function.split('_')[1],
+                'playback_type': clip_function.split('_')[1],
+                'file_size:': 0,
+                'file_mime_type:': '',
+                'file_size_bytes': 0,
+                'file_path': '/legacy',
+                'file_name': clip_filename,
                 'start_time': str(clip_start_time),
                 'end_time': 0,
                 'duration': 0,
-                'path': '/legacy',
-                'filename': clip_filename,
             }
             movie['audio_descriptions']['1']['clips'][str(clip_id_counter)] = clip
             clip_id_counter = clip_id_counter + 1

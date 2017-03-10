@@ -1,7 +1,6 @@
 // General imports.
 const express = require('express');
 const path = require('path');
-const bb = require('express-busboy');
 const db = require('./db/connection');
 const compression = require('compression');
 const conf = require('./shared/config')();
@@ -14,15 +13,19 @@ const port = process.env.PORT || 8080;
 
 // Our web framework itself.
 const app = express();
+const formidable = require('express-formidable');
+app.use(formidable());
 
-const bbOptions = {
-  upload: true,
-  path: path.join(__dirname, 'uploads'),
-  // allowedPath: /^\/uploads$/,
-  // allowedPath: /./,
-  restrictMultiple: false,
-};
-bb.extend(app, bbOptions);
+// const bbOptions = {
+//   allowUpload: true,
+//   upload: true,
+//   path: path.join(__dirname, 'uploads'),
+//   mimeTypeLimit: ['audio/wav', 'audio/x-fft', 'audio/x-gsm610', 'audio/x-wav', 'audio/x-wav-11khz', 'audio/x-wav-6khz'],
+//   // allowedPath: /^\/uploads$/,
+//   // allowedPath: /./,
+//   restrictMultiple: false,
+// };
+// bb.extend(app, bbOptions);
 
 // Compression.
 // app.use(compression());

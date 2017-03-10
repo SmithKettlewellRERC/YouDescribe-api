@@ -5,6 +5,7 @@ const videosController = require('../controllers/videosController');
 
 router.post('/', videosController.addOne);
 router.get('/', videosController.getAll);
+router.get('/search', videosController.search);
 router.put('/:id', videosController.updateOne);
 router.get('/:id', videosController.getOne);
 
