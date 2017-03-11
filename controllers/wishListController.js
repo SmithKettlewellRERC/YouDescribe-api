@@ -8,10 +8,10 @@ const WishList = require('./../models/wishList');
 const wishListController = {
 
   addOne: (req, res) => {
-    const externalMediaId = req.fields.id;
+    const id = req.fields.id;
 
     // Let's first search on videos collection.
-    Video.findOne({ external_media_id: externalMediaId }, (err1, video) => {
+    Video.findOne({ _id: id }, (err1, video) => {
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -24,7 +24,7 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         // Let's now search at wishlist collection.
-        WishList.findOne({ _id: externalMediaId }, (err2, wishListItem) => {
+        WishList.findOne({ _id: id }, (err2, wishListItem) => {
 
           // Error handling.
           if (err2) {
@@ -36,7 +36,7 @@ const wishListController = {
           // We already have in the database the video requested.
           if (wishListItem) {
             // Let's increment the requested cunter.
-            wishListItem.request_counter += 1;
+            wishListItem.votes += 1;
             wishListItem.save()
             .catch((errSave) => {
               console.log(errSave);
@@ -48,9 +48,10 @@ const wishListController = {
           } else {
             // Let's create.
             const wishListReq = {
-              _id: externalMediaId,
-              title: req.fields.videoTitle,
+              _id: id,
+              title: req.fields.title,
               votes: 0,
+              status: 'queued',
               created_at: nowUtc(),
               updated_at: nowUtc(),
             };

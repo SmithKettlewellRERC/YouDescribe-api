@@ -8,7 +8,6 @@ const videosController = {
 
   addOne: (req, res) => {
     const id = req.fields.id;
-    // const id = req.body.id;
     Video.findOne({ _id: id })
     .then((video) => {
       if (video) {
@@ -29,18 +28,23 @@ const videosController = {
         const newVideo = new Video(newVideoData);
         newVideo.save()
         .then((newVideoSaved) => {
+          console.log('AAAAAAA');
           const ret = apiMessages.getResponseByCode(1003);
           ret.result = newVideoSaved;
           res.status(ret.status).json(ret);
+          res.end();
+          return;
         })
         .catch((err3) => {
+          console.log('BBBBBBBBBB');
           console.log(err3);
           const ret = apiMessages.getResponseByCode(1);
           res.status(ret.status).json(ret);
-        })
+        });
       }
     })
     .catch((err) => {
+      console.log('CCCCCCC');
       console.log(err);
       const ret = apiMessages.getResponseByCode(1);
       res.status(ret.status).json(ret);
