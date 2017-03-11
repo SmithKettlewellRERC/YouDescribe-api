@@ -1,7 +1,6 @@
 const fse = require('fs-extra');
 const conf = require('../shared/config')();
 
-
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
@@ -23,7 +22,6 @@ const audioClipController = {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
-        return;
       }
       if (video) {
         // Int he future we will have to fix this to allow multiple ADs.
@@ -37,7 +35,7 @@ const audioClipController = {
 
         // Getting the next ID of the audio clip.
         const clips = video.audio_descriptions['1'].clips;
-        const clipsIds = Object.keys(clips).sort((a,b) => a - b);
+        const clipsIds = Object.keys(clips).sort((a, b) => a - b);
         let newAudioClipId = 1;
         if (clipsIds.length > 0) {
           newAudioClipId = parseInt(clipsIds.pop()) + 1;
@@ -96,7 +94,7 @@ const audioClipController = {
         });
       } else {
         const ret = apiMessages.getResponseByCode(58);
-        res.status(ret.status).json(ret)
+        res.status(ret.status).json(ret);
       }
     });
   }

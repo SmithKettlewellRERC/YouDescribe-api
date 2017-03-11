@@ -1,34 +1,26 @@
-// General imports.
-const express = require('express');
+// Our web framework itself.
 const path = require('path');
-const db = require('./db/connection');
-const compression = require('compression');
+const bodyParser = require('body-parser');
 const conf = require('./shared/config')();
+const express = require('express');
+const app = express();
+
+// Parse application/json.
+app.use(bodyParser.json());
+
+// Database.
+const db = require('./db/connection');
+
+// Compression.
+// const compression = require('compression');
+// app.use(compression());
 
 // Logs library.
 const morgan = require('morgan');
+app.use(morgan('combined'));
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;
-
-// Our web framework itself.
-const app = express();
-const formidable = require('express-formidable');
-app.use(formidable());
-
-// const bbOptions = {
-//   allowUpload: true,
-//   upload: true,
-//   path: path.join(__dirname, 'uploads'),
-//   mimeTypeLimit: ['audio/wav', 'audio/x-fft', 'audio/x-gsm610', 'audio/x-wav', 'audio/x-wav-11khz', 'audio/x-wav-6khz'],
-//   // allowedPath: /^\/uploads$/,
-//   // allowedPath: /./,
-//   restrictMultiple: false,
-// };
-// bb.extend(app, bbOptions);
-
-// Compression.
-// app.use(compression());
 
 // CORS.
 app.use((req, res, next) => {
@@ -40,9 +32,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Apache format logs.
-app.use(morgan('combined'));
-
 // Our server routes.
 const wishList = require('./routes/wishList');
 const videos = require('./routes/videos');
@@ -53,6 +42,7 @@ app.use(`/${conf.apiVersion}/wishlist`, wishList);
 app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
 
+// Statis route for wav files.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // The Restful API drain.

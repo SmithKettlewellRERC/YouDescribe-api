@@ -7,7 +7,7 @@ const nowUtc = require('./../shared/dateTime').nowUtc;
 const videosController = {
 
   addOne: (req, res) => {
-    const id = req.fields.id;
+    const id = req.body.id;
     Video.findOne({ _id: id })
     .then((video) => {
       if (video) {
@@ -21,8 +21,8 @@ const videosController = {
           created_at: nowUtc(),
           updated_at: nowUtc(),
           language: 1,
-          title: req.fields.title,
-          notes: req.fields.notes,
+          title: req.body.title,
+          notes: req.body.notes,
           audio_descriptions: {},
         };
         const newVideo = new Video(newVideoData);
@@ -33,7 +33,6 @@ const videosController = {
           ret.result = newVideoSaved;
           res.status(ret.status).json(ret);
           res.end();
-          return;
         })
         .catch((err3) => {
           console.log('BBBBBBBBBB');
@@ -53,14 +52,13 @@ const videosController = {
 
   updateOne: (req, res) => {
     const id = req.params.id;
-    const notes = req.fields.notes;
+    const notes = req.body.notes;
 
     Video.findOneAndUpdate({ _id: id }, { $set: { notes } }, { new: true }, (err, video) => {
       if (err) {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
-        return;
       }
       if (video) {
         const ret = apiMessages.getResponseByCode(1004);
@@ -85,7 +83,6 @@ const videosController = {
         const ret = apiMessages.getResponseByCode(55);
         res.status(ret.status).json(ret);
       }
-      return;
     })
     .catch((err) => {
       console.log(err);

@@ -83,6 +83,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    61: { // wishListController
+      message: 'No wish list items to delivery at this time',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -120,6 +125,11 @@ module.exports = {
     },
     1007: { // videoController
       message: 'Videos metadata matching you query successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1008: { // wishListVideoController
+      message: 'Wish list successfully retrieved',
       status: 200,
       type: 'success',
     },

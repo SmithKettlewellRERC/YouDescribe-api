@@ -8,7 +8,7 @@ const WishList = require('./../models/wishList');
 const wishListController = {
 
   addOne: (req, res) => {
-    const id = req.fields.id;
+    const id = req.body.id;
 
     // Let's first search on videos collection.
     Video.findOne({ _id: id }, (err1, video) => {
@@ -16,6 +16,7 @@ const wishListController = {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
+        return;
       }
 
       // Video with AD already exists.
@@ -31,6 +32,7 @@ const wishListController = {
             console.log(err2);
             const ret = apiMessages.getResponseByCode(1);
             res.status(ret.status).json(ret);
+            return;
           }
 
           // We already have in the database the video requested.
@@ -42,6 +44,7 @@ const wishListController = {
               console.log(errSave);
               const ret = apiMessages.getResponseByCode(1);
               res.status(ret.status).json(ret);
+              return;
             });
             const ret = apiMessages.getResponseByCode(51);
             res.status(ret.status).json(ret);
@@ -49,7 +52,7 @@ const wishListController = {
             // Let's create.
             const wishListReq = {
               _id: id,
-              title: req.fields.title,
+              title: req.body.title,
               votes: 0,
               status: 'queued',
               created_at: nowUtc(),
@@ -57,22 +60,24 @@ const wishListController = {
             };
 
             const newWishList = new WishList(wishListReq);
-
             newWishList.save()
 
             .then((newWishListSaved) => {
               const ret = apiMessages.getResponseByCode(1001);
               ret.result = newWishListSaved;
               res.status(ret.status).json(ret);
+              return;
             })
             .catch((err3) => {
               console.log(err3);
               const ret = apiMessages.getResponseByCode(1);
               res.status(ret.status).json(ret);
-            })
+              return;
+            });
           }
         });
       }
+      return;
     });
   },
 
@@ -86,6 +91,25 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         const ret = apiMessages.getResponseByCode(52);
+        res.status(ret.status).json(ret);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      const ret = apiMessages.getResponseByCode(1);
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  getAll: (req, res) => {
+    WishList.find({ status: 'queued' }).limit(30)
+    .then((items) => {
+      if (items) {
+        const ret = apiMessages.getResponseByCode(1008);
+        ret.result = items;
+        res.status(ret.status).json(ret);
+      } else {
+        const ret = apiMessages.getResponseByCode(61);
         res.status(ret.status).json(ret);
       }
     })
