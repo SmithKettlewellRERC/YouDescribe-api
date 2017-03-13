@@ -72,6 +72,7 @@ const videosController = {
   },
 
   getOne: (req, res) => {
+    console.log(req.headers);
     const _id = req.params.id;
     Video.findOne({ _id })
     .then((video) => {

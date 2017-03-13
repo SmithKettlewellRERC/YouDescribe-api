@@ -40,14 +40,17 @@ const wishListController = {
             // Let's increment the requested cunter.
             wishListItem.votes += 1;
             wishListItem.save()
+            .then((item) => {
+              const ret = apiMessages.getResponseByCode(1009);
+              ret.result = item;
+              res.status(ret.status).json(ret);
+            })
             .catch((errSave) => {
               console.log(errSave);
               const ret = apiMessages.getResponseByCode(1);
               res.status(ret.status).json(ret);
               return;
             });
-            const ret = apiMessages.getResponseByCode(51);
-            res.status(ret.status).json(ret);
           } else {
             // Let's create.
             const wishListReq = {
@@ -102,7 +105,8 @@ const wishListController = {
   },
 
   getAll: (req, res) => {
-    WishList.find({ status: 'queued' }).limit(30)
+    // WishList.find({ status: 'queued' }).limit(30)
+    WishList.find({ status: 'queued' })
     .then((items) => {
       if (items) {
         const ret = apiMessages.getResponseByCode(1008);

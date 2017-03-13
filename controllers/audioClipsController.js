@@ -8,11 +8,11 @@ const Video = require('./../models/video');
 
 const audioClipController = {
   addOne: (req, res) => {
+
     // We only accept requests with files attached.
-    if (!req.files.wavfile) {
+    if (req.file.mimetype !== 'audio/wav') {
       const ret = apiMessages.getResponseByCode(60);
       res.status(ret.status).json(ret);
-      return;
     }
 
     const videoId = req.params.videoId;
@@ -53,34 +53,34 @@ const audioClipController = {
             const ret = apiMessages.getResponseByCode(1);
             res.status(ret.status).json(ret);
           }
-          // Copying the file from tmp to uploads.
-          fse.copy(req.files.wavfile.path, finalFilePath, (errCopy) => {
+          // Moving the file from tmp to uploads.
+          fse.move(req.file.path, finalFilePath, { overwrite: true }, (errCopy) => {
             if (errCopy) {
               const ret = apiMessages.getResponseByCode(1);
               res.status(ret.status).json(ret);
             }
-            console.log('UPLOAAAAADDDDDDDDDD');
 
             const newAudioClip = {
-              label: req.fields.label,
-              playback_type: req.fields.playbackType,
-              start_time: req.fields.startTime,
-              end_time: req.fields.endTime,
-              duration: req.fields.duration,
+              label: req.body.label,
+              playback_type: req.body.playbackType,
+              start_time: req.body.startTime,
+              // end_time: req.body.endTime,
+              // duration: req.body.duration,
               file_name: fileName,
-              file_size_bytes: req.files.wavfile.size,
-              file_mime_type: req.files.wavfile.type,
+              file_size_bytes: req.file.size,
+              file_mime_type: req.file.mimetype,
               file_path: relativePath,
               created_at: nowUtc(),
-              updated_at: nowUtc(),
+              // updated_at: nowUtc(),
             };
-
-            console.log('newAudioClip', newAudioClip);
 
             video.audio_descriptions[1].clips[newAudioClipId] = newAudioClip;
             video.markModified('audio_descriptions');
             video.save()
             .then((videoSaved) => {
+              console.log('SAVED');
+              console.log('REQ HEADERS', req.headers)
+              console.log(videoSaved);
               const ret = apiMessages.getResponseByCode(1002);
               ret.result = videoSaved;
               res.status(ret.status).json(ret);

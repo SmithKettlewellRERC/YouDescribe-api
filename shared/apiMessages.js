@@ -33,11 +33,6 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    51: { // wishListController
-      message: 'The requested video is already in the wish list',
-      status: 400,
-      type: 'error',
-    },
     52: { // wishListController
       message: 'The requested wish list item does not exist',
       status: 400,
@@ -130,6 +125,11 @@ module.exports = {
     },
     1008: { // wishListVideoController
       message: 'Wish list successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1009: { // wishListController
+      message: 'The requested video is already in the wish list',
       status: 200,
       type: 'success',
     },
