@@ -69,7 +69,7 @@ const audioClipController = {
               file_name: fileName,
               file_size_bytes: req.file.size,
               file_mime_type: req.file.mimetype,
-              file_path: relativePath,
+              file_path: '/current' + relativePath,
               created_at: nowUtc(),
               // updated_at: nowUtc(),
             };

@@ -111,8 +111,8 @@ if __name__ == '__main__':
     conn = mysql.connector.connect(user='root', password='123456',host='127.0.0.1',database='youdescribe')
 
     # MONGO
-    client = MongoClient()
-    # client = MongoClient("mongodb://127.0.0.1:27017")
+    # client = MongoClient()
+    client = MongoClient("mongodb://127.0.0.1:27017")
     db = client['youdescribe']
 
     importVideos()
