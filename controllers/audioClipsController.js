@@ -1,5 +1,6 @@
 const fse = require('fs-extra');
 const conf = require('../shared/config')();
+const request = require('request');
 
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
@@ -61,6 +62,7 @@ const audioClipController = {
               res.status(ret.status).json(ret);
             }
 
+            console.log('DURATION', req.body.duration)
 
             const newAudioClip = {
               label: req.body.label,
@@ -73,16 +75,20 @@ const audioClipController = {
               file_mime_type: req.file.mimetype,
               file_path: '/current' + relativePath,
               created_at: nowUtc(),
-              // updated_at: nowUtc(),
             };
 
             video.audio_descriptions[1].clips[newAudioClipId] = newAudioClip;
             video.markModified('audio_descriptions');
             video.save()
             .then((videoSaved) => {
-              console.log('SAVED');
-              console.log('REQ HEADERS', req.headers)
-              console.log(videoSaved);
+              
+              request.put({
+                url: `${conf.apiUrl}/wishlist/${videoId}`,
+                // form: {videoId:videoId}
+              }, (err, res, body) => {
+                console.log(err, res, body);
+              });
+
               const ret = apiMessages.getResponseByCode(1002);
               ret.result = videoSaved;
               res.status(ret.status).json(ret);
@@ -150,9 +156,14 @@ const audioClipController = {
             const newVideo = new Video(newVideoData);
             newVideo.save()
             .then((videoSaved) => {
-              console.log('SAVED');
-              console.log('REQ HEADERS', req.headers)
-              console.log(videoSaved);
+
+              request.put({
+                url: `${conf.apiUrl}/wishlist/${videoId}`,
+                // form: {videoId:videoId}
+              }, (err, res, body) => {
+                console.log(err, res, body);
+              });
+
               const ret = apiMessages.getResponseByCode(1003);
               ret.result = videoSaved;
               res.status(ret.status).json(ret);

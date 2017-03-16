@@ -107,6 +107,7 @@ const wishListController = {
   getAll: (req, res) => {
     // WishList.find({ status: 'queued' }).limit(30)
     WishList.find({ status: 'queued' })
+    .sort({ votes: -1 })
     .then((items) => {
       if (items) {
         const ret = apiMessages.getResponseByCode(1008);
@@ -123,6 +124,26 @@ const wishListController = {
       res.status(ret.status).json(ret);
     });
   },
+
+  updateOne: (req, res) => {
+    const videoId = req.params.id;
+    console.log('GOING to UPDATE', videoId)
+
+    WishList.findOneAndUpdate({ _id: videoId }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
+      if (err) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+      if (wishList) {
+        const ret = apiMessages.getResponseByCode(1010);
+        ret.result = wishList;
+        res.status(ret.status).json(ret);
+      } else {
+        const ret = apiMessages.getResponseByCode(62);
+        res.status(ret.status).json(ret);
+      }
+    });
+  }
 };
 
 module.exports = wishListController;

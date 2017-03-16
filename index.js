@@ -47,7 +47,6 @@ app.use(function(req, res, next) {
     console.log('OPTIONS');
     return res.send(200);
   } else {
-    console.log('NEXT');
     return next();
   }
 });

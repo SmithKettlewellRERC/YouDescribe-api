@@ -83,6 +83,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    62: { // wishListController
+      message: 'The wish list item you are trying to update does not exist',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -123,13 +128,18 @@ module.exports = {
       status: 200,
       type: 'success',
     },
-    1008: { // wishListVideoController
+    1008: { // wishListController
       message: 'Wish list successfully retrieved',
       status: 200,
       type: 'success',
     },
     1009: { // wishListController
       message: 'The requested video is already in the wish list',
+      status: 200,
+      type: 'success',
+    },
+    1010: { // wishListController
+      message: 'The whis list status was updated successfully',
       status: 200,
       type: 'success',
     },
