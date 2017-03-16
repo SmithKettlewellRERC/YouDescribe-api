@@ -22,6 +22,7 @@ const videosController = {
           updated_at: nowUtc(),
           language: 1,
           title: req.body.title,
+          description: req.body.description,
           notes: req.body.notes,
           audio_descriptions: {},
         };

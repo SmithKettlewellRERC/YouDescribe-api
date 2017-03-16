@@ -23,8 +23,9 @@ const audioClipController = {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
       }
+
       if (video) {
-        // Int he future we will have to fix this to allow multiple ADs.
+        // In the future we will have to fix this to allow multiple ADs.
         if (!video.audio_descriptions) {
           video.audio_descriptions = {};
           video.audio_descriptions[1] = {
@@ -60,12 +61,13 @@ const audioClipController = {
               res.status(ret.status).json(ret);
             }
 
+
             const newAudioClip = {
               label: req.body.label,
               playback_type: req.body.playbackType,
               start_time: req.body.startTime,
-              // end_time: req.body.endTime,
-              // duration: req.body.duration,
+              end_time: req.body.endTime,
+              duration: req.body.duration,
               file_name: fileName,
               file_size_bytes: req.file.size,
               file_mime_type: req.file.mimetype,
@@ -92,9 +94,76 @@ const audioClipController = {
             });
           });
         });
+
       } else {
-        const ret = apiMessages.getResponseByCode(58);
-        res.status(ret.status).json(ret);
+
+        // Fixing paths to save audio clip files.
+        const relativePath = `/${videoId}`;
+        const absPathToSave = `${conf.uploadsRootDir}${relativePath}`;
+        const fileName = `${videoId}_1.wav`;
+        const finalFilePath = `${absPathToSave}/${fileName}`;
+
+        // Let's assure the directory we are going to save the files exist.
+        fse.ensureDir(absPathToSave, (errDir) => {
+          if (errDir) {
+            const ret = apiMessages.getResponseByCode(1);
+            res.status(ret.status).json(ret);
+          }
+          // Moving the file from tmp to uploads.
+          fse.move(req.file.path, finalFilePath, { overwrite: true }, (errCopy) => {
+            if (errCopy) {
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
+            }
+
+            const newVideoData = {
+              _id: videoId,
+              status: 'published',
+              views: 0,
+              created_at: nowUtc(),
+              updated_at: nowUtc(),
+              language: 1,
+              title: req.body.title,
+              description: req.body.description,
+              notes: req.body.notes,
+              audio_descriptions: {
+                1: {
+                  likes: 0,
+                  clips: {
+                    1: {
+                      label: req.body.label,
+                      playback_type: req.body.playbackType,
+                      start_time: req.body.startTime,
+                      end_time: req.body.endTime,
+                      duration: req.body.duration,
+                      file_name: fileName,
+                      file_size_bytes: req.file.size,
+                      file_mime_type: req.file.mimetype,
+                      file_path: '/current' + relativePath,
+                      created_at: nowUtc(),
+                    }
+                  },
+                }
+              }
+            };
+
+            const newVideo = new Video(newVideoData);
+            newVideo.save()
+            .then((videoSaved) => {
+              console.log('SAVED');
+              console.log('REQ HEADERS', req.headers)
+              console.log(videoSaved);
+              const ret = apiMessages.getResponseByCode(1003);
+              ret.result = videoSaved;
+              res.status(ret.status).json(ret);
+            })
+            .catch((errSave) => {
+              console.log(errSave);
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
+            });
+          });
+        });
       }
     });
   }
