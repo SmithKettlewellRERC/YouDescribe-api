@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const wishListSchema = new Schema({
-  _id: String,
+  youtube_id: String,
   title: String,
   votes: Number,
   status: String,

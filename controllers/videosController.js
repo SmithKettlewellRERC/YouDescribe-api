@@ -1,6 +1,9 @@
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
 const Video = require('./../models/video');
+const AudioDescription = require('./../models/audioDescription');
+const User = require('./../models/user');
+const AudioClip = require('./../models/audioClip');
 const nowUtc = require('./../shared/dateTime').nowUtc;
 
 // The controller itself.
@@ -73,43 +76,50 @@ const videosController = {
   },
 
   getOne: (req, res) => {
-    const _id = req.params.id;
-    Video.findOne({ _id })
-    .then((video) => {
+    const youtube_id = req.params.id;
+    Video.findOne({ youtube_id })
+    .populate({
+      path: 'audio_descriptions',
+      populate: {
+        path: 'user audio_clips',
+      }
+    })
+    .exec((errGetOne, video) => {
+      if (errGetOne) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
       if (video) {
         const ret = apiMessages.getResponseByCode(1000);
         ret.result = video;
-        res.status(ret.status).json(ret);
+        res.status(ret.status).json(ret);  
       } else {
         const ret = apiMessages.getResponseByCode(55);
         res.status(ret.status).json(ret);
       }
     })
-    .catch((err) => {
-      console.log(err);
-      const ret = apiMessages.getResponseByCode(1);
-      res.status(ret.status).json(ret);
-    });
   },
 
   getAll: (req, res) => {
     Video.find({ status: 'published' }).limit(30)
-    .then((videos) => {
-      if (videos) {
-        const ret = apiMessages.getResponseByCode(1006);
-        // ret.result = videos.slice(0,30);
-        ret.result = videos;
-        res.status(ret.status).json(ret);
-      } else {
-        const ret = apiMessages.getResponseByCode(59);
-        res.status(ret.status).json(ret);
+    .populate({
+      path: 'audio_descriptions',
+      populate: {
+        path: 'user audio_clips',
+        // populate: {
+        //   path: 'user'
+        // }
       }
     })
-    .catch((err) => {
-      console.log(err);
-      const ret = apiMessages.getResponseByCode(1);
-      res.status(ret.status).json(ret);
-    });
+    .exec((errGetAll, videos) => {
+      if (errGetAll) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+      const ret = apiMessages.getResponseByCode(1006);
+      ret.result = videos;
+      res.status(ret.status).json(ret);  
+    })
   },
 
   search: (req, res) => {

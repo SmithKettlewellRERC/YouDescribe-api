@@ -2,34 +2,16 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-// const videoSchema = new Schema({ any: {} }, { collection: 'videos' });
-
 const videoSchema = new Schema({
-  _id: String,
   title: String,
+  description: String,
+  youtube_id: String,
   created_at: Number,
   updated_at: Number,
   views: Number,
   language: Number,
-  rating: Number,
   status: String,
-  audio_descriptions: {},
-    // id: Number,
-    // likes: Number,
-    // author: Number,
-    // clips: Schema.Types.Mixed,
-  //   id: Number,
-  //   old_id: Number,
-  //   created_at: Number,
-  //   updated_at: Number,
-  //   title: String,
-  //   downloads: Number,
-  //   type: String,
-  //   start_time: Number,
-  //   end_time: Number,
-  //   duration: Number,
-  //   filename: String,
-  notes: String,
+  audio_descriptions: [ {type: Schema.Types.ObjectId, ref: 'AudioDescription'} ],
 }, { collection: 'videos' });
 
 const Video = mongoose.model('Video', videoSchema);

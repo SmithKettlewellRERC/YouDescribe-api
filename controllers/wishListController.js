@@ -11,7 +11,7 @@ const wishListController = {
     const id = req.body.id;
 
     // Let's first search on videos collection.
-    Video.findOne({ _id: id }, (err1, video) => {
+    Video.findOne({ youtube_id: id }, (err1, video) => {
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -25,7 +25,7 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         // Let's now search at wishlist collection.
-        WishList.findOne({ _id: id }, (err2, wishListItem) => {
+        WishList.findOne({ youtube_id: id }, (err2, wishListItem) => {
 
           // Error handling.
           if (err2) {
@@ -54,7 +54,7 @@ const wishListController = {
           } else {
             // Let's create.
             const wishListReq = {
-              _id: id,
+              youtube_id: id,
               title: req.body.title,
               votes: 0,
               status: 'queued',
@@ -86,7 +86,7 @@ const wishListController = {
 
   getOne: (req, res) => {
     const id = req.params.id;
-    WishList.findOne({ _id: id })
+    WishList.findOne({ youtube_id: id })
     .then((wishListItem) => {
       if (wishListItem) {
         const ret = apiMessages.getResponseByCode(1002);
@@ -129,7 +129,7 @@ const wishListController = {
     const videoId = req.params.id;
     console.log('GOING to UPDATE', videoId)
 
-    WishList.findOneAndUpdate({ _id: videoId }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
+    WishList.findOneAndUpdate({ youtube_id: videoId }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
       if (err) {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
