@@ -1,8 +1,5 @@
 const fse = require('fs-extra');
 const conf = require('../shared/config')();
-const request = require('request');
-
-// Application modules.
 const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
 const Video = require('./../models/video');
@@ -11,7 +8,8 @@ const AudioClip = require('./../models/audioClip');
 
 const audioClipController = {
   addOne: (req, res) => {
-    console.log('ADD ONE')
+    // TEMPORARY.
+    const LOGGED_USER = '58ce2350fe9c4194105fa35d';
 
     // We only accept requests with files attached.
     if (req.file.mimetype !== 'audio/wav') {
@@ -19,20 +17,19 @@ const audioClipController = {
       res.status(ret.status).json(ret);
     }
 
-    // Getting the main ids.
+    // Getting the main IDs (audioDescriptionId can be null).
     const youtube_id = req.params.videoId;
     const audioDescriptionId = req.body.audioDescriptionId;
 
-    // Fixing paths to save audio clip files.
+    // Fixing paths to save audio clip file.
     const relativePath = `/${youtube_id}`;
     const absPathToSave = `${conf.uploadsRootDir}${relativePath}`;
 
-    // console.log('@@@@@@', req.body.playbackType,req.body.startTime,req.body.endTime,req.body.duration);
-
+    // First step: create de audio clip object.
     const newAudioClip = new AudioClip({
       video: null,
       audio_description: null,
-      user: '58cdb6ac46e13db72761c6a0',
+      user: LOGGED_USER,
       label: req.body.label,
       playback_type: req.body.playbackType,
       start_time: req.body.startTime,
@@ -45,67 +42,186 @@ const audioClipController = {
       created_at: nowUtc(),
     });
 
+    // Saving the audio clip into the db.
     newAudioClip.save((errSaveAudioClip, audioClip) => {
       if (errSaveAudioClip) {
         console.log(errSaveAudioClip)
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
       }
+
+      // The audioClip ID that was returned from the creation process.
       const audioClipId = audioClip['_id'];
 
+      // As we now have the ID, we can build the filename to be saved.
       const fileName = `${youtube_id}_${audioClipId}.wav`;
       const finalFilePath = `${absPathToSave}/${fileName}`;
 
-      // Saving the file on FS.
+      // Assuring that the directory exists.
       fse.ensureDir(absPathToSave, (errDir) => {
         if (errDir) {
           const ret = apiMessages.getResponseByCode(1);
           res.status(ret.status).json(ret);
         }
+
+        // Moving the uploaded file to the final destination.
         fse.move(req.file.path, finalFilePath, { overwrite: true }, (errCopy) => {
           if (errCopy) {
             const ret = apiMessages.getResponseByCode(1);
             res.status(ret.status).json(ret);
           }
 
-          console.log('File saved ->', finalFilePath);
-          console.log('audioDescriptionId', audioDescriptionId)
-          console.log('audioClipId', audioClipId)
-
-          AudioDescription.findOneAndUpdate({ _id: null }, { $push: { audio_clips: audioClipId }}, (errUpdateAd, ad) => {
+          // Checking if we have the AD passed.
+          AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $push: { audio_clips: audioClipId }}, (errUpdateAd, returnedAudioDescription) => {
             if (errUpdateAd) {
-              console.log('error to update', errUpdateAd);
-              return;
+              console.log(errUpdateAd);
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
             }
-            if (ad) {
-              console.log('AD was already in the db. Just increment', db);
+
+            // We already have one audio description.
+            if (returnedAudioDescription) {
+
+              // Updating the audio clip references.
+              audioClip.update({ _id: audioClipId }, {
+                $set: {
+                  audio_description: returnedAudioDescription._id,
+                  video: returnedAudioDescription.video,
+                }
+              }, (errToUpdateAd, audioClipUpdated) => {
+                if (errToUpdateAd) {
+                  console.log(errToUpdateAd);
+                  const ret = apiMessages.getResponseByCode(1);
+                  res.status(ret.status).json(ret);
+                }
+                console.log('Audio clip updated')
+              });
+
+              // All set.
+              return;
+
             } else {
+              // We don't have any audio description. Let's create a new one.
               const newAudioDescription = new AudioDescription({
                 audio_clips: [audioClipId],
                 video: null,
-                user: '58cdb6ac46e13db72761c6a0',
+                user: LOGGED_USER,
                 likes: 0,
                 language: 1,
                 created_at: nowUtc(),
                 updated_at: nowUtc(),
                 notes: '',
               });
+
+              // Saving the audio description
+              newAudioDescription.save((errNewAd, createdAd) => {
+                if (errNewAd) {
+                  console.log(errNewAd);
+                  const ret = apiMessages.getResponseByCode(1);
+                  res.status(ret.status).json(ret);
+                }
+
+                // The brand new ID of the AD.
+                const createdAdId = createdAd._id;
+
+                // Now it is video time! :)
+                Video.findOne({ youtube_id }, (errFindVideo, video) => {
+                  if (errFindVideo) {
+                    console.log(errFindVideo);
+                    const ret = apiMessages.getResponseByCode(1);
+                    res.status(ret.status).json(ret);
+                  }
+
+                  // If the video we've just searched exists.
+                  if (video) {
+
+                    // Updating the list of audio descriptions references.
+                    Video.update({ _id: video._id }, { $push: {
+                      audio_descriptions: createdAdId,
+                    }}, (errUpdatingVideo, updatedVideo) => {
+                      if (errUpdatingVideo) {
+                        console.log(errUpdatingVideo);
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);
+                      }
+                      if (updatedVideo) {
+                        
+                        // Updating the audio clips references.
+                        audioClip.update({ _id: audioClipId }, {
+                          $set: {
+                            audio_description: createdAdId,
+                            video: video._id,
+                          }
+                        }, (errUpdatingAudioClip, audioClipUpdated) => {
+                          if (errUpdatingAudioClip) {
+                            console.log(errUpdatingAudioClip);
+                            const ret = apiMessages.getResponseByCode(1);
+                            res.status(ret.status).json(ret);
+                          }
+                          if (audioClipUpdated) {
+                            // All set.
+                          } else {
+                            const ret = apiMessages.getResponseByCode(1);
+                            res.status(ret.status).json(ret);                        
+                          }
+                        });
+                      } else {
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);                        
+                      }
+                    });
+
+                  } else {
+
+                    // We don't have a video. Let's create it.
+                    const newVideo = new Video({
+                      title: req.body.title,
+                      description: req.body.description,
+                      youtube_id: youtube_id,
+                      created_at: nowUtc(),
+                      updated_at: nowUtc(),
+                      views: 0,
+                      language: 1,
+                      status: 'draft',
+                      audio_descriptions: [ createdAdId ],
+                    });
+
+                    // Saving the brand new video.
+                    newVideo.save((errSavingNewVideo, newVideoCreated) => {
+                      if (errSavingNewVideo) {
+                        console.log(errSavingNewVideo);
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);
+                      }
+                      const newVideoIdCreated = newVideoCreated._id;
+
+                      if (newVideoCreated) {
+                        audioClip.update({ _id: audioClipId }, { $set: {
+                          audio_description: createdAdId,
+                          video: video.newVideoIdCreated,
+                        }}, (errUpdatingAudioClip, audioClipUpdated) => {
+                          if (errUpdatingAudioClip) {
+                            console.log(errUpdatingAudioClip);
+                            const ret = apiMessages.getResponseByCode(1);
+                            res.status(ret.status).json(ret);
+                          }
+                          if (audioClipUpdated) {
+                            // All set.
+                          } else {
+                            const ret = apiMessages.getResponseByCode(1);
+                            res.status(ret.status).json(ret);
+                          }
+                        });
+                      } else {
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);
+                      }
+                    });
+                  }
+                })
+              });
             }
           })
-
-    //   const audioDescription = {
-    //     audio_clips: [ {type: Schema.Types.ObjectId, ref: 'AudioClip'} ],
-    //     video: {type: Schema.Types.ObjectId, ref: 'Video'},
-    //     user: '58cdb6ac46e13db72761c6a0',
-    //     likes: 0,
-    //     language: 1,
-    //     created_at: nowUtc(),
-    //     updated_at: nowUtc(),
-    //     notes: '',
-    //   };
-
-
-
         });
       });
     });
