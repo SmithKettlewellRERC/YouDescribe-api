@@ -8,10 +8,10 @@ const WishList = require('./../models/wishList');
 const wishListController = {
 
   addOne: (req, res) => {
-    const id = req.body.id;
+    const youtube_id = req.body.id;
 
     // Let's first search on videos collection.
-    Video.findOne({ youtube_id: id }, (err1, video) => {
+    Video.findOne({ youtube_id }, (err1, video) => {
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -25,7 +25,7 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         // Let's now search at wishlist collection.
-        WishList.findOne({ youtube_id: id }, (err2, wishListItem) => {
+        WishList.findOne({ youtube_id }, (err2, wishListItem) => {
 
           // Error handling.
           if (err2) {
@@ -53,30 +53,25 @@ const wishListController = {
             });
           } else {
             // Let's create.
-            const wishListReq = {
-              youtube_id: id,
+            const newWishList = new WishList({
+              youtube_id,
               title: req.body.title,
               votes: 0,
               status: 'queued',
               created_at: nowUtc(),
               updated_at: nowUtc(),
-            };
-
-            const newWishList = new WishList(wishListReq);
-            newWishList.save()
-
-            .then((newWishListSaved) => {
-              const ret = apiMessages.getResponseByCode(1001);
-              ret.result = newWishListSaved;
-              res.status(ret.status).json(ret);
-              return;
-            })
-            .catch((err3) => {
-              console.log(err3);
-              const ret = apiMessages.getResponseByCode(1);
-              res.status(ret.status).json(ret);
-              return;
             });
+
+            newWishList.save((errSaving, wishListItemSaved) => {
+              if (errSaving) {
+                console.log(errSaving);
+                const ret = apiMessages.getResponseByCode(1);
+                res.status(ret.status).json(ret);
+              }
+              const ret = apiMessages.getResponseByCode(1001);
+              ret.result = wishListItemSaved;
+              res.status(ret.status).json(ret);
+            })
           }
         });
       }
@@ -85,8 +80,8 @@ const wishListController = {
   },
 
   getOne: (req, res) => {
-    const id = req.params.id;
-    WishList.findOne({ youtube_id: id })
+    const youtube_id = req.params.id;
+    WishList.findOne({ youtube_id })
     .then((wishListItem) => {
       if (wishListItem) {
         const ret = apiMessages.getResponseByCode(1002);
@@ -126,10 +121,9 @@ const wishListController = {
   },
 
   updateOne: (req, res) => {
-    const videoId = req.params.id;
-    console.log('GOING to UPDATE', videoId)
+    const youtube_id = req.params.id;
 
-    WishList.findOneAndUpdate({ youtube_id: videoId }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
+    WishList.findOneAndUpdate({ youtube_id }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
       if (err) {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);

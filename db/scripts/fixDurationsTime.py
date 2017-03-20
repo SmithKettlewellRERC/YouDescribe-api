@@ -28,9 +28,12 @@ def main():
             hms, ms = duration.split('.')
             h, m, s = hms.split(':')
             duration_float = float(str(int(h) * 3600 + int(m) * 60 + int(s)) + '.' + str(ms))
-            end_time = ac['start_time'] + duration_float
+            if ac['playback_type'] == 'extended':
+                end_time = ac['start_time']
+            else:
+                end_time = ac['start_time'] + duration_float
             db.audio_clips.update_one({'_id':ac['_id']}, { '$set': {'duration': duration_float, 'end_time': end_time} })
-            # print acs_total, '. ', ac['_id'], 'duration: ', duration, ' -> ', duration_float
+            print acs_total, '. ', ac['_id'], 'duration: ', duration, ' -> ', duration_float
         else:
             print 'removing {}'.format(ac['_id'])
             db.audio_clips.remove({'_id':ac['_id']})

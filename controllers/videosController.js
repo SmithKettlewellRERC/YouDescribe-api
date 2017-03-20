@@ -101,7 +101,7 @@ const videosController = {
   },
 
   getAll: (req, res) => {
-    Video.find({ status: 'published' }).limit(30)
+    Video.find({ status: 'published' }).limit(50)
     .populate({
       path: 'audio_descriptions',
       populate: {
