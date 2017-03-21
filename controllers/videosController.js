@@ -56,9 +56,14 @@ const videosController = {
 
   updateOne: (req, res) => {
     const id = req.params.id;
+    const toUpdate = {};
     const notes = req.body.notes;
+    const publish = req.body.publish;
 
-    Video.findOneAndUpdate({ _id: id }, { $set: { notes } }, { new: true }, (err, video) => {
+    if (notes) toUpdate['notes'] = notes;
+    if (publish) toUpdate['status'] = 'published';
+
+    Video.findOneAndUpdate({ _id: id }, { $set: toUpdate }, { new: true }, (err, video) => {
       if (err) {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);

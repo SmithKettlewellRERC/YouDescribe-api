@@ -56,7 +56,7 @@ const wishListController = {
             const newWishList = new WishList({
               youtube_id,
               title: req.body.title,
-              votes: 0,
+              votes: 1,
               status: 'queued',
               created_at: nowUtc(),
               updated_at: nowUtc(),

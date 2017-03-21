@@ -191,7 +191,7 @@ console.log('VIDEO', video);
                       updated_at: nowUtc(),
                       views: 0,
                       language: 1,
-                      status: 'draft',
+                      status: 'published',
                       audio_descriptions: [ createdAdId ],
                     });
 

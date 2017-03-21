@@ -45,6 +45,7 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
   if (req.method === 'OPTIONS') {
     console.log('OPTIONS');
+    return next();
     return res.send(200);
   } else {
     return next();
