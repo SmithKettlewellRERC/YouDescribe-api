@@ -79,14 +79,17 @@ const audioClipController = {
               res.status(ret.status).json(ret);
             }
 
+console.log('returned audio description', returnedAudioDescription)
+
             // We already have one audio description.
             if (returnedAudioDescription) {
 
               // Updating the audio clip references.
-              audioClip.update({ _id: audioClipId }, {
+              AudioClip.update({ _id: audioClipId }, {
                 $set: {
                   audio_description: returnedAudioDescription._id,
                   video: returnedAudioDescription.video,
+                  file_name: fileName,
                 }
               }, (errToUpdateAd, audioClipUpdated) => {
                 if (errToUpdateAd) {
@@ -94,9 +97,11 @@ const audioClipController = {
                   const ret = apiMessages.getResponseByCode(1);
                   res.status(ret.status).json(ret);
                 }
-                console.log('Audio clip updated')
+                console.log('Audio description updated');
+                console.log(audioClipUpdated);
               });
 
+console.log('ALLLL SETTTTTT WITH THE EXISTING DATA')
               // All set.
               return;
 
@@ -112,6 +117,8 @@ const audioClipController = {
                 updated_at: nowUtc(),
                 notes: '',
               });
+
+console.log('newAudioDescription', newAudioDescription)
 
               // Saving the audio description
               newAudioDescription.save((errNewAd, createdAd) => {
@@ -131,6 +138,8 @@ const audioClipController = {
                     const ret = apiMessages.getResponseByCode(1);
                     res.status(ret.status).json(ret);
                   }
+
+console.log('VIDEO', video);
 
                   // If the video we've just searched exists.
                   if (video) {
@@ -186,6 +195,8 @@ const audioClipController = {
                       audio_descriptions: [ createdAdId ],
                     });
 
+console.log('newVideo', newVideo)
+
                     // Saving the brand new video.
                     newVideo.save((errSavingNewVideo, newVideoCreated) => {
                       if (errSavingNewVideo) {
@@ -195,10 +206,15 @@ const audioClipController = {
                       }
                       const newVideoIdCreated = newVideoCreated._id;
 
+
+console.log(newVideoIdCreated)
+
+
                       if (newVideoCreated) {
-                        audioClip.update({ _id: audioClipId }, { $set: {
+                        AudioClip.update({ _id: audioClipId }, { $set: {
                           audio_description: createdAdId,
-                          video: video.newVideoIdCreated,
+                          video: newVideoIdCreated,
+                          file_name: fileName,
                         }}, (errUpdatingAudioClip, audioClipUpdated) => {
                           if (errUpdatingAudioClip) {
                             console.log(errUpdatingAudioClip);
@@ -206,12 +222,20 @@ const audioClipController = {
                             res.status(ret.status).json(ret);
                           }
                           if (audioClipUpdated) {
-                            // All set.
+                            
+                            AudioDescription.update({ _id: createdAdId }, { $set: {
+                              video: newVideoIdCreated,
+                            }}, (errUpdatedAD, updatedAD) => {
+console.log(updatedAD);
+console.log('ALL SET FINAL')
+                            });
+
                           } else {
                             const ret = apiMessages.getResponseByCode(1);
                             res.status(ret.status).json(ret);
                           }
                         });
+
                       } else {
                         const ret = apiMessages.getResponseByCode(1);
                         res.status(ret.status).json(ret);
