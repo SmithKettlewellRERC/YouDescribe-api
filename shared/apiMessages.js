@@ -43,7 +43,7 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    54: { // wishListController, audioClipController
+    54: { // wishListController
       message: 'Error saving data',
       status: 400,
       type: 'error',
@@ -63,10 +63,7 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    58: { // audioClipsController
-      message: 'You are trying to add a audio clip to a video that does not exist',
-      status: 400,
-      type: 'error',
+    58: {
     },
     59: { // videoController
       message: 'No videos to delivery at this time',
