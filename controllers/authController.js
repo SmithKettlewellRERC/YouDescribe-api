@@ -8,6 +8,8 @@ const User = require('../models/user');
 const authController = {
   googleAuth: (req, res) => {
     const token = req.body.token;
+    console.log('TOKEN', token)
+    return;
     const GoogleAuth = require('google-auth-library');
     const auth = new GoogleAuth;
     const client = new auth.OAuth2(conf.googleClientId, '', '');
