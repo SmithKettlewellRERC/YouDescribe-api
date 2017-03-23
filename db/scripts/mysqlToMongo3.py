@@ -161,8 +161,8 @@ if __name__ == '__main__':
 
     # MONGO
     print 'Connectiong to mongo...'
-    # client = MongoClient("mongodb://127.0.0.1:27017")
-    client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@webng.io:27017/youdescribe")
+    client = MongoClient("mongodb://127.0.0.1:27017")
+    # client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@webng.io:27017/youdescribe")
     db = client['youdescribe']
     print 'mongo connected.'
 

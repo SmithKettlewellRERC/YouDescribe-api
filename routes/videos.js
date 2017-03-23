@@ -3,10 +3,10 @@ const express = require('express');
 const router = express.Router();
 const videosController = require('../controllers/videosController');
 
-router.post('/', videosController.addOne);
 router.get('/', videosController.getAll);
-router.get('/search', videosController.search);
-router.put('/:id', videosController.updateOne);
 router.get('/:id', videosController.getOne);
+router.get('/search', videosController.search);
+// router.post('/', videosController.addOne);
+// router.put('/:id', videosController.updateOne);
 
 module.exports = router;

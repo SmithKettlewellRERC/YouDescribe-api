@@ -9,7 +9,7 @@ const AudioClip = require('./../models/audioClip');
 const audioClipController = {
   addOne: (req, res) => {
     // TEMPORARY.
-    const LOGGED_USER = '58cf556546e13d72f1c70490';
+    const LOGGED_USER = '58d20f8e46e13da71bd1a9d5';
 
     // We only accept requests with files attached.
     if (req.file.mimetype !== 'audio/wav') {

@@ -140,6 +140,16 @@ module.exports = {
       status: 200,
       type: 'success',
     },
+    1011: { // authController
+      message: 'The user was successfully created',
+      status: 200,
+      type: 'success',
+    },
+    1012: { // authController
+      message: 'The user was successfully updated',
+      status: 200,
+      type: 'success',
+    },
   },
 
   getResponseByCode: function(code) {
