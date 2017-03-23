@@ -4,8 +4,8 @@ const router = express.Router();
 const videosController = require('../controllers/videosController');
 
 router.get('/', videosController.getAll);
-router.get('/:id', videosController.getOne);
 router.get('/search', videosController.search);
+router.get('/:id', videosController.getOne);
 // router.post('/', videosController.addOne);
 // router.put('/:id', videosController.updateOne);
 
