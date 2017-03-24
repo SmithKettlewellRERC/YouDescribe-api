@@ -105,8 +105,33 @@ const videosController = {
     })
   },
 
+  // getAll: (req, res) => {
+  //   Video.find({ status: 'published' }).limit(50)
+  //   .populate({
+  //     path: 'audio_descriptions',
+  //     populate: {
+  //       path: 'user audio_clips',
+  //       // populate: {
+  //       //   path: 'user'
+  //       // }
+  //     }
+  //   })
+  //   .exec((errGetAll, videos) => {
+  //     if (errGetAll) {
+  //       const ret = apiMessages.getResponseByCode(1);
+  //       res.status(ret.status).json(ret);
+  //     }
+  //     const ret = apiMessages.getResponseByCode(1006);
+  //     ret.result = videos;
+  //     res.status(ret.status).json(ret);  
+  //   })
+  // },
+
+  // added getPage
   getAll: (req, res) => {
-    Video.find({ status: 'published' }).limit(50)
+    let pgNumber = Number(req.query.page);
+    let searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
+    Video.find({ status: 'published' }).skip(searchPage - 30).limit(30)
     .populate({
       path: 'audio_descriptions',
       populate: {
