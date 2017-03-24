@@ -39,6 +39,7 @@ const wishListController = {
           if (wishListItem) {
             // Let's increment the requested cunter.
             wishListItem.votes += 1;
+            wishListItem.updated_at = nowUtc();
             wishListItem.save()
             .then((item) => {
               const ret = apiMessages.getResponseByCode(1009);
@@ -55,13 +56,11 @@ const wishListController = {
             // Let's create.
             const newWishList = new WishList({
               youtube_id,
-              title: req.body.title,
               votes: 1,
               status: 'queued',
               created_at: nowUtc(),
               updated_at: nowUtc(),
             });
-
             newWishList.save((errSaving, wishListItemSaved) => {
               if (errSaving) {
                 console.log(errSaving);
@@ -123,7 +122,7 @@ const wishListController = {
   updateOne: (req, res) => {
     const youtube_id = req.params.id;
 
-    WishList.findOneAndUpdate({ youtube_id }, { $set: { status: 'dequeued' } }, { new: true }, (err, wishList) => {
+    WishList.findOneAndUpdate({ youtube_id }, { $set: { status: 'dequeued', updated_at: nowUtc() } }, { new: true }, (err, wishList) => {
       if (err) {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
