@@ -4,9 +4,8 @@ const nowUtc = require('./../shared/dateTime').nowUtc;
 const GoogleAuth = require('google-auth-library');
 const User = require('../models/user');
 
-
 const authController = {
-  googleAuth: (req, res) => {
+  googleAuth: (req, res, next) => {
     const token = req.body.token;
     const GoogleAuth = require('google-auth-library');
     const auth = new GoogleAuth;
@@ -16,14 +15,23 @@ const authController = {
       conf.googleClientId,
 
       function(e, login) {
-        var payload = login.getPayload();
-        var userid = payload['sub'];
+        const payload = login.getPayload();
+        const userid = payload['sub'];
 
-        console.log('#################################################')
-        console.log('e', e);
-        console.log('login', login);
-        console.log('payload', payload);
-        console.log('#################################################')
+        // The login is valid. Let's set the token in the session.
+        // if (userid) {
+        //   console.log('The login is valid. Lets set the token in the session.', userid);
+        //   req.session.token = req.session.token || token;
+        //   // console.log('req.session.token', req.session.token);
+        // } else {
+        //   console.log('The login is INVALID.');
+        // }
+
+        // console.log('#################################################')
+        // console.log('e', e);
+        // console.log('login', login);
+        // console.log('payload', payload);
+        // console.log('#################################################')
 
         User.findOneAndUpdate(
           { google_user_id: userid },
