@@ -106,6 +106,10 @@ const videosController = {
   },
 
   getAll: (req, res) => {
+    // req.session.views = (req.session.views || 0) + 1;
+    // console.log('req.session.views', req.session, req.session.views)
+  console.log('Cookies: ', req.cookies)
+
     Video.find({ status: 'published' }).limit(50)
     .populate({
       path: 'audio_descriptions',
