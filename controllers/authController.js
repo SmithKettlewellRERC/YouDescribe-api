@@ -6,7 +6,7 @@ const User = require('../models/user');
 
 const authController = {
   googleAuth: (req, res, next) => {
-    const token = req.body.token;
+    const token = req.body.userToken;
     const GoogleAuth = require('google-auth-library');
     const auth = new GoogleAuth;
     const client = new auth.OAuth2(conf.googleClientId, '', '');

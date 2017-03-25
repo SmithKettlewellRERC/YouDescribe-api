@@ -1,14 +1,12 @@
 // Our web framework itself.
 const path = require('path');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const conf = require('./shared/config')();
 const express = require('express');
 const app = express();
 // CORS + CSRF https://expressjs.com/en/resources/middleware/cors.html
 
 app.use(bodyParser.json());
-app.use(cookieParser())
 
 // Database.
 const db = require('./db/connection');
