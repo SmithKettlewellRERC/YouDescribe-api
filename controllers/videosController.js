@@ -167,7 +167,7 @@ const videosController = {
   //   });
   // },
 
-  searchAndPage: (req, res) => {
+  search: (req, res) => {
     const searchTerm = req.query.q;
     const pgNumber = Number(req.query.page);
     const searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
