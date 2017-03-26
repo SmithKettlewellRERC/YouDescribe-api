@@ -8,8 +8,8 @@ const AudioClip = require('./../models/audioClip');
 
 const audioClipController = {
   addOne: (req, res) => {
-    // TEMPORARY.
-    const LOGGED_USER = '58d20f8e46e13da71bd1a9d5';
+    // According to the middleware, we cannot arrive here wo a userId.
+    const userId = req.userId;
 
     // We only accept requests with files attached.
     if (req.file.mimetype !== 'audio/wav') {
@@ -29,7 +29,7 @@ const audioClipController = {
     const newAudioClip = new AudioClip({
       video: null,
       audio_description: null,
-      user: LOGGED_USER,
+      user: userId,
       label: req.body.label,
       playback_type: req.body.playbackType,
       start_time: req.body.startTime,
@@ -130,7 +130,7 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
             const newAudioDescription = new AudioDescription({
               audio_clips: [audioClipId],
               video: null,
-              user: LOGGED_USER,
+              user: userId,
               likes: 0,
               language: 1,
               created_at: nowUtc(),

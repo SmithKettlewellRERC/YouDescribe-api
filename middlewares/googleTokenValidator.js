@@ -10,6 +10,7 @@ function googleTokenValidator(req, res, next) {
   getUserByToken(userToken)
   .then(userLogged => {
     if (userLogged._id) {
+      req.userId = userLogged._id;
       next();
     } else {
       const ret = apiMessages.getResponseByCode(63);
