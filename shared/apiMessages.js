@@ -85,6 +85,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    63: { // ALL
+      message: 'The token is invalid',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,

@@ -16,8 +16,8 @@ const db = require('./db/connection');
 // app.use(compression());
 
 // Logs library.
-const morgan = require('morgan');
-app.use(morgan('combined'));
+// const morgan = require('morgan');
+// app.use(morgan('combined'));
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;
@@ -43,7 +43,7 @@ app.use(function(req, res, next) {
   // res.header('Access-Control-Expose-Headers', 'Content-Length');
   res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS');
+    // console.log('OPTIONS');
     return next();
     return res.send(200);
   } else {

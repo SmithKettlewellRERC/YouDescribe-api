@@ -7,7 +7,6 @@ const User = require('../models/user');
 const authController = {
   googleAuth: (req, res, next) => {
     const token = req.body.userToken;
-    const GoogleAuth = require('google-auth-library');
     const auth = new GoogleAuth;
     const client = new auth.OAuth2(conf.googleClientId, '', '');
     client.verifyIdToken(
@@ -17,21 +16,6 @@ const authController = {
       function(e, login) {
         const payload = login.getPayload();
         const userid = payload['sub'];
-
-        // The login is valid. Let's set the token in the session.
-        // if (userid) {
-        //   console.log('The login is valid. Lets set the token in the session.', userid);
-        //   req.session.token = req.session.token || token;
-        //   // console.log('req.session.token', req.session.token);
-        // } else {
-        //   console.log('The login is INVALID.');
-        // }
-
-        // console.log('#################################################')
-        // console.log('e', e);
-        // console.log('login', login);
-        // console.log('payload', payload);
-        // console.log('#################################################')
 
         User.findOneAndUpdate(
           { google_user_id: userid },
