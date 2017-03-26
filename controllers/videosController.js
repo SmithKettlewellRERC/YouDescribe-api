@@ -152,9 +152,26 @@ const videosController = {
     })
   },
 
-  search: (req, res) => {
+  // search: (req, res) => {
+  //   const searchTerm = req.query.q;
+  //   Video.find({ status: 'published', title: new RegExp(searchTerm, 'i') }).limit(30)
+  //   .then((videos) => {
+  //     const ret = apiMessages.getResponseByCode(1007);
+  //     ret.result = videos;
+  //     res.status(ret.status).json(ret);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //     const ret = apiMessages.getResponseByCode(1);
+  //     res.status(ret.status).json(ret);
+  //   });
+  // },
+
+  searchAndPage: (req, res) => {
     const searchTerm = req.query.q;
-    Video.find({ status: 'published', title: new RegExp(searchTerm, 'i') }).limit(30)
+    const pgNumber = Number(req.query.page);
+    const searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
+    Video.find({ status: 'published', title: new RegExp(searchTerm, 'i') }).skip(searchPage - 30).limit(30)
     .then((videos) => {
       const ret = apiMessages.getResponseByCode(1007);
       ret.result = videos;
