@@ -97,27 +97,6 @@ const wishListController = {
     });
   },
 
-  // getAll: (req, res) => {
-  //   // WishList.find({ status: 'queued' }).limit(30)
-  //   WishList.find({ status: 'queued' })
-  //   .sort({ votes: -1 }).limit(30)
-  //   .then((items) => {
-  //     if (items) {
-  //       const ret = apiMessages.getResponseByCode(1008);
-  //       ret.result = items;
-  //       res.status(ret.status).json(ret);
-  //     } else {
-  //       const ret = apiMessages.getResponseByCode(61);
-  //       res.status(ret.status).json(ret);
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //     const ret = apiMessages.getResponseByCode(1);
-  //     res.status(ret.status).json(ret);
-  //   });
-  // },
-
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
