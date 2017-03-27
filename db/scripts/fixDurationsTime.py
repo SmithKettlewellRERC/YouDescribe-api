@@ -11,7 +11,7 @@ def main():
     acs = db.audio_clips.find({})
     acs_total = 0
     for ac in acs:
-        if acs_total > 100000000:
+        if acs_total > 100000:
             break
         # print ac
         path = base + '/' + ac['file_name']
@@ -32,20 +32,12 @@ def main():
                 end_time = ac['start_time']
             else:
                 end_time = ac['start_time'] + duration_float
+            # print end_time
             db.audio_clips.update_one({'_id':ac['_id']}, { '$set': {'duration': duration_float, 'end_time': end_time} })
-            print acs_total, '. ', ac['_id'], 'duration: ', duration, ' -> ', duration_float
+            print acs_total, '. ', ac['_id'],'type:', ac['playback_type'], 'start_time', ac['start_time'], 'end_time', end_time,'duration: ', duration_float
         else:
             print 'removing {}'.format(ac['_id'])
             db.audio_clips.remove({'_id':ac['_id']})
-
-
-
-
-
-
-
-
-
 
         # with contextlib.closing(wave.open(path,'r')) as f:
         #     frames = f.getnframes()

@@ -16,8 +16,8 @@ const db = require('./db/connection');
 // app.use(compression());
 
 // Logs library.
-const morgan = require('morgan');
-app.use(morgan('combined'));
+// const morgan = require('morgan');
+// app.use(morgan('combined'));
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;
@@ -43,7 +43,7 @@ app.use(function(req, res, next) {
   // res.header('Access-Control-Expose-Headers', 'Content-Length');
   res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS');
+    // console.log('OPTIONS');
     return next();
     return res.send(200);
   } else {
@@ -63,8 +63,13 @@ app.use(`/${conf.apiVersion}/wishlist`, wishList);
 app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
 
-// Statis route for wav files.
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static route for wav files.
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: function(res) {
+    res.setHeader("Content-Type", "audio/wav");
+  }
+}));
 
 // The Restful API drain.
 app.get('*', (req, res) => {

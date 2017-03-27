@@ -74,7 +74,6 @@ const wishListController = {
           }
         });
       }
-      return;
     });
   },
 
