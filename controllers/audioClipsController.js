@@ -223,7 +223,7 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                     updated_at: nowUtc(),
                     views: 0,
                     language: 1,
-                    status: 'published',
+                    status: 'draft',
                     audio_descriptions: [ createdAdId ],
                   });
 

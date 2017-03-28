@@ -5,6 +5,7 @@ const AudioDescription = require('./../models/audioDescription');
 const User = require('./../models/user');
 const AudioClip = require('./../models/audioClip');
 const nowUtc = require('./../shared/dateTime').nowUtc;
+const WishList = require('./../models/wishList');
 
 // The controller itself.
 const videosController = {
@@ -105,27 +106,44 @@ const videosController = {
     })
   },
 
-  // getAll: (req, res) => {
-  //   Video.find({ status: 'published' }).limit(50)
-  //   .populate({
-  //     path: 'audio_descriptions',
-  //     populate: {
-  //       path: 'user audio_clips',
-  //       // populate: {
-  //       //   path: 'user'
-  //       // }
-  //     }
-  //   })
-  //   .exec((errGetAll, videos) => {
-  //     if (errGetAll) {
-  //       const ret = apiMessages.getResponseByCode(1);
-  //       res.status(ret.status).json(ret);
-  //     }
-  //     const ret = apiMessages.getResponseByCode(1006);
-  //     ret.result = videos;
-  //     res.status(ret.status).json(ret);  
-  //   })
-  // },
+  publish: (req, res) => {
+    const id = req.params.id;
+    const userId = req.userId;
+
+    Video.findOneAndUpdate(
+      { youtube_id: id },
+      { $set: { status: 'published' }}
+    )
+    .populate({
+      path: 'audio_descriptions',
+      populate: {
+        path: 'user audio_clips',
+      }
+    })
+    .exec((err, video) => {
+      if (err) {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+      if (video) {
+
+        // Try to remove the video from the wishlist.
+        WishList.findOneAndUpdate(
+          { youtube_id: id },
+          { $set: { status: 'dequeued' }}
+        ).exec();
+
+        // Send the response with the video populated.
+        const ret = apiMessages.getResponseByCode(10013);
+        ret.result = video;
+        res.status(ret.status).json(ret);
+      } else {
+        const ret = apiMessages.getResponseByCode(64);
+        res.status(ret.status).json(ret);
+      }
+    });
+  },
 
   // added getPage
   getAll: (req, res) => {

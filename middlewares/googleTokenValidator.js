@@ -1,6 +1,8 @@
 const apiMessages = require('./../shared/apiMessages');
 const getUserByToken = require('./../shared/getUserByToken');
 
+// Adds to request a property called userId that contains
+// the _id of the user.
 function googleTokenValidator(req, res, next) {
   const userToken = req.query.token;
   if (!userToken) {

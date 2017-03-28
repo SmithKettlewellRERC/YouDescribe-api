@@ -90,6 +90,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    64: { // videoController
+      message: 'It was impossible to publish the video',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -152,6 +157,11 @@ module.exports = {
     },
     1012: { // authController
       message: 'The user was successfully updated',
+      status: 200,
+      type: 'success',
+    },
+    10013: { // videoController
+      message: 'The video was successfully published',
       status: 200,
       type: 'success',
     },
