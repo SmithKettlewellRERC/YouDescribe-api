@@ -7,7 +7,7 @@ const wishListSchema = new Schema({
   status: String,
   created_at: Number,
   updated_at: Number,
-}, { collection: 'wishlist' });
+}, { collection: 'wish_list' });
 
 const WishList = mongoose.model('WishList', wishListSchema);
 

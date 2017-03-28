@@ -64,12 +64,12 @@ app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
 
 // Static route for wav files.
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
-  setHeaders: function(res) {
-    res.setHeader("Content-Type", "audio/wav");
-  }
-}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+//   setHeaders: function(res) {
+//     res.setHeader("Content-Type", "audio/wav");
+//   }
+// }));
 
 // The Restful API drain.
 app.get('*', (req, res) => {
