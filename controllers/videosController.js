@@ -145,6 +145,48 @@ const videosController = {
     });
   },
 
+  getVideosByUserId: (req, res) => {
+    const userId = req.params.userId;
+    AudioDescription.find(
+      { user: userId }
+    )
+    .exec((err, ads) => {
+      if (err) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+
+      const ret = apiMessages.getResponseByCode(1013);
+
+      const arrayOfAdsIds = [];
+      if (ads) {
+        ads.forEach(ad => {
+          arrayOfAdsIds.push(ad._id);
+        });
+      } else {
+        ret.result = [];
+        res.status(ret.status).json(ret);
+      }
+
+      Video.find({
+        audio_descriptions: { $in: arrayOfAdsIds }
+      })
+      .exec((errVideos, videos) => {
+        if (errVideos) {
+          const ret = apiMessages.getResponseByCode(1);
+          res.status(ret.status).json(ret);
+        }
+        if (videos) {
+          ret.result = videos;
+        } else {
+          ret.result = [];
+        }
+        res.status(ret.status).json(ret);  
+      });
+      
+    })
+  },
+
   // added getPage
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);

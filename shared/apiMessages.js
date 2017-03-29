@@ -95,6 +95,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    65: { // userController
+      message: 'The user you requested does not exist',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -160,8 +165,13 @@ module.exports = {
       status: 200,
       type: 'success',
     },
-    10013: { // videoController
-      message: 'The video was successfully published',
+    1013: { // videoController
+      message: 'The videos for the selected user were successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1014: { // userController
+      message: 'The user you requested was successfully retrieved',
       status: 200,
       type: 'success',
     },

@@ -56,12 +56,14 @@ const auth = require('./routes/auth');
 const wishList = require('./routes/wishList');
 const videos = require('./routes/videos');
 const audioClips = require('./routes/audioClips');
+const users = require('./routes/users');
 
 // Middleware for routes.
 app.use(`/${conf.apiVersion}/auth`, auth);
 app.use(`/${conf.apiVersion}/wishlist`, wishList);
 app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
+app.use(`/${conf.apiVersion}/users`, users);
 
 // Static route for wav files.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
