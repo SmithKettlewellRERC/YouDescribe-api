@@ -194,29 +194,33 @@ const videosController = {
     })
   },
 
-  // search: (req, res) => {
-  //   const searchTerm = req.query.q;
-  //   Video.find({ status: 'published', title: new RegExp(searchTerm, 'i') }).limit(30)
-  //   .then((videos) => {
-  //     const ret = apiMessages.getResponseByCode(1007);
-  //     ret.result = videos;
-  //     res.status(ret.status).json(ret);
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  //     const ret = apiMessages.getResponseByCode(1);
-  //     res.status(ret.status).json(ret);
-  //   });
-  // },
-
   search: (req, res) => {
     const searchTerm = req.query.q;
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
-    Video.find({ status: 'published', title: new RegExp(searchTerm, 'i') }).skip(requestedVideoAmount - 30).limit(30)
+    Video.find({ title: new RegExp(searchTerm, 'i') }).skip(requestedVideoAmount - 30).limit(30)
+    .populate({
+      path: 'audio_descriptions',
+      populate: {
+        path: 'user audio_clips',
+      }
+    })    
     .then((videos) => {
+      const videosFiltered = [];
+      videos.forEach(video => {
+        let audioDescriptionsFiltered = [];
+        video.audio_descriptions.forEach(ad => {
+          if (ad.status === 'published') {
+            audioDescriptionsFiltered.push(ad);
+          }
+        });
+        video.audio_descriptions = audioDescriptionsFiltered;
+        if (audioDescriptionsFiltered.length > 0) {
+          videosFiltered.push(video);
+        }
+      });
       const ret = apiMessages.getResponseByCode(1007);
-      ret.result = videos;
+      ret.result = videosFiltered;
       res.status(ret.status).json(ret);
     })
     .catch((err) => {
