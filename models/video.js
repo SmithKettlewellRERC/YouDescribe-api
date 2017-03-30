@@ -10,7 +10,6 @@ const videoSchema = new Schema({
   updated_at: Number,
   views: Number,
   language: Number,
-  status: String,
   audio_descriptions: [ {type: Schema.Types.ObjectId, ref: 'AudioDescription'} ],
 }, { collection: 'videos' });
 

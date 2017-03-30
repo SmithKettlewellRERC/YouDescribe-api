@@ -96,6 +96,14 @@ const videosController = {
         res.status(ret.status).json(ret);
       }
       if (video) {
+        // DO NOT REMOVE THIS CODE!
+        // let audioDescriptionsFiltered = [];
+        // video.audio_descriptions.forEach(ad => {
+        //   if (ad.status === 'published') {
+        //     audioDescriptionsFiltered.push(ad);
+        //   }
+        // });
+        // video.audio_descriptions = audioDescriptionsFiltered;
         const ret = apiMessages.getResponseByCode(1000);
         ret.result = video;
         res.status(ret.status).json(ret);  
@@ -104,45 +112,6 @@ const videosController = {
         res.status(ret.status).json(ret);
       }
     })
-  },
-
-  publish: (req, res) => {
-    const id = req.params.id;
-    const userId = req.userId;
-
-    Video.findOneAndUpdate(
-      { youtube_id: id },
-      { $set: { status: 'published' }}
-    )
-    .populate({
-      path: 'audio_descriptions',
-      populate: {
-        path: 'user audio_clips',
-      }
-    })
-    .exec((err, video) => {
-      if (err) {
-        console.log(err);
-        const ret = apiMessages.getResponseByCode(1);
-        res.status(ret.status).json(ret);
-      }
-      if (video) {
-
-        // Try to remove the video from the wishlist.
-        WishList.findOneAndUpdate(
-          { youtube_id: id },
-          { $set: { status: 'dequeued' }}
-        ).exec();
-
-        // Send the response with the video populated.
-        const ret = apiMessages.getResponseByCode(10013);
-        ret.result = video;
-        res.status(ret.status).json(ret);
-      } else {
-        const ret = apiMessages.getResponseByCode(64);
-        res.status(ret.status).json(ret);
-      }
-    });
   },
 
   getVideosByUserId: (req, res) => {
@@ -191,7 +160,7 @@ const videosController = {
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
-    Video.find({ status: 'published' }).skip(searchPage - 30).limit(30)
+    Video.find({}).skip(searchPage - 30).limit(30)
     .populate({
       path: 'audio_descriptions',
       populate: {
@@ -206,8 +175,21 @@ const videosController = {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
       }
+      const videosFiltered = [];
+      videos.forEach(video => {
+        let audioDescriptionsFiltered = [];
+        video.audio_descriptions.forEach(ad => {
+          if (ad.status === 'published') {
+            audioDescriptionsFiltered.push(ad);
+          }
+        });
+        video.audio_descriptions = audioDescriptionsFiltered;
+        if (audioDescriptionsFiltered.length > 0) {
+          videosFiltered.push(video);
+        }
+      });
       const ret = apiMessages.getResponseByCode(1006);
-      ret.result = videos;
+      ret.result = videosFiltered;
       res.status(ret.status).json(ret);  
     })
   },

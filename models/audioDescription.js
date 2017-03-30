@@ -11,6 +11,7 @@ const audioDescriptionSchema = new Schema({
   created_at: Number,
   updated_at: Number,
   notes: String,
+  status: String,
 }, { collection: 'audio_descriptions' });
 
 const AudioDescription = mongoose.model('AudioDescription', audioDescriptionSchema);

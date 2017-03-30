@@ -75,7 +75,7 @@ const audioClipController = {
           if (audioDescriptionId.length === 24) {
 
             // Checking if we have the AD passed.
-            AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $push: { audio_clips: audioClipId }}, (errUpdateAd, returnedAudioDescription) => {
+            AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $set: { notes: req.body.audioDescriptionNotes }, $push: { audio_clips: audioClipId }}, (errUpdateAd, returnedAudioDescription) => {
               if (errUpdateAd) {
                 console.log(errUpdateAd);
                 const ret = apiMessages.getResponseByCode(1);
@@ -99,7 +99,6 @@ const audioClipController = {
                     res.status(ret.status).json(ret);
                   }
 
-                  // Hacky solution while I don't discover how to populate existant objs.
                   Video.findOne({ youtube_id })
                   .populate({
                     path: 'audio_descriptions',
@@ -131,11 +130,12 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
               audio_clips: [audioClipId],
               video: null,
               user: userId,
+              status: 'draft',
               likes: 0,
               language: 1,
               created_at: nowUtc(),
               updated_at: nowUtc(),
-              notes: '',
+              notes: req.body.audioDescriptionNotes,
             });
 
             // Saving the brand new audio description
@@ -223,7 +223,6 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                     updated_at: nowUtc(),
                     views: 0,
                     language: 1,
-                    status: 'draft',
                     audio_descriptions: [ createdAdId ],
                   });
 

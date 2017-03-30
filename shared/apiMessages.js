@@ -90,8 +90,8 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    64: { // videoController
-      message: 'It was impossible to publish the video',
+    64: { // audioDescriptionsController
+      message: 'It was impossible to publish the audio descriptions',
       status: 400,
       type: 'error',
     },
@@ -172,6 +172,11 @@ module.exports = {
     },
     1014: { // userController
       message: 'The user you requested was successfully retrieved',
+      status: 200,
+      type: 'success',
+    },
+    1015: { // audioDescriptionsController
+      message: 'The audio descriptions was successfully published',
       status: 200,
       type: 'success',
     },

@@ -27,7 +27,7 @@ def importMain():
             'updated_at': movie_modified,
             'views': 0,
             'language': 1,
-            'status': 'published',
+            # 'status': 'published',
             'audio_descriptions': [],
         }
         db.videos.insert(movie)
@@ -75,12 +75,14 @@ def importMain():
                         'language': 1,
                         'audio_clips': [],
                         'notes': '',
+                        'status': 'published',
                         'created_at': 20170317000000,
                         'update_at': 20170317000000
                     }
                     total_ads = total_ads + 1
                     res_ad = db.audio_descriptions.insert_one(ad)
                     adId = res_ad.inserted_id
+                    # adId = {'_id':res_ad.inserted_id,'status':'published'}
                     # print adId, movie_fk
                     db.videos.update({'legacy_video_id': movie_fk}, { '$push': { 'audio_descriptions': adId } })
                 
