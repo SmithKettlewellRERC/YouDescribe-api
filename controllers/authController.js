@@ -3,28 +3,34 @@ const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
 const GoogleAuth = require('google-auth-library');
 const User = require('../models/user');
+const crypto = require('crypto');
 
 const authController = {
   googleAuth: (req, res, next) => {
-    const token = req.body.userToken;
+    const googleToken = req.body.googleToken;
     const auth = new GoogleAuth;
     const client = new auth.OAuth2(conf.googleClientId, '', '');
     client.verifyIdToken(
-      token,
+      googleToken,
       conf.googleClientId,
 
       function(e, login) {
         const payload = login.getPayload();
-        const userid = payload['sub'];
+        const googleUserId = payload['sub'];
+
+        const newToken = crypto.createHmac('sha256', conf.cryptoSecret)
+                   .update(conf.cryptoSeed + nowUtc())
+                   .digest('hex');
 
         User.findOneAndUpdate(
-          { google_user_id: userid },
+          { google_user_id: googleUserId },
           { $set:
             {
               last_login: nowUtc(),
               updated_at: nowUtc(),
+              token: newToken,
             }
-          }, (err, user) => {
+          }, { new: true }, (err, user) => {
             if (err) {
               const ret = apiMessages.getResponseByCode(1);
               res.status(ret.status).json(ret);
@@ -40,8 +46,9 @@ const authController = {
                 given_name: payload.given_name,
                 picture: payload.picture,
                 locale: payload.locale,
-                google_user_id: userid,
+                google_user_id: googleUserId,
                 last_login: nowUtc(),
+                token: newToken,
               });
               newUser.save((errNewUser, newUser) => {
                 if (errNewUser) {

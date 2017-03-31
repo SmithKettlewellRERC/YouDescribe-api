@@ -13,6 +13,7 @@ const userSchema = new Schema({
   updated_at: Number,
   last_login: Number,
   status: String,
+  token: String,
 }, { collection: 'users' });
 
 const User = mongoose.model('User', userSchema);

@@ -8,10 +8,10 @@ const WishList = require('./../models/wishList');
 const wishListController = {
 
   addOne: (req, res) => {
-    const youtube_id = req.body.id;
+    const youTubeId = req.body.youTubeId;
 
     // Let's first search on videos collection.
-    Video.findOne({ youtube_id }, (err1, video) => {
+    Video.findOne({ youtube_id: youTubeId }, (err1, video) => {
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -25,7 +25,7 @@ const wishListController = {
         res.status(ret.status).json(ret);
       } else {
         // Let's now search at wishlist collection.
-        WishList.findOne({ youtube_id }, (err2, wishListItem) => {
+        WishList.findOne({ youtube_id: youTubeId }, (err2, wishListItem) => {
 
           // Error handling.
           if (err2) {
@@ -55,7 +55,7 @@ const wishListController = {
           } else {
             // Let's create.
             const newWishList = new WishList({
-              youtube_id,
+              youtube_id: youTubeId,
               votes: 1,
               status: 'queued',
               created_at: nowUtc(),
@@ -78,8 +78,8 @@ const wishListController = {
   },
 
   getOne: (req, res) => {
-    const youtube_id = req.params.id;
-    WishList.findOne({ youtube_id })
+    const youTubeId = req.params.youTubeId;
+    WishList.findOne({ youtube_id: youTubeId })
     .then((wishListItem) => {
       if (wishListItem) {
         const ret = apiMessages.getResponseByCode(1002);
@@ -120,9 +120,9 @@ const wishListController = {
   },
 
   updateOne: (req, res) => {
-    const youtube_id = req.params.id;
+    const youTubeId = req.params.youTubeId;
 
-    WishList.findOneAndUpdate({ youtube_id }, { $set: { status: 'dequeued', updated_at: nowUtc() } }, { new: true }, (err, wishList) => {
+    WishList.findOneAndUpdate({ youtube_id: youTubeId }, { $set: { status: 'dequeued', updated_at: nowUtc() } }, (err, wishList) => {
       if (err) {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);

@@ -7,7 +7,7 @@ const WishList = require('./../models/wishList');
 const audioDesriptionsController = {
 
   publishUnpublish: (req, res) => {
-    const userId = req.userId;
+    const userId = req.body.userId;
     const adId = req.params.audioDescriptionId;
     const action = req.query.action === 'publish' ? 'published': 'draft';
 

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const wishListController = require('../controllers/wishListController');
-const googleTokenValidator = require('./../middlewares/googleTokenValidator');
+const userTokenValidator = require('./../middlewares/userTokenValidator');
 
-router.post('/', googleTokenValidator, wishListController.addOne);
-router.get('/:id', wishListController.getOne);
+router.post('/', userTokenValidator, wishListController.addOne);
+router.get('/:youTubeId', wishListController.getOne);
 router.get('/', wishListController.getAll);
-router.put('/:id', googleTokenValidator, wishListController.updateOne);
+router.put('/:youTubeId', userTokenValidator, wishListController.updateOne);
 
 module.exports = router;

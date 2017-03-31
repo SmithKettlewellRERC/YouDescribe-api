@@ -9,7 +9,7 @@ const AudioClip = require('./../models/audioClip');
 const audioClipController = {
   addOne: (req, res) => {
     // According to the middleware, we cannot arrive here wo a userId.
-    const userId = req.userId;
+    const userId = req.body.userId;
 
     // We only accept requests with files attached.
     if (req.file.mimetype !== 'audio/wav') {

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const videosController = require('../controllers/videosController');
-const googleTokenValidator = require('./../middlewares/googleTokenValidator');
+const userTokenValidator = require('./../middlewares/userTokenValidator');
 
 
 router.get('/', videosController.getAll);
@@ -10,6 +10,6 @@ router.get('/:id', videosController.getOne);
 router.get('/user/:userId', videosController.getVideosByUserId);
 // router.post('/', videosController.addOne);
 // router.put('/:id', videosController.updateOne);
-// router.post('/:id', googleTokenValidator, videosController.publish);
+// router.post('/:id', userTokenValidator, videosController.publish);
 
 module.exports = router;

@@ -1,10 +1,10 @@
 const express = require('express');
 const multer = require('multer');
-const googleTokenValidator = require('./../middlewares/googleTokenValidator');
+const userTokenValidator = require('./../middlewares/userTokenValidator');
 const upload = multer({ dest: 'uploads/tmp/' });
 const router = express.Router();
 const audioClipsController = require('../controllers/audioClipsController');
 
-router.post('/:videoId', googleTokenValidator, upload.single('wavfile'), audioClipsController.addOne);
+router.post('/:videoId', upload.single('wavfile'), userTokenValidator, audioClipsController.addOne);
 
 module.exports = router;
