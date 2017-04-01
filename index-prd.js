@@ -1,4 +1,4 @@
-// Our web framework itself.
+
 const path = require('path');
 const bodyParser = require('body-parser');
 const conf = require('./shared/config')();
@@ -61,7 +61,7 @@ app.use(`/${conf.apiVersion}/users`, users);
 app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 
 // Static route for wav files.
-app.use('/audio-descriptions-files', express.static(path.join(__dirname, '/mnt/ebs/audio-descriptions-files')));
+app.use('/audio-descriptions-files', express.static('/mnt/ebs/audio-descriptions-files'));
 
 // The Restful API drain.
 app.get('*', (req, res) => {
