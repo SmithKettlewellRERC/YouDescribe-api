@@ -156,7 +156,6 @@ const videosController = {
     })
   },
 
-  // added getPage
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);

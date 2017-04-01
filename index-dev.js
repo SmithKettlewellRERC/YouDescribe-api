@@ -9,15 +9,15 @@ const app = express();
 app.use(bodyParser.json());
 
 // Database.
-const db = require('./db/connection');
+const db = require('./db/connection-dev');
 
 // Compression.
 // const compression = require('compression');
 // app.use(compression());
 
 // Logs library.
-// const morgan = require('morgan');
-// app.use(morgan('combined'));
+const morgan = require('morgan');
+app.use(morgan('combined'));
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;
