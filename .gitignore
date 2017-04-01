@@ -4,4 +4,5 @@ db/config.js
 db/dumps
 db/scripts
 deploy.sh
+/audio-descriptions-files
 /uploads
