@@ -4,7 +4,8 @@
   "description": "A RestFul API to handle all data for YouDescribe Platform.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "NODE_ENV=dev nodemon index-dev.js",
+    "prd": "NODE_ENV=prd node index-prd.js"
   },
   "repository": {
     "type": "git",

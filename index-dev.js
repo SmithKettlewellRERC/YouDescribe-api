@@ -1,3 +1,4 @@
+const NODE_ENV = process.env.NODE_ENV;
 const path = require('path');
 const bodyParser = require('body-parser');
 const conf = require('./shared/config')();
