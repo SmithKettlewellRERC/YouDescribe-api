@@ -6,5 +6,6 @@ const router = express.Router();
 const audioClipsController = require('../controllers/audioClipsController');
 
 router.post('/:videoId', upload.single('wavfile'), userTokenValidator, audioClipsController.addOne);
+router.delete('/:audioClipId', userTokenValidator, audioClipsController.delOne);
 
 module.exports = router;

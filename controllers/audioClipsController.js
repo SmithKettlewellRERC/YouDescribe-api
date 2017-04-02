@@ -290,6 +290,12 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
         });
       });
     });
+  },
+
+  delOne: (req, res) => {
+    console.log('CONSOLE');
+    const ret = apiMessages.getResponseByCode(1);
+    res.status(ret.status).json(ret);
   }
 };
 
