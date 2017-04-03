@@ -23,7 +23,7 @@ const audioClipController = {
 
     // Fixing paths to save audio clip file.
     const relativePath = `/${youtube_id}`;
-    const absPathToSave = `${conf.uploadsRootDir}${relativePath}`;
+    const absPathToSave = `${conf.uploadsRootDirToSave}${relativePath}`;
 
     // First step: create de audio clip object.
     const newAudioClip = new AudioClip({
@@ -293,9 +293,51 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
   },
 
   delOne: (req, res) => {
-    console.log('CONSOLE');
-    const ret = apiMessages.getResponseByCode(1);
-    res.status(ret.status).json(ret);
+    const audioClipId = req.params.audioClipId;
+    AudioClip.findByIdAndRemove({ _id: audioClipId })
+    .exec(function(errFindAndRemove, audioClipDeleted) {
+      if (errFindAndRemove) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+
+      if (audioClipDeleted) {
+        // Let's delete the file.
+        const absFilePath = `${conf.uploadsRootDirToDelete}/${audioClipDeleted.file_path}/${audioClipDeleted.file_name}`;
+        // console.log('Removing file...', absFilePath);
+        fse.remove(absFilePath, errDeleting => {});
+
+        const audioDescriptionId = audioClipDeleted.audio_description;
+
+        AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, {
+          $pull: { audio_clips: audioClipId }
+        }, { new: true }, (errAd, adUpdated) => {
+
+          if (errAd) {
+            const ret = apiMessages.getResponseByCode(1);
+            res.status(ret.status).json(ret);            
+          }
+
+          if (adUpdated.audio_clips.length === 0) {
+            AudioDescription.remove({ _id: audioDescriptionId }, (errR, adRemoved) => {});
+          }
+
+          const videoId = adUpdated.video;
+          Video.findOne({ _id: videoId })
+          .populate({
+            path: 'audio_descriptions',
+            populate: {
+              path: 'user audio_clips',
+            }
+          })
+          .exec((errPopulate, video) => {
+            const ret = apiMessages.getResponseByCode(1016);
+            ret.result = video;
+            res.status(ret.status).json(ret);
+          });   
+        });
+      }
+    });
   }
 };
 

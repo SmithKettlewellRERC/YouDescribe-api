@@ -11,8 +11,8 @@ app.use(bodyParser.json());
 const db = require('./db/connection-dev');
 
 // Logs library.
-const morgan = require('morgan');
-app.use(morgan('combined'));
+// const morgan = require('morgan');
+// app.use(morgan('combined'));
 
 // Server HTTP port setup.
 const port = process.env.PORT || 8080;
@@ -20,10 +20,10 @@ const port = process.env.PORT || 8080;
 // CORS.
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length');
   if (req.method === 'OPTIONS') {
     return next();
-    return res.send(200);
   } else {
     return next();
   }

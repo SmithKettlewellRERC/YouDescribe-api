@@ -180,6 +180,11 @@ module.exports = {
       status: 200,
       type: 'success',
     },
+    1016: { // audioClipsController
+      message: 'Audio clip was successfully removed',
+      status: 200,
+      type: 'success',
+    },
   },
 
   getResponseByCode: function(code) {
