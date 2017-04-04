@@ -7,7 +7,7 @@ import subprocess
 import re
 
 def main():
-    base = '/Users/rodrigo/Desktop/youdescribe/api/uploads/legacy'
+    base = '/Users/rodrigo/Desktop/youdescribe/api/audio-descriptions-files/legacy'
     acs = db.audio_clips.find({})
     acs_total = 0
     for ac in acs:
@@ -49,8 +49,8 @@ def main():
 
 if __name__ == '__main__':
     print 'Fixing times...'
-    client = MongoClient("mongodb://127.0.0.1:27017")
-    # client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@webng.io:27017/youdescribe")
+    # client = MongoClient("mongodb://127.0.0.1:27017")
+    client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@api.youdescribe.org:27017/youdescribe")
     db = client['youdescribe']
     main()
     print 'Finished.'
