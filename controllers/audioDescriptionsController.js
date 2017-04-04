@@ -21,31 +21,38 @@ const audioDesriptionsController = {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
       }
-      if (ad) {
-        // Try to remove the video from the wishlist.
-        // WishList.findOneAndUpdate(
-        //   { youtube_id: id },
-        //   { $set: { status: 'dequeued' }}
-        // ).exec();
-
-        Video.findOne({
-          audio_descriptions: { $in: [ad._id] }
-        })
-        .populate({
-          path: 'audio_descriptions',
-          populate: {
-            path: 'user audio_clips',
+      const videoId = ad.video;
+      Video.findOne({ _id: videoId })
+      .populate({
+        path: 'audio_descriptions',
+        populate: {
+          path: 'user audio_clips',
+        }
+      })
+      .exec((err, videoToCheck) => {
+        const ads = videoToCheck.audio_descriptions;
+        const youTubeId = videoToCheck.youtube_id;
+        let onePublished = false;
+        ads.forEach((ad) => {
+          if (ad.status === 'published') {
+            onePublished = true;
           }
-        })
-        .exec((errVideo, video) => {
-          const ret = apiMessages.getResponseByCode(1015);
-          ret.result = video;
-          res.status(ret.status).json(ret);
         });
-      } else {
-        const ret = apiMessages.getResponseByCode(64);
+        if (onePublished) {
+          WishList.findOneAndUpdate(
+            { youtube_id: youTubeId },
+            { $set: { status: 'dequeued' }}
+          ).exec();
+        } else {
+          WishList.findOneAndUpdate(
+            { youtube_id: youTubeId },
+            { $set: { status: 'queued' }}
+          ).exec();
+        }
+        const ret = apiMessages.getResponseByCode(1015);
+        ret.result = videoToCheck;
         res.status(ret.status).json(ret);
-      }
+      });
     });
   }
 }

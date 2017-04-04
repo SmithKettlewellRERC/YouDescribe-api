@@ -90,8 +90,8 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    64: { // audioDescriptionsController
-      message: 'It was impossible to publish the audio descriptions',
+    64: { // audioClipsController
+      message: 'We have just removed the video as it does not have any more audio descriptions',
       status: 400,
       type: 'error',
     },

@@ -99,7 +99,7 @@ const audioClipController = {
                     res.status(ret.status).json(ret);
                   }
 
-                  Video.findOne({ youtube_id })
+                  Video.findOneAndUpdate({ youtube_id }, { $set: { updated_at: nowUtc() }})
                   .populate({
                     path: 'audio_descriptions',
                     populate: {
@@ -161,7 +161,7 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
                 if (video) {
 
                   // Updating the list of audio descriptions references.
-                  Video.update({ _id: video._id }, { $push: {
+                  Video.update({ _id: video._id }, { $set: { updated_at: nowUtc() }, $push: {
                     audio_descriptions: createdAdId,
                   }}, (errUpdatingVideo, updatedVideo) => {
                     if (errUpdatingVideo) {
@@ -262,7 +262,7 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                                 }
                               })
                               .exec((errPopulate, video) => {
-  console.log('ALL SET 3 - Exec - Create audio clip - Create AD - Create Video');
+  console.log('ALL SET 3 - Create audio clip - Create AD - Create Video');
                                 const ret = apiMessages.getResponseByCode(1005);
                                 ret.result = video;
                                 res.status(ret.status).json(ret);
@@ -300,14 +300,20 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
       }
-
+// console.log('audioClipDeleted', audioClipDeleted);
       if (audioClipDeleted) {
         // Let's delete the file.
         const absFilePath = `${conf.uploadsRootDirToDelete}/${audioClipDeleted.file_path}/${audioClipDeleted.file_name}`;
-        // console.log('Removing file...', absFilePath);
-        fse.remove(absFilePath, errDeleting => {});
+        fse.remove(absFilePath, errDeleting => {
+          if (errDeleting) {
+            return console.error(errDeleting);
+          }
+// console.log('File deleted', absFilePath);
+        });
 
         const audioDescriptionId = audioClipDeleted.audio_description;
+
+// console.log('audioDescriptionId', audioDescriptionId);
 
         AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, {
           $pull: { audio_clips: audioClipId }
@@ -318,11 +324,15 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
             res.status(ret.status).json(ret);            
           }
 
+// console.log('audioDescriptionUpdated', adUpdated);
+
           if (adUpdated.audio_clips.length === 0) {
+// console.log('removing the audio description because we dont have audio clips anymore');
             AudioDescription.remove({ _id: audioDescriptionId }, (errR, adRemoved) => {});
           }
 
           const videoId = adUpdated.video;
+// console.log('returning the video', videoId);
           Video.findOne({ _id: videoId })
           .populate({
             path: 'audio_descriptions',
@@ -331,11 +341,23 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
             }
           })
           .exec((errPopulate, video) => {
-            const ret = apiMessages.getResponseByCode(1016);
-            ret.result = video;
-            res.status(ret.status).json(ret);
+
+            // We can remove the video as it does not have more ADs.
+            if (video.audio_descriptions.length === 0) {
+// console.log('Removing the video');
+              Video.remove({ _id: videoId }, (errRemovingVideo, videoRemoved) => {});
+              const ret = apiMessages.getResponseByCode(64);
+              res.status(ret.status).json(ret);              
+            } else {
+// console.log('Video returned', JSON.stringify(video, null, '  '))
+              const ret = apiMessages.getResponseByCode(1016);
+              ret.result = video;
+              res.status(ret.status).json(ret);
+            }
           });   
         });
+      } else {
+// console.log('Audio clip was not deleted', audioClipId);
       }
     });
   }

@@ -10,7 +10,7 @@ const wishListController = {
   addOne: (req, res) => {
     const youTubeId = req.body.youTubeId;
 
-    // Let's first search on videos collection.
+    // Let's first search in videos collection.
     Video.findOne({ youtube_id: youTubeId }, (err1, video) => {
       if (err1) {
         console.log(err1);
