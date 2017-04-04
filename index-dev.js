@@ -46,7 +46,7 @@ app.use(`/${conf.apiVersion}/users`, users);
 app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 
 // Static route for wav files.
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/audio-descriptions-files', express.static(path.join(__dirname, '/audio-descriptions-files')));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 //   setHeaders: function(res) {
 //     res.setHeader("Content-Type", "audio/wav");
