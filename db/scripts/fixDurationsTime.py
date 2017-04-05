@@ -49,8 +49,7 @@ def main():
 
 if __name__ == '__main__':
     print 'Fixing times...'
-    # client = MongoClient("mongodb://127.0.0.1:27017")
-    client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@api.youdescribe.org:27017/youdescribe")
+    client = MongoClient("mongodb://127.0.0.1:27017")
     db = client['youdescribe']
     main()
     print 'Finished.'

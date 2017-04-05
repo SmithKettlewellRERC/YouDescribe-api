@@ -132,7 +132,7 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
               user: userId,
               status: 'draft',
               likes: 0,
-              language: 1,
+              language: 'en',
               created_at: nowUtc(),
               updated_at: nowUtc(),
               notes: req.body.audioDescriptionNotes,
@@ -222,7 +222,7 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                     created_at: nowUtc(),
                     updated_at: nowUtc(),
                     views: 0,
-                    language: 1,
+                    language: 'en',
                     audio_descriptions: [ createdAdId ],
                   });
 

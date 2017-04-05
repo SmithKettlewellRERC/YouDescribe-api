@@ -26,7 +26,7 @@ def importMain():
             'created_at': movie_created,
             'updated_at': movie_modified,
             'views': 0,
-            'language': 1,
+            # 'language': 'en',
             # 'status': 'published',
             'audio_descriptions': [],
         }
@@ -72,7 +72,7 @@ def importMain():
                         'legacy_user_id': user_id,
                         'legacy_video_id': movie_fk,
                         'likes': 0,
-                        'language': 1,
+                        'language': 'en',
                         'audio_clips': [],
                         'notes': '',
                         'status': 'published',
@@ -163,8 +163,7 @@ if __name__ == '__main__':
 
     # MONGO
     print 'Connectiong to mongo...'
-    # client = MongoClient("mongodb://127.0.0.1:27017")
-    client = MongoClient("mongodb://youdescribe:EEwasdR7pbg6gyT@api.youdescribe.org:27017/youdescribe")
+    client = MongoClient("mongodb://127.0.0.1:27017")
     db = client['youdescribe']
     print 'mongo connected.'
 

@@ -197,7 +197,8 @@ const videosController = {
     const searchTerm = req.query.q;
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
-    Video.find({ title: new RegExp(searchTerm, 'i') }).skip(requestedVideoAmount - 30).limit(30)
+    // Video.find({ title: new RegExp(searchTerm, 'i') }).sort({ updated_at: -1 }).skip(requestedVideoAmount - 30).limit(30)
+    Video.find({ $text: { $search: searchTerm }}).sort({ updated_at: -1 }).skip(requestedVideoAmount - 30).limit(30)
     .populate({
       path: 'audio_descriptions',
       populate: {

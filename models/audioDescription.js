@@ -7,7 +7,7 @@ const audioDescriptionSchema = new Schema({
   video: {type: Schema.Types.ObjectId, ref: 'Video'},
   user: {type: Schema.Types.ObjectId, ref: 'User'},
   likes: Number,
-  language: Number,
+  language: String,
   created_at: Number,
   updated_at: Number,
   notes: String,
