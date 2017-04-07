@@ -22,26 +22,17 @@ app.use(morgan('combined'));
 const port = process.env.PORT || 3000;
 
 // CORS.
-// var allowCrossDomain = function(req, res, next) {
-//     res.header('Access-Control-Allow-Origin', 'example.com');
-//     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//     res.header('Access-Control-Allow-Headers', 'Content-Type');
-
-//     next();
-// }
 app.use(function(req, res, next) {
-  // res.header('Access-Control-Allow-Origin', req.get('Origin') || '*');
-  res.header('Access-Control-Allow-Origin', '*');
-  // res.header('Access-Control-Allow-Credentials', 'true');
-  // res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-  // res.header('Access-Control-Expose-Headers', 'Content-Length');
-  res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range');
-  if (req.method === 'OPTIONS') {
-    return next();
-    return res.send(200);
-  } else {
-    return next();
+  const allowedOrigins = ['https://beta.youdescribe.org', 'https://youdescribe.org', 'https://www.youdescribe.org'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.indexOf(origin) > -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
+  res.header('Access-Control-Allow-Origin', 'https://beta.youdescribe.org');
+  res.header('Vary', 'Origin');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length');
+  return next();
 });
 
 // Our server routes.
