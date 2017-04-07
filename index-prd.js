@@ -19,7 +19,7 @@ const morgan = require('morgan');
 app.use(morgan('combined'));
 
 // Server HTTP port setup.
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 
 // CORS.
 // var allowCrossDomain = function(req, res, next) {
