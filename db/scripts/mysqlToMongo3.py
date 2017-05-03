@@ -71,7 +71,7 @@ def importMain():
                         'video': video['_id'],
                         'legacy_user_id': user_id,
                         'legacy_video_id': movie_fk,
-                        'likes': 0,
+                        'overall_rating': -1,
                         'language': 'en',
                         'audio_clips': [],
                         'notes': '',

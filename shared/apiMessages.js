@@ -50,7 +50,7 @@ module.exports = {
     },
     55: { // videoController
       message: 'The requested video was not found',
-      status: 400,
+      status: 200, // ???????
       type: 'error',
     },
     56: { // videoController
