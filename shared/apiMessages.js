@@ -100,6 +100,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    66: { // overallRatingController
+      message: 'There was a problem to rate the selected audio description',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -182,6 +187,11 @@ module.exports = {
     },
     1016: { // audioClipsController
       message: 'Audio clip was successfully removed',
+      status: 200,
+      type: 'success',
+    },
+    1017: { // overallRatingController
+      message: 'Rating was successfully saved',
       status: 200,
       type: 'success',
     },
