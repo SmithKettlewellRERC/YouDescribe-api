@@ -5,7 +5,7 @@ const OverallRating = require('./../models/overallRating');
 const AudioDescription = require('./../models/audioDescription');
 
 
-const  overallVote = (audioDescriptionId, rating) => {
+const overallVote = (audioDescriptionId, rating) => {
   rating = parseInt(rating);
   AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $inc: { overall_rating_votes_counter: 1 }}, { new: true }, (errVotes, resVotesAd) => {
     if (resVotesAd) {

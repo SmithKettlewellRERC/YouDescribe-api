@@ -41,6 +41,7 @@ const videos = require('./routes/videos');
 const audioClips = require('./routes/audioClips');
 const users = require('./routes/users');
 const audioDescriptions = require('./routes/audioDescriptions');
+const audioDescriptionsFeedback = require('./routes/audioDescriptionsFeedback');
 const overallRatings = require('./routes/overallRatings');
 
 // Middleware for routes.
@@ -50,7 +51,8 @@ app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
 app.use(`/${conf.apiVersion}/users`, users);
 app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
-app.use(`/${conf.apiVersion}/overallRatings`, overallRatings);
+app.use(`/${conf.apiVersion}/audiodescriptionsfeedback`, audioDescriptionsFeedback);
+app.use(`/${conf.apiVersion}/overallratings`, overallRatings);
 
 // Static route for wav files.
 app.use('/audio-descriptions-files', express.static('/mnt/ebs/audio-descriptions-files'));
