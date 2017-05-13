@@ -1,7 +1,7 @@
 // Application modules.
 const nowUtc = require('./../shared/dateTime').nowUtc;
 const apiMessages = require('./../shared/apiMessages');
-const OverallRating = require('./../models/overallRating');
+const AudioDescriptionRating = require('./../models/audioDescriptionRating');
 const AudioDescription = require('./../models/audioDescription');
 
 
@@ -32,7 +32,7 @@ const overallVote = (audioDescriptionId, rating) => {
   });
 }
 
-const overallRatingsController = {
+const audioDescriptionsRatingController = {
   addOne: (req, res) => {
     const userId = req.body.userId;
     const audioDescriptionId = req.params.audioDescriptionId;
@@ -48,7 +48,7 @@ const overallRatingsController = {
       rating: rating,
     };
         
-    OverallRating.findOneAndUpdate(query, update, (err, resUpdated) => {
+    AudioDescriptionRating.findOneAndUpdate(query, update, (err, resUpdated) => {
       if (err) {
         console.log(err);
         const ret = apiMessages.getResponseByCode(1);
@@ -61,14 +61,14 @@ const overallRatingsController = {
         ret.result = resUpdated;
         res.status(ret.status).json(ret);
       } else {
-        const overallRating = new OverallRating({
+        const audioDescriptionRating = new AudioDescriptionRating({
           audio_description_id: audioDescriptionId,
           user_id: userId,
           created_at: nowUtc(),
           updated_at: nowUtc(),
           rating: rating,                
         });
-        overallRating.save((errNew, resNew) => {
+        audioDescriptionRating.save((errNew, resNew) => {
           if (errNew) {
             console.log(errNew);
             const ret = apiMessages.getResponseByCode(1);
@@ -89,4 +89,4 @@ const overallRatingsController = {
   }
 }
 
-module.exports = overallRatingsController;
+module.exports = audioDescriptionsRatingController;

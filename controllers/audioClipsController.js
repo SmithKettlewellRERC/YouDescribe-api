@@ -160,24 +160,21 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
                 // If the video we've just searched exists.
                 if (video) {
 
+                  // Now we need to update the audio description with the videoId.
+                  AudioDescription.findOneAndUpdate({ _id: createdAdId }, { $set: { video: video._id }}).exec((err, ad) => {});
+
                   // Updating the list of audio descriptions references.
-                  Video.update({ _id: video._id }, { $set: { updated_at: nowUtc() }, $push: {
-                    audio_descriptions: createdAdId,
-                  }}, (errUpdatingVideo, updatedVideo) => {
+                  Video.update({ _id: video._id }, { $set: { updated_at: nowUtc() }, $push: { audio_descriptions: createdAdId }}, (errUpdatingVideo, updatedVideo) => {
                     if (errUpdatingVideo) {
                       console.log(errUpdatingVideo);
                       const ret = apiMessages.getResponseByCode(1);
                       res.status(ret.status).json(ret);
                     }
+
                     if (updatedVideo) {
                       
                       // Updating the audio clips references.
-                      audioClip.update({ _id: audioClipId }, {
-                        $set: {
-                          audio_description: createdAdId,
-                          video: video._id,
-                        }
-                      }, (errUpdatingAudioClip, audioClipUpdated) => {
+                      audioClip.update({ _id: audioClipId }, { $set: { audio_description: createdAdId, video: video._id } }, (errUpdatingAudioClip, audioClipUpdated) => {
                         if (errUpdatingAudioClip) {
                           console.log(errUpdatingAudioClip);
                           const ret = apiMessages.getResponseByCode(1);
@@ -185,14 +182,10 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
                         }
                         if (audioClipUpdated) {
 
+
                           // Hacky solution while I don't discover how to populate existant objs.
                           Video.findOne({ youtube_id })
-                          .populate({
-                            path: 'audio_descriptions',
-                            populate: {
-                              path: 'user audio_clips',
-                            }
-                          })
+                          .populate({ path: 'audio_descriptions', populate: { path: 'user audio_clips' }})
                           .exec((errPopulate, video) => {
 console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                             const ret = apiMessages.getResponseByCode(1005);
