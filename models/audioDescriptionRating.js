@@ -8,6 +8,7 @@ const audioDescriptionRatingSchema = new Schema({
   created_at: Number,
   updated_at: Number,
   rating: Number,
+  feedback: [],
 }, { collection: 'audio_descriptions_ratings' });
 
 module.exports = mongoose.model('AudioDescriptionRating', audioDescriptionRatingSchema);

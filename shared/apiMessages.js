@@ -100,16 +100,6 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    66: { // overallRatingController
-      message: 'There was a problem to rate the selected audio description',
-      status: 400,
-      type: 'error',
-    },
-    67: { // audioDescriptionsFeedbackController
-      message: 'There was a problem to save the feedback for the audio description',
-      status: 400,
-      type: 'error',
-    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -197,11 +187,6 @@ module.exports = {
     },
     1017: { // overallRatingController
       message: 'Rating was successfully saved',
-      status: 200,
-      type: 'success',
-    },
-    1018: { // audioDescriptionsFeedbackController
-      message: 'Feedback was successfully saved',
       status: 200,
       type: 'success',
     },
