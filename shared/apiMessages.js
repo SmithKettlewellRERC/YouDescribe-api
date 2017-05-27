@@ -190,6 +190,16 @@ module.exports = {
       status: 200,
       type: 'success',
     },
+    1018: { // audioDescriptionsController
+      message: 'Audio description was successfully update',
+      status: 200,
+      type: 'success',
+    },
+    1019: { // audioClipsController
+      message: 'Audio clip was successfully update',
+      status: 200,
+      type: 'success',
+    },
   },
 
   getResponseByCode: function(code) {

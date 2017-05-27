@@ -353,7 +353,30 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
 // console.log('Audio clip was not deleted', audioClipId);
       }
     });
-  }
+  },
+
+  updateOne: (req, res) => {
+    const acId = req.params.audioClipId;
+    const userId = req.body.userId;
+    const label = req.body.label;
+
+    AudioClip.findOneAndUpdate(
+      { _id: acId, user: userId },
+      { $set: { label }},
+      { new: true }
+    )
+    .exec((err, ac) => {
+      if (err) {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+      const ret = apiMessages.getResponseByCode(1019);
+      ret.result = ac;
+      res.status(ret.status).json(ret);
+    });
+  },
+
 };
 
 module.exports = audioClipController;

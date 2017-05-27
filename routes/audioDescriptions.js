@@ -5,4 +5,6 @@ const userTokenValidator = require('./../middlewares/userTokenValidator');
 
 router.post('/:audioDescriptionId', userTokenValidator, audioDescriptionsController.publishUnpublish);
 
+router.put('/:audioDescriptionId', userTokenValidator, audioDescriptionsController.updateAudioDescription);
+
 module.exports = router;
