@@ -21,19 +21,6 @@ app.use(morgan('combined'));
 // Server HTTP port setup.
 const port = process.env.PORT || 3000;
 
-// CORS - Will be handled by NgInx.
-// app.use(function(req, res, next) {
-//   const allowedOrigins = ['https://beta.youdescribe.org', 'https://youdescribe.org', 'https://www.youdescribe.org'];
-//   const origin = req.headers.origin;
-//   if (allowedOrigins.indexOf(origin) > -1) {
-//     res.header('Access-Control-Allow-Origin', origin);
-//   }
-//   res.header('Vary', 'Origin');
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-//   res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length');
-//   return next();
-// });
-
 // Our server routes.
 const auth = require('./routes/auth');
 const wishList = require('./routes/wishList');
