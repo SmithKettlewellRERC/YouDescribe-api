@@ -358,11 +358,29 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
   updateOne: (req, res) => {
     const acId = req.params.audioClipId;
     const userId = req.body.userId;
-    const label = req.body.label;
-
+    let toUpdate = {};
+    if (req.body.label) {
+      toUpdate = { $set: { label: req.body.label }}
+    }
+    if (req.body.playback_type) {
+      const playback_type = req.body.playback_type;
+      const start_time = req.body.start_time;
+      const duration = req.body.duration;
+      let end_time = req.body.end_time;
+      if (playback_type === 'extended') {
+        end_time = start_time;
+      } 
+      if (playback_type === 'inline') {
+        end_time = parseFloat(start_time) + parseFloat(duration);
+      } 
+      toUpdate = { $set: {
+        playback_type,
+        end_time,
+      }}
+    }
     AudioClip.findOneAndUpdate(
       { _id: acId, user: userId },
-      { $set: { label }},
+      toUpdate,
       { new: true }
     )
     .exec((err, ac) => {
