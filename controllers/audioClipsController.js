@@ -374,6 +374,7 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
         end_time = parseFloat(start_time) + parseFloat(duration);
       } 
       toUpdate = { $set: {
+        start_time,
         playback_type,
         end_time,
       }}
