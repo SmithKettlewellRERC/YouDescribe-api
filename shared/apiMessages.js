@@ -176,7 +176,7 @@ module.exports = {
       type: 'success',
     },
     1015: { // audioDescriptionsController
-      message: 'The audio descriptions was successfully published',
+      message: 'The audio descriptions was successfully updated',
       status: 200,
       type: 'success',
     },
@@ -191,7 +191,7 @@ module.exports = {
       type: 'success',
     },
     1018: { // audioDescriptionsController
-      message: 'Audio description was successfully update',
+      message: 'The audio descriptions was successfully created',
       status: 200,
       type: 'success',
     },
