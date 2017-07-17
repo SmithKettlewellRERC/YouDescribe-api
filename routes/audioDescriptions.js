@@ -7,4 +7,6 @@ router.post('/:videoId', userTokenValidator, audioDescriptionsController.createO
 
 router.put('/:audioDescriptionId', userTokenValidator, audioDescriptionsController.updateAudioDescription);
 
+router.delete('/:audioDescriptionId', userTokenValidator, audioDescriptionsController.deleteAudioDescription);
+
 module.exports = router;

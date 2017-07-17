@@ -192,6 +192,46 @@ const audioDesriptionsController = {
     });
   },
 
+  deleteAudioDescription: (req, res) => {
+    const userId = req.body.userId;
+    const adId = req.params.audioDescriptionId;
+
+    AudioDescription.findOne({ _id: adId }, (errAd, adReturned) => {
+
+      const videoId = adReturned.video;
+
+      // Looping through all audio clips.
+      adReturned.audio_clips.forEach((audioClipId) => {
+        AudioClip.findByIdAndRemove({ _id: audioClipId })
+        .exec(function(errFindAndRemove, removedAudioClip) {
+          // Let's delete the file.
+          const absFilePath = `${conf.uploadsRootDirToDelete}/${removedAudioClip.file_path}/${removedAudioClip.file_name}`;
+          fse.remove(absFilePath, errDeleting => {
+            console.log('Removed audio clip', rabsFilePath, emovedAudioClip);
+          });
+        });
+      });
+
+      // Let's update the video. Remove the audio description id reference from it.
+      Video.findOneAndUpdate({ _id: videoId }, { $pull: { audio_descriptions: adId } }, { new: true })
+      .exec((err, updatedVideo) => {
+
+        // Let's remove the video as it doesn't have any audio descriptions anymore.
+        if (updatedVideo.audio_descriptions.length === 0) {
+          Video.findByIdAndRemove({ _id: videoId }).exec((errRemovingVideo, removedVideo) => {
+            console.log('Removed video', removedVideo);
+          });
+        } else {
+          console.log('Updated video', updatedVideo);
+        }
+      });
+
+      // Now let's delete the audio description itself.
+      Video.findByIdAndRemove({ _id: adId }.exec((errRemovingAd, removedAd) => {
+        console.log('Removed audio description', removedAd);
+      }));
+    });
+  },
 }
 
 module.exports = audioDesriptionsController;
