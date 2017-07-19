@@ -1,10 +1,12 @@
 // Application modules.
+const fse = require('fs-extra');
 const apiMessages = require('./../shared/apiMessages');
 const Video = require('./../models/video');
 const AudioDescription = require('./../models/audioDescription');
 const WishList = require('./../models/wishList');
 const conf = require('../shared/config')();
 const nowUtc = require('./../shared/dateTime').nowUtc;
+const AudioClip = require('./../models/audioClip');
 
 const audioDesriptionsController = {
 
@@ -207,18 +209,28 @@ const audioDesriptionsController = {
           // Let's delete the file.
           const absFilePath = `${conf.uploadsRootDirToDelete}/${removedAudioClip.file_path}/${removedAudioClip.file_name}`;
           fse.remove(absFilePath, errDeleting => {
-            console.log('Removed audio clip', rabsFilePath, emovedAudioClip);
+            console.log('Removed audio clip', absFilePath, removedAudioClip);
           });
         });
       });
 
       // Let's update the video. Remove the audio description id reference from it.
       Video.findOneAndUpdate({ _id: videoId }, { $pull: { audio_descriptions: adId } }, { new: true })
-      .exec((err, updatedVideo) => {
+      .exec((errUpdatingVideo, updatedVideo) => {
+        if (errUpdatingVideo) {
+          console.log(errUpdatingVideo);
+          const ret = apiMessages.getResponseByCode(1);
+          res.status(ret.status).json(ret);
+        }
 
         // Let's remove the video as it doesn't have any audio descriptions anymore.
         if (updatedVideo.audio_descriptions.length === 0) {
           Video.findByIdAndRemove({ _id: videoId }).exec((errRemovingVideo, removedVideo) => {
+            if (errRemovingVideo) {
+              console.log(errRemovingVideo);
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
+            }
             console.log('Removed video', removedVideo);
           });
         } else {
@@ -227,9 +239,16 @@ const audioDesriptionsController = {
       });
 
       // Now let's delete the audio description itself.
-      Video.findByIdAndRemove({ _id: adId }.exec((errRemovingAd, removedAd) => {
+      AudioDescription.findByIdAndRemove({ _id: adId }).exec((errRemovingAd, removedAd) => {
+        if (errRemovingAd) {
+          console.log(errRemovingAd);
+          const ret = apiMessages.getResponseByCode(1);
+          res.status(ret.status).json(ret);
+        }
         console.log('Removed audio description', removedAd);
-      }));
+        const ret = apiMessages.getResponseByCode(1020);
+        res.status(ret.status).json(ret);
+      });
     });
   },
 }

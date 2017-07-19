@@ -200,6 +200,11 @@ module.exports = {
       status: 200,
       type: 'success',
     },
+    1020: { // audioDescriptionsController
+      message: 'The audio descriptions was successfully removed',
+      status: 200,
+      type: 'success',
+    },
   },
 
   getResponseByCode: function(code) {
