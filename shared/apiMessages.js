@@ -100,6 +100,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    66: { // idiomsController
+      message: 'There was a problem to retrieve the idioms list',
+      status: 400,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,
@@ -202,6 +207,11 @@ module.exports = {
     },
     1020: { // audioDescriptionsController
       message: 'The audio descriptions was successfully removed',
+      status: 200,
+      type: 'success',
+    },
+    1021: { // idiomsController
+      message: 'Idioms successfully retrieved',
       status: 200,
       type: 'success',
     },
