@@ -1,13 +1,13 @@
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
-const Idiom = require('./../models/idiom');
+const Language = require('./../models/language');
 
 // The controller itself.
-const idiomsController = {
+const languagesController = {
 
   getAll: (req, res) => {
-    Idiom.find({})
+    Language.find({})
     .sort({ name: 1 })
     .then((items) => {
       if (items) {
@@ -28,4 +28,4 @@ const idiomsController = {
 
 };
 
-module.exports = idiomsController;
+module.exports = languagesController;

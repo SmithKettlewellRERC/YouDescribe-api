@@ -75,7 +75,7 @@ const audioClipController = {
           if (audioDescriptionId.length === 24) {
 
             // Checking if we have the AD passed.
-            AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $set: { notes: req.body.audioDescriptionNotes }, $push: { audio_clips: audioClipId }}, (errUpdateAd, returnedAudioDescription) => {
+            AudioDescription.findOneAndUpdate({ _id: audioDescriptionId }, { $set: { notes: req.body.audioDescriptionNotes, language: req.body.audioDescriptionSelectedLanguage }, $push: { audio_clips: audioClipId }}, (errUpdateAd, returnedAudioDescription) => {
               if (errUpdateAd) {
                 console.log(errUpdateAd);
                 const ret = apiMessages.getResponseByCode(1);
@@ -132,7 +132,7 @@ console.log('ALL SET 1 - Create audio clip - AD Already exists - Video already e
               user: userId,
               status: 'draft',
               likes: 0,
-              language: 'en',
+              language: req.body.audioDescriptionSelectedLanguage,
               created_at: nowUtc(),
               updated_at: nowUtc(),
               notes: req.body.audioDescriptionNotes,
@@ -215,7 +215,6 @@ console.log('ALL SET 2 - Create audio clip - Create AD - Video already exists');
                     created_at: nowUtc(),
                     updated_at: nowUtc(),
                     views: 0,
-                    language: 'en',
                     audio_descriptions: [ createdAdId ],
                   });
 

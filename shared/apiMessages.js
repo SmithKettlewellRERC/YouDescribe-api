@@ -100,8 +100,8 @@ module.exports = {
       status: 400,
       type: 'error',
     },
-    66: { // idiomsController
-      message: 'There was a problem to retrieve the idioms list',
+    66: { // languagesController
+      message: 'There was a problem to retrieve the languages list',
       status: 400,
       type: 'error',
     },
@@ -210,8 +210,8 @@ module.exports = {
       status: 200,
       type: 'success',
     },
-    1021: { // idiomsController
-      message: 'Idioms successfully retrieved',
+    1021: { // languagesController
+      message: 'Languages successfully retrieved',
       status: 200,
       type: 'success',
     },

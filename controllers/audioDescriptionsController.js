@@ -22,9 +22,11 @@ const audioDesriptionsController = {
       toUpdate['status'] = req.query.action === 'publish' ? 'published': 'draft';
     }
 
+    toUpdate['language'] = req.body.audioDescriptionSelectedLanguage;
+
     AudioDescription.findOneAndUpdate(
       { _id: adId, user: userId },
-      { $set: toUpdate}
+      { $set: toUpdate }
     )
     .exec((err, ad) => {
       if (err) {
@@ -41,7 +43,7 @@ const audioDesriptionsController = {
         }
       })
       .exec((err, videoToCheck) => {
-        // Every time we have to go against all audio description to update the wish list.
+        // Every time we have to go against all audio descriptions to update the wish list.
         const ads = videoToCheck.audio_descriptions;
         const youTubeId = videoToCheck.youtube_id;
         let onePublished = false;
@@ -74,6 +76,7 @@ const audioDesriptionsController = {
     const notes = req.body.notes || null;
     const title = req.body.title;
     const description = req.body.description;
+    const language = req.body.audioDescriptionSelectedLanguage;
 
     // We don't have any audio description. Let's create a new one.
     const newAudioDescription = new AudioDescription({
@@ -82,7 +85,7 @@ const audioDesriptionsController = {
       user: userId,
       status: 'draft',
       likes: 0,
-      language: 'en',
+      language,
       created_at: nowUtc(),
       updated_at: nowUtc(),
       notes: req.body.notes,
@@ -147,7 +150,6 @@ const audioDesriptionsController = {
               created_at: nowUtc(),
               updated_at: nowUtc(),
               views: 0,
-              language: 'en',
               audio_descriptions: [ createdAdId ],
             });
 
