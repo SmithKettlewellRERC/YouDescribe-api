@@ -99,7 +99,7 @@ const wishListController = {
 
   getAll: (req, res) => {
     const pgNumber = Number(req.query.page);
-    const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
+    const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 20 : (pgNumber * 20);
     WishList.find({ status: 'queued' })
     .sort({ votes: -1 }).skip(requestedVideoAmount - 30).limit(30)
     .then((items) => {
