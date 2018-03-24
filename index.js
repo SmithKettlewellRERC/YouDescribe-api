@@ -1,4 +1,4 @@
-const NODE_ENV = process.env.NODE_ENV;
+const { NODE_ENV } = process.env;
 const path = require('path');
 const bodyParser = require('body-parser');
 const conf = require('./shared/config')();
@@ -8,7 +8,7 @@ const app = express();
 app.use(bodyParser.json());
 
 // Database.
-const db = require('./db/connection-prd');
+const db = require('./db/connection');
 
 // Compression.
 const compression = require('compression');
@@ -19,7 +19,21 @@ const morgan = require('morgan');
 app.use(morgan('combined'));
 
 // Server HTTP port setup.
-const port = process.env.PORT || 3000;
+const port = NODE_ENV === 'dev' ? '8080' : '80';
+
+// CORS.
+if (NODE_ENV === 'dev') {
+  app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length');
+    if (req.method === 'OPTIONS') {
+      return next();
+    } else {
+      return next();
+    }
+  });
+}
 
 // Our server routes.
 const auth = require('./routes/auth');
@@ -42,7 +56,9 @@ app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
 
 // Static route for wav files.
-app.use('/audio-descriptions-files', express.static('/mnt/ebs/audio-descriptions-files'));
+const audioDescriptionsStorePath = process.env.NODE_ENV === 'dev' ? express.static(path.join(__dirname, '/audio-descriptions-files')) : '/mnt/ebs/audio-descriptions-files';
+
+app.use('/audio-descriptions-files', audioDescriptionsStorePath);
 
 // The Restful API drain.
 app.get('*', (req, res) => {
