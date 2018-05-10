@@ -102,7 +102,7 @@ const wishListController = {
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 15 : (pgNumber * 15);
     WishList.find({ status: 'queued' })
     // .sort({ votes: -1 }).skip(requestedVideoAmount - 15).limit(15)
-    .sort({ created_at: 1 }).skip(requestedVideoAmount - 15).limit(15)
+    .sort({ created_at: -1 }).skip(requestedVideoAmount - 15).limit(15)
     .then((items) => {
       if (items) {
         const ret = apiMessages.getResponseByCode(1008);
