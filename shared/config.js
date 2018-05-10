@@ -3,9 +3,11 @@ const NODE_ENV = process.env.NODE_ENV;
 
 module.exports = () => {
   const apiVersion = 'v1';
+  let uploadsRootDirToServe = path.join(__dirname, '..', '/audio-descriptions-files');
   let uploadsRootDirToSave = path.join(__dirname, '..', 'audio-descriptions-files', 'current');
   let uploadsRootDirToDelete = path.join(__dirname, '..', 'audio-descriptions-files');
   if (NODE_ENV === 'prd') {
+    uploadsRootDirToServe = '/mnt/ebs/audio-descriptions-files';
     uploadsRootDirToSave = '/mnt/ebs/audio-descriptions-files/current';
     uploadsRootDirToDelete = '/mnt/ebs/audio-descriptions-files';
   }
@@ -15,6 +17,7 @@ module.exports = () => {
   const cryptoSeed = '#@2$d32467ERvdd';
   return {
     apiVersion,
+    uploadsRootDirToServe,
     uploadsRootDirToSave,
     uploadsRootDirToDelete,
     cryptoSeed,

@@ -56,7 +56,10 @@ app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
 
 // Static route for wav files.
-const audioDescriptionsStorePath = process.env.NODE_ENV === 'dev' ? express.static(path.join(__dirname, '/audio-descriptions-files')) : '/mnt/ebs/audio-descriptions-files';
+let audioDescriptionsStorePath = conf.uploadsRootDirToServe;
+if (NODE_ENV === 'dev') {
+  audioDescriptionsStorePath = express.static(conf.uploadsRootDirToServe);
+}
 
 app.use('/audio-descriptions-files', audioDescriptionsStorePath);
 
