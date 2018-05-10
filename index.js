@@ -56,12 +56,8 @@ app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
 
 // Static route for wav files.
-let audioDescriptionsStorePath = conf.uploadsRootDirToServe;
-if (NODE_ENV === 'dev') {
-  audioDescriptionsStorePath = express.static(conf.uploadsRootDirToServe);
-}
-
-app.use('/audio-descriptions-files', audioDescriptionsStorePath);
+console.log('File path for wav files', conf.uploadsRootDirToServe);
+app.use('/audio-descriptions-files', express.static(conf.uploadsRootDirToServe));
 
 // The Restful API drain.
 app.get('*', (req, res) => {
