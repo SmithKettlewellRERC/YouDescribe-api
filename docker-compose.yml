@@ -1,17 +1,23 @@
-version: "2"
+version: '3'
 services:
   api:
-    container_name: app
+    container_name: youdescribe-api
     restart: always
     build: .
     ports:
       - "3000:3000"
     links:
       - mongo
+    volumes:
+      - ./audio-descriptions-files:/usr/src/app/audio-descriptions-files
   mongo:
     container_name: mongo
     image: mongo
-    volumes:
-      - ./data:/data/db
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+    # volumes:
+    #   - ./data:/data/db
+    # /usr/local/var/mongodb
     ports:
       - "27017:27017"
