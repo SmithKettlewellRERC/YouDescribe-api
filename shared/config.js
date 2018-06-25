@@ -13,6 +13,7 @@ module.exports = () => {
   }
   const googleClientId = '1056671841574-e1r4soednlur8hl2sl0ooumpvftt1s2k.apps.googleusercontent.com';
   const googleiOSClientId = '1056671841574-5qo81vnn336mlds8mjk33cpkron1pv80.apps.googleusercontent.com';
+  const googleAndroidClientId = '460424020444-9fn04ktboesvvbd3p99mdc2tn5759nb0.apps.googleusercontent.com';
   const cryptoSecret = '8c628449c5102aeabd49b5dc3a2a516ea6';
   const cryptoSeed = '#@2$d32467ERvdd';
   return {
@@ -24,5 +25,6 @@ module.exports = () => {
     cryptoSecret,
     googleClientId,
     googleiOSClientId,
+    googleAndroidClientId,
   };
 };
