@@ -3,7 +3,11 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const conf = require('./shared/config')();
 const express = require('express');
+const http = require('http');
+const cluster = require('cluster');
+const numWorkers = require('os').cpus().length;
 const app = express();
+
 
 app.use(bodyParser.json());
 
@@ -64,7 +68,56 @@ app.get('*', (req, res) => {
   res.status(200).json('{"status":"not found"}');
 });
 
-// Starting the port listener.
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}...`);
-});
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const bind = typeof port === 'string' ? `Pipe  ${port}` : `Port ${port}`;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running.`);
+  console.log(`Master cluster setting up ${numWorkers} workers...`);
+
+  for (let i = 0; i < numWorkers; i += 1) {
+    cluster.fork();
+  }
+
+  cluster.on('online', (worker) => {
+    console.log(`Worker (child process) ${worker.process.pid} is running.`);
+  });
+
+  /**
+   * To make sure we do not loose any workers.
+   */
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}.`);
+    console.log('Starting a new worker.');
+    cluster.fork();
+  });
+} else {
+  /**
+   * Starting HTTP server (each worker will start one process).
+   */
+  const httpServer = http.createServer(app);
+  httpServer.listen(port, () => {
+    console.log(`Child process ${process.pid} is listening to all incoming requests on port ${port}.`);
+  });
+
+  /**
+   * Errors listener.
+   */
+  httpServer.on('error', onError);
+}

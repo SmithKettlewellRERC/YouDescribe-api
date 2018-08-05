@@ -2,6 +2,7 @@
 const apiMessages = require('./../shared/apiMessages');
 const Video = require('./../models/video');
 const AudioDescription = require('./../models/audioDescription');
+const AudioDescriptionRating = require('./../models/audioDescriptionRating');
 const User = require('./../models/user');
 const AudioClip = require('./../models/audioClip');
 const nowUtc = require('./../shared/dateTime').nowUtc;
@@ -96,17 +97,39 @@ const videosController = {
         res.status(ret.status).json(ret);
       }
       if (video) {
-        // DO NOT REMOVE THIS CODE!
-        // let audioDescriptionsFiltered = [];
-        // video.audio_descriptions.forEach(ad => {
-        //   if (ad.status === 'published') {
-        //     audioDescriptionsFiltered.push(ad);
-        //   }
-        // });
-        // video.audio_descriptions = audioDescriptionsFiltered;
-        const ret = apiMessages.getResponseByCode(1000);
-        ret.result = video;
-        res.status(ret.status).json(ret);  
+        const newVideo = video.toJSON();
+        const promisesQueue = [];
+        const audioDescriptions = newVideo.audio_descriptions.slice();
+        newVideo.audio_descriptions = [];
+        audioDescriptions.forEach(ad => {
+          const adId = ad._id;
+          const query = AudioDescriptionRating.find({ audio_description_id: adId  });
+          const promise = query.exec();
+          ad.feedbacks = {};
+          promise.then((audioDescriptionRating) => {
+            if (audioDescriptionRating && audioDescriptionRating.length > 0) {
+              audioDescriptionRating.map(adr => {
+                if (adr.feedback.length > 0) {
+                  adr.feedback.map(item => {
+                    if (!ad.feedbacks.hasOwnProperty(item)) {
+                      ad.feedbacks[item] = 0;
+                    }
+                    ad.feedbacks[item] += 1;
+                  });
+                }
+              });
+            }
+            newVideo.audio_descriptions.push(ad);
+          });
+          promisesQueue.push(promise);
+        });
+
+        Promise.all(promisesQueue).then(() => {
+          const ret = apiMessages.getResponseByCode(1000);
+          ret.result = newVideo;
+          res.status(ret.status).json(ret);
+        });
+
       } else {
         const ret = apiMessages.getResponseByCode(55);
         res.status(ret.status).json(ret);

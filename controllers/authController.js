@@ -12,7 +12,7 @@ const authController = {
     const client = new auth.OAuth2(conf.googleClientId, '', '');
     client.verifyIdToken(
       googleToken,
-      [conf.googleClientId, conf.googleiOSClientId],
+      [conf.googleClientId, conf.googleiOSClientId, conf.googleAndroidClientId],
 
       function(e, login) {
         const payload = login.getPayload();
