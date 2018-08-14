@@ -105,6 +105,11 @@ module.exports = {
       status: 400,
       type: 'error',
     },
+    67: { // wishListController
+      message: 'Just one vote per user',
+      status: 403,
+      type: 'error',
+    },
     1000: { // videoController
       message: 'Video metadata successfully retrieved',
       status: 200,

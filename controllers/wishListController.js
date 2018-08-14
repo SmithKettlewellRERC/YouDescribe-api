@@ -3,6 +3,8 @@ const apiMessages = require('./../shared/apiMessages');
 const nowUtc = require('./../shared/dateTime').nowUtc;
 const Video = require('./../models/video');
 const WishList = require('./../models/wishList');
+const UserVotes = require('./../models/userVotes');
+const userVotesHelper = require('./helpers/userVotes');
 
 // The controller itself.
 const wishListController = {
@@ -24,52 +26,69 @@ const wishListController = {
         const ret = apiMessages.getResponseByCode(50);
         res.status(ret.status).json(ret);
       } else {
-        // Let's now search at wishlist collection.
-        WishList.findOne({ youtube_id: youTubeId }, (err2, wishListItem) => {
-
-          // Error handling.
-          if (err2) {
-            console.log(err2);
-            const ret = apiMessages.getResponseByCode(1);
+        const userId = req.body.userId;
+        UserVotes.findOne({ user: userId, youtube_id: youTubeId }, (err, data) => {
+          if (data) {
+            // Already voted.
+            const ret = apiMessages.getResponseByCode(67);
             res.status(ret.status).json(ret);
-            return;
-          }
-
-          // We already have in the database the video requested.
-          if (wishListItem) {
-            // Let's increment the requested cunter.
-            wishListItem.votes += 1;
-            wishListItem.updated_at = nowUtc();
-            wishListItem.save()
-            .then((item) => {
-              const ret = apiMessages.getResponseByCode(1009);
-              ret.result = item;
-              res.status(ret.status).json(ret);
-            })
-            .catch((errSave) => {
-              console.log(errSave);
-              const ret = apiMessages.getResponseByCode(1);
-              res.status(ret.status).json(ret);
-              return;
-            });
           } else {
-            // Let's create.
-            const newWishList = new WishList({
-              youtube_id: youTubeId,
-              votes: 1,
-              status: 'queued',
-              created_at: nowUtc(),
-              updated_at: nowUtc(),
-            });
-            newWishList.save((errSaving, wishListItemSaved) => {
-              if (errSaving) {
-                console.log(errSaving);
-                const ret = apiMessages.getResponseByCode(1);
-                res.status(ret.status).json(ret);
-              }
-              const ret = apiMessages.getResponseByCode(1001);
-              ret.result = wishListItemSaved;
-              res.status(ret.status).json(ret);
+            // Vote accepted.
+            userVotesHelper.add(userId, youTubeId)
+            .then(userVotes => {
+
+              // Let's now search at wishlist collection.
+              WishList.findOne({ youtube_id: youTubeId }, (err2, wishListItem) => {
+
+                // Error handling.
+                if (err2) {
+                  console.log(err2);
+                  const ret = apiMessages.getResponseByCode(1);
+                  res.status(ret.status).json(ret);
+                  return;
+                }
+
+                // We already have in the database the video requested.
+                if (wishListItem) {
+                  // Let's increment the requested cunter.
+                  wishListItem.votes += 1;
+                  wishListItem.updated_at = nowUtc();
+                  wishListItem.save()
+                  .then((item) => {
+                    const ret = apiMessages.getResponseByCode(1009);
+                    ret.result = item;
+                    res.status(ret.status).json(ret);
+                  })
+                  .catch((errSave) => {
+                    console.log(errSave);
+                    const ret = apiMessages.getResponseByCode(1);
+                    res.status(ret.status).json(ret);
+                    return;
+                  });
+                } else {
+                  // Let's create.
+                  const newWishList = new WishList({
+                    youtube_id: youTubeId,
+                    votes: 1,
+                    status: 'queued',
+                    created_at: nowUtc(),
+                    updated_at: nowUtc(),
+                  });
+                  newWishList.save((errSaving, wishListItemSaved) => {
+                    if (errSaving) {
+                      console.log(errSaving);
+                      const ret = apiMessages.getResponseByCode(1);
+                      res.status(ret.status).json(ret);
+                    }
+                    const ret = apiMessages.getResponseByCode(1001);
+                    ret.result = wishListItemSaved;
+                    res.status(ret.status).json(ret);
+                  })
+                }
+              });
+            })
+            .catch(err => {
+              console.log('Error', err);
             })
           }
         });

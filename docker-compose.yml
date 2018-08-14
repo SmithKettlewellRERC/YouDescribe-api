@@ -1,23 +1,24 @@
 version: '3'
 services:
-  api:
-    container_name: youdescribe-api
-    restart: always
-    build: .
-    ports:
-      - "3000:3000"
-    links:
-      - mongo
-    volumes:
-      - ./audio-descriptions-files:/usr/src/app/audio-descriptions-files
   mongo:
+    image: mongo:latest
     container_name: mongo
-    image: mongo
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: example
-    # volumes:
-    #   - ./data:/data/db
-    # /usr/local/var/mongodb
+    volumes:
+        - ./db/var:/data/db
     ports:
       - "27017:27017"
+  api:
+    image: node:latest
+    container_name: youdescribe-api
+    restart: always
+    command: node /usr/src/app/index.js
+    environment:
+      NODE_ENV: dev
+    ports:
+      - "8080:8080"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    volumes:
+      - ./:/usr/src/app

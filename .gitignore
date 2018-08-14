@@ -3,6 +3,7 @@ node_modules
 db/config.js
 db/dumps
 db/scripts
+db/var
 deploy.sh
 /audio-descriptions-files
 /uploads
