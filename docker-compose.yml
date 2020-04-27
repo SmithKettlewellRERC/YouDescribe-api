@@ -22,3 +22,5 @@ services:
       - mongo
     volumes:
       - ./:/usr/src/app
+
+docker run -p 27017:27017 -v /Users/rodrigo/Documents/dev/youdescribe/api/db/var:/data/db mongo

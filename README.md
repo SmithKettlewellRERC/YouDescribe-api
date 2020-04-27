@@ -1,5 +1,7 @@
 # You Describe API
 
+docker run -p 27017:27017 -v /Users/rodrigo/data/Dropbox/dev/youdescribe/api/db/var/:/data/db mongo
+
 /auth
     POST
         /auth
