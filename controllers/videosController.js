@@ -181,8 +181,8 @@ const videosController = {
 
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);
-    let searchPage = (pgNumber === NaN || pgNumber === 0) ? 80 : (pgNumber * 80);
-    Video.find({}).sort({ updated_at: -1 }).skip(searchPage - 80).limit(80)
+    let searchPage = (pgNumber === NaN || pgNumber === 0) ? 50 : (pgNumber * 50);
+    Video.find({}).sort({ updated_at: -1 }).skip(searchPage - 50).limit(80)
     .populate({
       path: 'audio_descriptions',
       populate: {
