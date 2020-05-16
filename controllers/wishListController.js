@@ -1,10 +1,14 @@
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
-const nowUtc = require('./../shared/dateTime').nowUtc;
 const Video = require('./../models/video');
 const WishList = require('./../models/wishList');
 const UserVotes = require('./../models/userVotes');
 const userVotesHelper = require('./helpers/userVotes');
+const nowUtc = require('./../shared/dateTime').nowUtc;
+const msleep = require("../shared/helperFunctions").msleep;
+const convertISO8601ToSeconds = require("../shared/helperFunctions").convertISO8601ToSeconds;
+const request = require("request");
+const conf = require("../shared/config")();
 
 // The controller itself.
 const wishListController = {
@@ -13,7 +17,7 @@ const wishListController = {
     const youTubeId = req.body.youTubeId;
 
     // Let's first search in videos collection.
-    Video.findOne({ youtube_id: youTubeId }, (err1, video) => {
+    Video.findOne({youtube_id: youTubeId}).populate({path: "audio_descriptions"}).exec((err1, video) => { /* updated on 03/08/2020 */
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -21,8 +25,18 @@ const wishListController = {
         return;
       }
 
-      // Video with AD already exists.
-      if (video) {
+      // Video with !!!!!!published!!!!!! AD already exists.  /* updated on 03/08/2020 */
+      let published = false;                                  /* updated on 03/08/2020 */
+      if (video) {                                            /* updated on 03/08/2020 */
+        const audioDescriptions = video.audio_descriptions;   /* updated on 03/08/2020 */
+        for (var i = 0; i < audioDescriptions.length; ++i) {  /* updated on 03/08/2020 */
+          if (audioDescriptions[i].status == "published") {   /* updated on 03/08/2020 */
+            published = true;                                 /* updated on 03/08/2020 */
+            break;                                            /* updated on 03/08/2020 */
+          }                                                   /* updated on 03/08/2020 */
+        }                                                     /* updated on 03/08/2020 */
+      }                                                       /* updated on 03/08/2020 */
+      if (published) {                                        /* updated on 03/08/2020 */
         const ret = apiMessages.getResponseByCode(50);
         res.status(ret.status).json(ret);
       } else {
@@ -80,6 +94,49 @@ const wishListController = {
                       const ret = apiMessages.getResponseByCode(1);
                       res.status(ret.status).json(ret);
                     }
+                    /* start of new youtube infocard */
+                    request.get(`${conf.youTubeApiUrl}/videos?id=${wishListItemSaved.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                      if (!err) {
+                        const jsonObj = JSON.parse(body);
+                        if (jsonObj.items.length > 0) {
+                          const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
+                          const tags = (jsonObj.items[0].snippet.tags || []);
+                          const categoryId = jsonObj.items[0].snippet.categoryId;
+                          request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                            const jsonObj = JSON.parse(body);
+                            let category = "";
+                            for (var i = 0; i < jsonObj.items.length; ++i) {
+                              if (i > 0) {
+                                category += ",";
+                              }
+                              category += jsonObj.items[i].snippet.title;
+                            }
+                            const toUpdate = {
+                              tags: tags,
+                              category_id: categoryId,
+                              category: category,
+                              duration: duration,
+                              youtube_status: "available",
+                            };
+                            WishList.findOneAndUpdate(
+                              {youtube_id: wishListItemSaved.youtube_id},
+                              {$set: toUpdate},
+                              {new: true}
+                            ).exec();
+                          });
+                        } else {
+                          const toUpdate = {
+                            youtube_status: "unavailable",
+                          };
+                          WishList.findOneAndUpdate(
+                            {youtube_id: wishListItemSaved.youtube_id},
+                            {$set: toUpdate},
+                            {new: true}
+                          ).exec();
+                        }
+                      }
+                    });
+                    /* end of new youtube infocard */
                     const ret = apiMessages.getResponseByCode(1001);
                     ret.result = wishListItemSaved;
                     res.status(ret.status).json(ret);
@@ -156,7 +213,35 @@ const wishListController = {
         res.status(ret.status).json(ret);
       }
     });
-  }
+  },
+
+  getByCategories: (req, res) => {
+    const limit = req.query.limit || 7;
+    const slice = req.query.slice || 4;
+    WishList.aggregate([
+      {$match: {category: {$ne: ""}, status: "queued"}},
+      {$sort: {votes: -1}},
+      {
+        $group: {
+          _id: "$category",
+          data: {$push: {"youtube_id": "$youtube_id", "votes": "$votes"}},
+          count: {$sum: 1}
+        }
+      },
+      {$sort: {count: -1}},
+      {$limit: limit},
+      {
+        $project: {
+          data: {$slice: ["$data", slice]},
+          count: "$count"
+        }
+      }
+    ]).collation({locale: "en"}).exec((err, videos) => {
+      const ret = {status: 200};
+      ret.result = videos;
+      res.status(ret.status).json(ret);
+    });
+  },
 };
 
 module.exports = wishListController;

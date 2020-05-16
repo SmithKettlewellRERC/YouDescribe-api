@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const audioClip = new Schema({
-  video: {type: Schema.Types.ObjectId, ref: 'Video'},
-  audio_description: {type: Schema.Types.ObjectId, ref: 'AudioDescription'},
+const audioClipSchema = new Schema({
+  video: {type: Schema.Types.ObjectId, ref: 'VideoOld'},
+  audio_description: {type: Schema.Types.ObjectId, ref: 'AudioDescriptionOld'},
   user: {type: Schema.Types.ObjectId, ref: 'User'},
   created_at: Number,
   updated_at: Number,
@@ -24,8 +24,8 @@ const audioClip = new Schema({
       end_time: Number,
     }
   ],
-}, { collection: 'audio_clips' });
+}, { collection: 'audio_clips_old' });
 
-const AudioClip = mongoose.model('AudioClip', audioClip);
+const AudioClipOld = mongoose.model('AudioClipOld', audioClipSchema);
 
-module.exports = AudioClip;
+module.exports = AudioClipOld;

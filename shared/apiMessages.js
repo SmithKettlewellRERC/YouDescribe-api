@@ -220,6 +220,16 @@ module.exports = {
       status: 200,
       type: 'success',
     },
+    1022: { // adminController
+      message: "Admin login succeeded",
+      status: 200,
+      type: "success",
+    },
+    1023: { // adminController
+      message: "Admin login required",
+      status: 200,
+      type: "error",
+    },
   },
 
   getResponseByCode: function(code) {

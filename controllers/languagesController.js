@@ -1,6 +1,6 @@
 // Application modules.
 const apiMessages = require('./../shared/apiMessages');
-const nowUtc = require('./../shared/dateTime').nowUtc;
+const nowUtc = require('./../shared/helperFunctions').nowUtc;
 const Language = require('./../models/language');
 
 // The controller itself.

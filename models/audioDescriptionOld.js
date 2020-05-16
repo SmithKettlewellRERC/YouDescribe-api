@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const audioDescriptionSchema = new Schema({
-  audio_clips: [ {type: Schema.Types.ObjectId, ref: 'AudioClip'} ],
-  video: {type: Schema.Types.ObjectId, ref: 'Video'},
+  audio_clips: [ {type: Schema.Types.ObjectId, ref: 'AudioClipOld'} ],
+  video: {type: Schema.Types.ObjectId, ref: 'VideoOld'},
   user: {type: Schema.Types.ObjectId, ref: 'User'},
   overall_rating_votes_counter: Number,
   overall_rating_average: Number,
@@ -15,8 +15,8 @@ const audioDescriptionSchema = new Schema({
   notes: String,
   status: String,
   admin_review: String,
-}, { collection: 'audio_descriptions' });
+}, { collection: 'audio_descriptions_old' });
 
-const AudioDescription = mongoose.model('AudioDescription', audioDescriptionSchema);
+const AudioDescriptionOld = mongoose.model('AudioDescriptionOld', audioDescriptionSchema);
 
-module.exports = AudioDescription;
+module.exports = AudioDescriptionOld;

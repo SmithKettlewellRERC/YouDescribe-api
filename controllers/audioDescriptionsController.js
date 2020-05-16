@@ -1,12 +1,15 @@
 // Application modules.
 const fse = require('fs-extra');
 const apiMessages = require('./../shared/apiMessages');
+const conf = require('../shared/config')();
+const nowUtc = require('./../shared/dateTime').nowUtc;
+const request = require("request");
 const Video = require('./../models/video');
 const AudioDescription = require('./../models/audioDescription');
 const WishList = require('./../models/wishList');
-const conf = require('../shared/config')();
-const nowUtc = require('./../shared/dateTime').nowUtc;
 const AudioClip = require('./../models/audioClip');
+const AudioDescriptionRating = require('./../models/audioDescriptionRating');
+const ObjectId = require("mongoose").Types.ObjectId;
 
 const audioDesriptionsController = {
 
@@ -16,13 +19,13 @@ const audioDesriptionsController = {
 
     let toUpdate = {};
     if (req.body.notes) {
-      toUpdate['notes'] = req.body.notes;
+      toUpdate["notes"] = req.body.notes;
     }
     if (req.query.action) {
-      toUpdate['status'] = req.query.action === 'publish' ? 'published': 'draft';
+      toUpdate["status"] = req.query.action === 'publish' ? 'published': 'draft';
     }
 
-    toUpdate['language'] = req.body.audioDescriptionSelectedLanguage;
+    toUpdate["language"] = req.body.audioDescriptionSelectedLanguage;
 
     AudioDescription.findOneAndUpdate(
       { _id: adId, user: userId },
@@ -251,6 +254,235 @@ const audioDesriptionsController = {
         const ret = apiMessages.getResponseByCode(1020);
         res.status(ret.status).json(ret);
       });
+    });
+  },
+
+  getAllByPage: (req, res) => {
+    const keyword = req.query.keyword;
+    const pageNumber = Number(req.query.page);
+    var sortBy = req.query.sortby;
+    if (sortBy == undefined || sortBy == "") {
+      sortBy = "video._id";
+    }
+    var order = parseInt(req.query.order);
+    if (order == undefined || order != 1) {
+      order = -1;
+    }
+    const endNumber = (pageNumber === NaN) ? 50 : (pageNumber * 50);
+    /* start of old method */
+    // AudioDescription.countDocuments({}, (err, count) => {
+    //   AudioDescription.aggregate([
+    //     {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+    //     {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+    //     {$unwind: "$video"},
+    //     {$unwind: "$user"},
+    //     {$sort: {[sortBy]: order, _id: order}},
+    //   ]).collation({locale: "en"}).skip(endNumber - 50).limit(50).exec((err, audioDescriptions) => {
+    //     const ret = {status: 200};
+    //     ret.count = Math.ceil(count / 50);
+    //     ret.result = audioDescriptions;
+    //     res.status(ret.status).json(ret);
+    //   });
+    // });
+    /* end of old method */
+    /* start of new method */
+    AudioDescription.aggregate([
+      {$lookup: {from: "languages", localField: "language", foreignField: "code", as: "language"}},
+      {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+      {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+      {$unwind: "$language"},
+      {$unwind: "$video"},
+      {$unwind: "$user"},
+      {
+        $match: {
+          $or: [
+            {"language.name": {$regex: keyword, $options: "$i"}},
+            {"video.category": {$regex: keyword, $options: "$i"}},
+            {"video.title": {$regex: keyword, $options: "$i"}},
+            {"video.tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+            {"video.custom_tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+            {"user.name": {$regex: keyword, $options: "$i"}}
+          ]
+        }
+      },
+      {$sort: {[sortBy]: order, _id: order}},
+    ]).collation({locale: "en"}).exec((err, audioDescriptions) => {
+      const audioDescriptionsPaginated = [];
+      for (var i = endNumber - 50; i < audioDescriptions.length && i < endNumber; ++i) {
+        audioDescriptionsPaginated.push(audioDescriptions[i]);
+      }
+      const ret = {status: 200};
+      ret.count = audioDescriptions.length;
+      ret.result = audioDescriptionsPaginated;
+      res.status(ret.status).json(ret);
+    });
+    /* end of new method */
+  },
+
+  getById: (req, res) => {
+    const id = req.query.id;
+    const toUpdate = {admin_review: "reviewed"};
+    AudioDescription.findOneAndUpdate(
+      {_id: id},
+      {$set: toUpdate},
+      {new: true}
+    ).populate({
+      path: "video user audio_clips",
+    }).exec((err, audioDescription) => {
+      AudioDescriptionRating.find({
+        audio_description_id: id
+      }).populate({
+        path: "user_id",
+      }).exec((err, ratings) => {
+        const ret = {status: 200};
+        ret.result = {
+          audioDescription: audioDescription,
+          ratings: ratings,
+        };
+        res.status(ret.status).json(ret);
+      });
+    });
+  },
+
+  getNext: (req, res) => {
+    const keyword = req.query.keyword;
+    const isNext = parseInt(req.query.isnext);
+    const id = req.query.id;
+    var sortBy = req.query.sortby;
+    if (sortBy == undefined || sortBy == "") {
+      sortBy = "video._id";
+    }
+    var order = parseInt(req.query.order);
+    if (order == undefined || order != 1) {
+      order = -1;
+    }
+    const finalOrder = parseInt(isNext * order);
+    const comparator = (finalOrder > 0) ? "$gt" : "$lt";
+    AudioDescription.findOne({_id: id}).populate({
+      path: "video user",
+    }).exec((err, audioDescription) => {
+      var separator = "";
+      if (sortBy == "video._id") {
+        separator = ObjectId(audioDescription.video._id);
+      } else if (sortBy == "video.title") {
+        separator = audioDescription.video.title;
+      } else if (sortBy == "user.name") {
+        separator = audioDescription.user.name;
+      } else if (sortBy == "status") {
+        separator = audioDescription.status;
+      } else if (sortBy == "video.youtube_status") {
+        separator = audioDescription.video.youtube_status;
+      } else if (sortBy == "video.category") {
+        separator = audioDescription.video.category;
+      } else if (sortBy == "overall_rating_average") {
+        separator = audioDescription.overall_rating_average;
+      } else if (sortBy == "created_at") {
+        separator = audioDescription.created_at;
+      }
+      AudioDescription.aggregate([
+        /* start of old method */
+        // {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+        // {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+        // {$unwind: "$video"},
+        // {$unwind: "$user"},
+        // {$sort: {[sortBy]: finalOrder, _id: finalOrder}},
+        // {$match:
+        //   {$or:
+        //     [
+        //       {[sortBy]: separator, _id: {[comparator]: ObjectId(id)}},
+        //       {[sortBy]: {[comparator]: separator}}
+        //     ]
+        //   }
+        // },
+        /* end of old method */
+        /* start of new method*/
+        {$lookup: {from: "languages", localField: "language", foreignField: "code", as: "language"}},
+        {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+        {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+        {$unwind: "$language"},
+        {$unwind: "$video"},
+        {$unwind: "$user"},
+        {
+          $match: {
+            $or: [
+              {"language.name": {$regex: keyword, $options: "$i"}},
+              {"video.category": {$regex: keyword, $options: "$i"}},
+              {"video.title": {$regex: keyword, $options: "$i"}},
+              {"video.tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+              {"video.custom_tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+              {"user.name": {$regex: keyword, $options: "$i"}}
+            ]
+          }
+        },
+        {$sort: {[sortBy]: finalOrder, _id: finalOrder}},
+        {$match:
+          {$or:
+            [
+              {[sortBy]: separator, _id: {[comparator]: ObjectId(id)}},
+              {[sortBy]: {[comparator]: separator}}
+            ]
+          }
+        },
+        /* end of new method */
+      ]).collation({locale: "en"}).limit(1).exec((err, audioDescription) => {
+        const ret = {status: 200};
+        ret.result = audioDescription[0];
+        if (ret.result) {
+          console.log("============");
+          console.log(ret.result.video.title);
+          console.log("============");
+        }
+        res.status(ret.status).json(ret);
+      });
+    });
+  },
+
+  updateStatus: (req, res) => {
+    const toUpdate = {status: req.body.status};
+    AudioDescription.findOneAndUpdate(
+      {_id: req.body.id},
+      {$set: toUpdate},
+      {new: true}
+    ).exec((err, audioDescription) => {
+      const ret = {status: 200};
+      ret.result = audioDescription;
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  searchByKeyword: (req, res) => {
+    const keyword = req.query.keyword;
+    var sortBy = req.query.sortby;
+    if (sortBy == undefined || sortBy == "") {
+      sortBy = "video._id";
+    }
+    var order = parseInt(req.query.order);
+    if (order == undefined || order != 1) {
+      order = -1;
+    }
+    AudioDescription.aggregate([
+      {$lookup: {from: "languages", localField: "language", foreignField: "code", as: "language"}},
+      {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+      {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+      {$unwind: "$language"},
+      {$unwind: "$video"},
+      {$unwind: "$user"},
+      {
+        $match: {
+          $or: [
+            {"language.name": {$regex: keyword, $options: "$i"}},
+            {"video.category": {$regex: keyword, $options: "$i"}},
+            {"video.title": {$regex: keyword, $options: "$i"}},
+            {"video.tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+            {"user.name": {$regex: keyword, $options: "$i"}}
+          ]
+        }
+      },
+      {$sort: {[sortBy]: order, _id: order}},
+    ]).exec((err, audioDescriptions) => {
+      const ret = {status: 200};
+      ret.result = audioDescriptions;
+      res.status(ret.status).json(ret);
     });
   },
 }

@@ -9,16 +9,13 @@ const videoSchema = new Schema({
   created_at: Number,
   updated_at: Number,
   views: Number,
-  audio_descriptions: [ {type: Schema.Types.ObjectId, ref: 'AudioDescription'} ],
+  audio_descriptions: [ {type: Schema.Types.ObjectId, ref: 'AudioDescriptionOld'} ],
   tags: [],
   category_id: String,
   category: String,
   youtube_status: String,
-  duration: Number,
-  custom_category: String,
-  custom_tags: [],
-}, { collection: 'videos' });
+}, { collection: 'videos_old' });
 
-const Video = mongoose.model('Video', videoSchema);
+const VideoOld = mongoose.model('VideoOld', videoSchema);
 
-module.exports = Video;
+module.exports = VideoOld;

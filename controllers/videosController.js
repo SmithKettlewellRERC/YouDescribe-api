@@ -5,8 +5,13 @@ const AudioDescription = require('./../models/audioDescription');
 const AudioDescriptionRating = require('./../models/audioDescriptionRating');
 const User = require('./../models/user');
 const AudioClip = require('./../models/audioClip');
+const WishList = require("./../models/wishList");
+const ObjectId = require("mongoose").Types.ObjectId;
 const nowUtc = require('./../shared/dateTime').nowUtc;
-const WishList = require('./../models/wishList');
+const msleep = require("../shared/helperFunctions").msleep;
+const convertISO8601ToSeconds = require("../shared/helperFunctions").convertISO8601ToSeconds;
+const request = require("request");
+const conf = require("../shared/config")();
 
 // The controller itself.
 const videosController = {
@@ -182,73 +187,398 @@ const videosController = {
   getAll: (req, res) => {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 50 : (pgNumber * 50);
-    Video.find({}).sort({ updated_at: -1 }).skip(searchPage - 50).limit(80)
-    .populate({
-      path: 'audio_descriptions',
-      populate: {
-        path: 'user audio_clips',
-        // populate: {
-        //   path: 'user'
-        // }
-      }
-    })
-    .exec((errGetAll, videos) => {
-      if (errGetAll) {
-        const ret = apiMessages.getResponseByCode(1);
-        res.status(ret.status).json(ret);
-      }
-      const videosFiltered = [];
-      videos.forEach(video => {
-        let audioDescriptionsFiltered = [];
-        video.audio_descriptions.forEach(ad => {
-          if (ad.status === 'published') {
-            audioDescriptionsFiltered.push(ad);
-          }
-        });
-        video.audio_descriptions = audioDescriptionsFiltered;
-        if (audioDescriptionsFiltered.length > 0) {
-          videosFiltered.push(video);
-        }
-      });
+    /* start of old method */
+    // Video.find({}).sort({created_at: -1}).skip(searchPage - 50).limit(50)
+    // .populate({
+    //   path: 'audio_descriptions',
+    //   populate: {
+    //     path: 'user audio_clips',
+    //     // populate: {
+    //     //   path: 'user'
+    //     // }
+    //   }
+    // })
+    // .exec((errGetAll, videos) => {
+    //   if (errGetAll) {
+    //     const ret = apiMessages.getResponseByCode(1);
+    //     res.status(ret.status).json(ret);
+    //   }
+    //   const videosFiltered = [];
+    //   videos.forEach(video => {
+    //     let audioDescriptionsFiltered = [];
+    //     video.audio_descriptions.forEach(ad => {
+    //       if (ad.status === 'published') {
+    //         audioDescriptionsFiltered.push(ad);
+    //       }
+    //     });
+    //     video.audio_descriptions = audioDescriptionsFiltered;
+    //     if (audioDescriptionsFiltered.length > 0) {
+    //       videosFiltered.push(video);
+    //     }
+    //   });
+    //   const ret = apiMessages.getResponseByCode(1006);
+    //   ret.result = videosFiltered;
+    //   res.status(ret.status).json(ret);
+    // })
+    /* end of old method */
+    /* start of new method */
+    Video.aggregate([
+      {$match: {"youtube_status": "available"}},
+      {$unwind: "$audio_descriptions"},
+      {$lookup: {from: "audio_descriptions", localField: "audio_descriptions", foreignField: "_id", as: "audio_description"}},
+      {$unwind: "$audio_description"},
+      {$match: {"audio_description.status": "published"}},
+      {$group: {_id: "$_id", youtube_id: {$first: "$youtube_id"}, created_at: {$first: "$created_at"}}},
+      {$sort: {created_at: -1}},
+    ]).collation({locale: "en"}).skip(searchPage - 50).limit(50).exec((err, videos) => {
       const ret = apiMessages.getResponseByCode(1006);
-      ret.result = videosFiltered;
-      res.status(ret.status).json(ret);  
-    })
+      ret.result = videos;
+      res.status(ret.status).json(ret);
+    });
+    /* end of new method */
   },
 
   search: (req, res) => {
     const searchTerm = req.query.q;
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 30 : (pgNumber * 30);
+    /* start of old method */
     // Video.find({ title: new RegExp(searchTerm, 'i') }).sort({ updated_at: -1 }).skip(requestedVideoAmount - 30).limit(30)
-    Video.find({ $text: { $search: searchTerm }}).sort({ updated_at: -1 }).skip(requestedVideoAmount - 30).limit(30)
-    .populate({
-      path: 'audio_descriptions',
-      populate: {
-        path: 'user audio_clips',
-      }
-    })    
-    .then((videos) => {
-      const videosFiltered = [];
-      videos.forEach(video => {
-        let audioDescriptionsFiltered = [];
-        video.audio_descriptions.forEach(ad => {
-          if (ad.status === 'published') {
-            audioDescriptionsFiltered.push(ad);
-          }
-        });
-        video.audio_descriptions = audioDescriptionsFiltered;
-        if (audioDescriptionsFiltered.length > 0) {
-          videosFiltered.push(video);
+    // // Video.find({ $text: { $search: searchTerm }}).sort({ updated_at: -1 }).skip(requestedVideoAmount - 30).limit(30)
+    // .populate({
+    //   path: 'audio_descriptions',
+    //   populate: {
+    //     path: 'user audio_clips',
+    //   }
+    // })    
+    // .then((videos) => {
+    //   const videosFiltered = [];
+    //   videos.forEach(video => {
+    //     let audioDescriptionsFiltered = [];
+    //     video.audio_descriptions.forEach(ad => {
+    //       if (ad.status === 'published') {
+    //         audioDescriptionsFiltered.push(ad);
+    //       }
+    //     });
+    //     video.audio_descriptions = audioDescriptionsFiltered;
+    //     if (audioDescriptionsFiltered.length > 0) {
+    //       videosFiltered.push(video);
+    //     }
+    //   });
+    //   const ret = apiMessages.getResponseByCode(1007);
+    //   ret.result = videosFiltered;
+    //   res.status(ret.status).json(ret);
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    //   const ret = apiMessages.getResponseByCode(1);
+    //   res.status(ret.status).json(ret);
+    // });
+    /* end of old method */
+    /* start of new method */
+    AudioDescription.aggregate([
+      {$match: {status: "published"}},
+      {$lookup: {from: "languages", localField: "language", foreignField: "code", as: "language"}},
+      {$lookup: {from: "videos", localField: "video", foreignField: "_id", as: "video"}},
+      {$lookup: {from: "users", localField: "user", foreignField: "_id", as: "user"}},
+      {$unwind: "$language"},
+      {$unwind: "$video"},
+      {$unwind: "$user"},
+      {
+        $match: {
+          $or: [
+            {"language.name": {$regex: searchTerm, $options: "$i"}},
+            {"video.category": {$regex: searchTerm, $options: "$i"}},
+            {"video.title": {$regex: searchTerm, $options: "$i"}},
+            {"video.tags": {$elemMatch: {$regex: searchTerm, $options: "$i"}}},
+            {"video.custom_tags": {$elemMatch: {$regex: searchTerm, $options: "$i"}}},
+            {"user.name": {$regex: searchTerm, $options: "$i"}}
+          ]
         }
+      },
+      {$group: {_id: "$video"}},
+      {$sort: {"_id.updated_at": -1}},
+    ]).skip(requestedVideoAmount - 30).limit(30).then((groups) => {
+      const videos = [];
+      groups.forEach(group => {
+        videos.push(group._id);
       });
       const ret = apiMessages.getResponseByCode(1007);
-      ret.result = videosFiltered;
+      ret.result = videos;
       res.status(ret.status).json(ret);
     })
     .catch((err) => {
       console.log(err);
       const ret = apiMessages.getResponseByCode(1);
+      res.status(ret.status).json(ret);
+    });
+    /* end of new method */
+  },
+
+  getAllByPage: (req, res) => {
+    const keyword = req.query.keyword;
+    const pageNumber = Number(req.query.page);
+    var sortBy = req.query.sortby;
+    if (sortBy == undefined || sortBy == "") {
+      sortBy = "_id";
+    }
+    var order = parseInt(req.query.order);
+    if (order == undefined || order != 1) {
+      order = -1;
+    }
+    const endNumber = (pageNumber === NaN) ? 50 : (pageNumber * 50);
+    Video.aggregate([
+      {
+        $match: {
+          $or: [
+            {"category": {$regex: keyword, $options: "$i"}},
+            {"title": {$regex: keyword, $options: "$i"}},
+            {"tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+            {"custom_tags": {$elemMatch: {$regex: keyword, $options: "$i"}}}
+          ]
+        }
+      },
+      {$sort: {[sortBy]: order, _id: order}},
+    ]).collation({locale: "en"}).exec((err, videos) => {
+      const videosPaginated = [];
+      for (var i = endNumber - 50; i < videos.length && i < endNumber; ++i) {
+        videosPaginated.push(videos[i]);
+      }
+      const ret = {status: 200};
+      ret.count = videos.length;
+      ret.result = videosPaginated;
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  getById: (req, res) => {
+    const id = req.query.id;
+    Video.findOne({_id: id}).populate({
+      path: "audio_descriptions",
+      populate: {
+        path: "user audio_clips",
+      }
+    }).exec((err, video) => {
+      const ret = {status: 200};
+      ret.result = video;
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  getNext: (req, res) => {
+    const keyword = req.query.keyword;
+    const isNext = parseInt(req.query.isnext);
+    const id = req.query.id;
+    var sortBy = req.query.sortby;
+    if (sortBy == undefined || sortBy == "") {
+      sortBy = "_id";
+    }
+    var order = parseInt(req.query.order);
+    if (order == undefined || order != 1) {
+      order = -1;
+    }
+    const finalOrder = parseInt(isNext * order);
+    const comparator = (finalOrder > 0) ? "$gt" : "$lt";
+    Video.findOne({_id: id}).exec((err, video) => {
+      var separator = "";
+      if (sortBy == "_id") {
+        separator = ObjectId(video._id);
+      } else if (sortBy == "title") {
+        separator = video.title;
+      } else if (sortBy == "youtube_status") {
+        separator = video.youtube_status;
+      } else if (sortBy == "category") {
+        separator = video.category;
+      } else if (sortBy == "created_at") {
+        separator = video.created_at;
+      }
+      Video.aggregate([
+        {
+          $match: {
+            $or: [
+              {"category": {$regex: keyword, $options: "$i"}},
+              {"title": {$regex: keyword, $options: "$i"}},
+              {"tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+              {"custom_tags": {$elemMatch: {$regex: keyword, $options: "$i"}}}
+            ]
+          }
+        },
+        {$sort: {[sortBy]: finalOrder, _id: finalOrder}},
+        {$match:
+          {$or:
+            [
+              {[sortBy]: separator, _id: {[comparator]: ObjectId(id)}},
+              {[sortBy]: {[comparator]: separator}}
+            ]
+          }
+        },
+      ]).collation({locale: "en"}).limit(1).exec((err, video) => {
+        const ret = {status: 200};
+        ret.result = video[0];
+        if (ret.result) {
+          console.log("============");
+          console.log(ret.result.title);
+          console.log("============");
+        }
+        res.status(ret.status).json(ret);
+      });
+    });
+  },
+
+  getYoutubeTags: (req, res) => {
+    const id = req.query.id;
+    Video.findOne({youtube_id: id}, {"tags": 1}).exec((err, video) => {
+      const ret = {status: 200};
+      ret.result = video;
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  updateCustomTags: (req, res) => {
+    const id = req.body.id;
+    const tags = req.body.tags;
+    const customTags = [];
+    tags.forEach(tag => {
+      customTags.push(tag.id.toLowerCase());
+    });
+    Video.findOneAndUpdate(
+      {youtube_id: id},
+      {$addToSet: {custom_tags: {$each: customTags}}},
+      {new: true}
+    ).exec((err, ac) => {
+      const ret = {status: 200};
+      ret.result = {};
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  updateYoutubeId: (req, res) => {
+    const id = req.body.id;
+    const youtubeId = req.body.youtube_id;
+    request.get(`${conf.youTubeApiUrl}/videos?id=${youtubeId}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+      if (!err) {
+        const jsonObj = JSON.parse(body);
+        if (jsonObj.items.length > 0) {
+          const title = jsonObj.items[0].snippet.title;
+          const description = jsonObj.items[0].snippet.description;
+          const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
+          const tags = (jsonObj.items[0].snippet.tags || []);
+          const categoryId = jsonObj.items[0].snippet.categoryId;
+          request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+            const jsonObj = JSON.parse(body);
+            let category = "";
+            for (var i = 0; i < jsonObj.items.length; ++i) {
+              if (i > 0) {
+                category += ",";
+              }
+              category += jsonObj.items[i].snippet.title;
+            }
+            const toUpdate = {
+              youtube_id: youtubeId,
+              title: title,
+              description: description,
+              tags: tags,
+              category_id: categoryId,
+              category: category,
+              duration: duration,
+              youtube_status: "available",
+            };
+            Video.findOneAndUpdate(
+              {_id: id},
+              {$set: toUpdate},
+              {new: true}
+            ).exec();
+          });
+        } else {
+          const toUpdate = {
+            youtube_id: youtubeId,
+            youtube_status: "unavailable",
+          };
+          Video.findOneAndUpdate(
+            {_id: id},
+            {$set: toUpdate},
+            {new: true}
+          ).exec();
+        }
+      }
+      const ret = {status: 200};
+      ret.result = {};
+      res.status(ret.status).json(ret);
+    });
+  },
+
+  // update tags, category_id, category, youtube_status, duration for each video
+  // https://www.googleapis.com/youtube/v3/videos?id=CKwUNBEFI0E&part=contentDetails,snippet,statistics&key=AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE
+  updateYoutubeInfoCards: (req, res) => {
+    const Model = (req.query.type == "Videos") ? Video : WishList;
+    Model.find({youtube_status: ""}).limit(1000).exec((err, videos) => {
+      videos.forEach(video => {
+        request.get(`${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+          if (!err) {
+            const jsonObj = JSON.parse(body);
+            if (jsonObj.items.length > 0) {
+              const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
+              const tags = (jsonObj.items[0].snippet.tags || []);
+              const categoryId = jsonObj.items[0].snippet.categoryId;
+              request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                const jsonObj = JSON.parse(body);
+                let category = "";
+                for (var i = 0; i < jsonObj.items.length; ++i) {
+                  if (i > 0) {
+                    category += ",";
+                  }
+                  category += jsonObj.items[i].snippet.title;
+                }
+                const toUpdate = {
+                  tags: tags,
+                  category_id: categoryId,
+                  category: category,
+                  duration: duration,
+                  youtube_status: "available",
+                };
+                Model.findOneAndUpdate(
+                  {youtube_id: video.youtube_id},
+                  {$set: toUpdate},
+                  {new: true}
+                ).exec((err, ac) => {
+                  console.log(video.youtube_id + "; available")
+                });
+              });
+            } else {
+              const toUpdate = {
+                youtube_status: "unavailable",
+              };
+              Model.findOneAndUpdate(
+                {youtube_id: video.youtube_id},
+                {$set: toUpdate},
+                {new: true}
+              ).exec((err, ac) => {
+                console.log(video.youtube_id + "; unavailable");
+              });
+            }
+          }
+        });
+        msleep(10);
+      });
+      res.end("done");
+    });
+  },
+
+  searchByKeyword: (req, res) => {
+    const keyword = req.query.keyword;
+    Video.aggregate([
+      {
+        $match: {
+          $or: [
+            {"category": {$regex: keyword, $options: "$i"}},
+            {"title": {$regex: keyword, $options: "$i"}},
+            {"tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
+          ]
+        }
+      }
+    ]).sort({created_at: -1, _id: -1}).exec((err, videos) => {
+      const ret = {status: 200};
+      ret.result = videos;
       res.status(ret.status).json(ret);
     });
   },

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
@@ -14,8 +14,11 @@ const userSchema = new Schema({
   last_login: Number,
   status: String,
   token: String,
-}, { collection: 'users' });
+  opt_in: [],
+  policy_review: String,
+  alias: String,
+}, { collection: "users" });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;

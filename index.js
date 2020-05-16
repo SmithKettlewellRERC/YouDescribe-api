@@ -1,32 +1,33 @@
-const { NODE_ENV } = process.env;
-const path = require('path');
-const bodyParser = require('body-parser');
-const conf = require('./shared/config')();
-const express = require('express');
-const http = require('http');
-const cluster = require('cluster');
-const numWorkers = require('os').cpus().length;
+// const { NODE_ENV } = process.env;
+const NODE_ENV = "prd";
+const path = require("path");
+const bodyParser = require("body-parser");
+const conf = require("./shared/config")();
+const express = require("express");
+const http = require("http");
+const cluster = require("cluster");
+const numWorkers = require("os").cpus().length;
 const app = express();
 
-
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 // Database.
-const db = require('./db/connection');
+const db = require("./db/connection");
 
 // Compression.
-const compression = require('compression');
+const compression = require("compression");
 app.use(compression());
 
 // Logs library.
-const morgan = require('morgan');
-app.use(morgan('combined'));
+const morgan = require("morgan");
+app.use(morgan("combined"));
 
 // Server HTTP port setup.
-const port = NODE_ENV === 'dev' ? '8080' : '3000';
+const port = NODE_ENV === "dev" ? "8080" : "3000";
 
 // CORS.
-if (NODE_ENV === 'dev') {
+// if (NODE_ENV === "dev") {
   app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
@@ -37,17 +38,19 @@ if (NODE_ENV === 'dev') {
       return next();
     }
   });
-}
+// }
 
 // Our server routes.
-const auth = require('./routes/auth');
-const wishList = require('./routes/wishList');
-const videos = require('./routes/videos');
-const audioClips = require('./routes/audioClips');
-const users = require('./routes/users');
-const audioDescriptions = require('./routes/audioDescriptions');
-const audioDescriptionsRating = require('./routes/audioDescriptionsRating');
-const languages = require('./routes/languages');
+const auth = require("./routes/auth");
+const wishList = require("./routes/wishList");
+const videos = require("./routes/videos");
+const audioClips = require("./routes/audioClips");
+const users = require("./routes/users");
+const audioDescriptions = require("./routes/audioDescriptions");
+const audioDescriptionsRating = require("./routes/audioDescriptionsRating");
+const languages = require("./routes/languages");
+const admins = require("./routes/admins");
+const statistics = require("./routes/statistics");
 
 // Middleware for routes.
 app.use(`/${conf.apiVersion}/auth`, auth);
@@ -58,6 +61,8 @@ app.use(`/${conf.apiVersion}/users`, users);
 app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
+app.use(`/${conf.apiVersion}/admins`, admins);
+app.use(`/${conf.apiVersion}/statistics`, statistics);
 
 // Static route for wav files.
 console.log('File path for wav files', conf.uploadsRootDirToServe);
@@ -121,3 +126,8 @@ if (cluster.isMaster) {
    */
   httpServer.on('error', onError);
 }
+
+process.on('uncaughtException', function (err) {
+  console.log(err);
+  console.log(err.stack);
+});
