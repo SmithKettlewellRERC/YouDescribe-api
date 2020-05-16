@@ -188,53 +188,53 @@ const videosController = {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 50 : (pgNumber * 50);
     /* start of old method */
-    // Video.find({}).sort({created_at: -1}).skip(searchPage - 50).limit(50)
-    // .populate({
-    //   path: 'audio_descriptions',
-    //   populate: {
-    //     path: 'user audio_clips',
-    //     // populate: {
-    //     //   path: 'user'
-    //     // }
-    //   }
-    // })
-    // .exec((errGetAll, videos) => {
-    //   if (errGetAll) {
-    //     const ret = apiMessages.getResponseByCode(1);
-    //     res.status(ret.status).json(ret);
-    //   }
-    //   const videosFiltered = [];
-    //   videos.forEach(video => {
-    //     let audioDescriptionsFiltered = [];
-    //     video.audio_descriptions.forEach(ad => {
-    //       if (ad.status === 'published') {
-    //         audioDescriptionsFiltered.push(ad);
-    //       }
-    //     });
-    //     video.audio_descriptions = audioDescriptionsFiltered;
-    //     if (audioDescriptionsFiltered.length > 0) {
-    //       videosFiltered.push(video);
-    //     }
-    //   });
-    //   const ret = apiMessages.getResponseByCode(1006);
-    //   ret.result = videosFiltered;
-    //   res.status(ret.status).json(ret);
-    // })
+    Video.find({}).sort({created_at: -1}).skip(searchPage - 50).limit(50)
+    .populate({
+      path: 'audio_descriptions',
+      populate: {
+        path: 'user audio_clips',
+        // populate: {
+        //   path: 'user'
+        // }
+      }
+    })
+    .exec((errGetAll, videos) => {
+      if (errGetAll) {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      }
+      const videosFiltered = [];
+      videos.forEach(video => {
+        let audioDescriptionsFiltered = [];
+        video.audio_descriptions.forEach(ad => {
+          if (ad.status === 'published') {
+            audioDescriptionsFiltered.push(ad);
+          }
+        });
+        video.audio_descriptions = audioDescriptionsFiltered;
+        if (audioDescriptionsFiltered.length > 0) {
+          videosFiltered.push(video);
+        }
+      });
+      const ret = apiMessages.getResponseByCode(1006);
+      ret.result = videosFiltered;
+      res.status(ret.status).json(ret);
+    })
     /* end of old method */
     /* start of new method */
-    Video.aggregate([
-      {$match: {"youtube_status": "available"}},
-      {$unwind: "$audio_descriptions"},
-      {$lookup: {from: "audio_descriptions", localField: "audio_descriptions", foreignField: "_id", as: "audio_description"}},
-      {$unwind: "$audio_description"},
-      {$match: {"audio_description.status": "published"}},
-      {$group: {_id: "$_id", youtube_id: {$first: "$youtube_id"}, created_at: {$first: "$created_at"}}},
-      {$sort: {created_at: -1}},
-    ]).collation({locale: "en"}).skip(searchPage - 50).limit(50).exec((err, videos) => {
-      const ret = apiMessages.getResponseByCode(1006);
-      ret.result = videos;
-      res.status(ret.status).json(ret);
-    });
+    // Video.aggregate([
+    //   {$match: {"youtube_status": "available"}},
+    //   {$unwind: "$audio_descriptions"},
+    //   {$lookup: {from: "audio_descriptions", localField: "audio_descriptions", foreignField: "_id", as: "audio_description"}},
+    //   {$unwind: "$audio_description"},
+    //   {$match: {"audio_description.status": "published"}},
+    //   {$group: {_id: "$_id", youtube_id: {$first: "$youtube_id"}, created_at: {$first: "$created_at"}}},
+    //   {$sort: {created_at: -1}},
+    // ]).collation({locale: "en"}).skip(searchPage - 50).limit(50).exec((err, videos) => {
+    //   const ret = apiMessages.getResponseByCode(1006);
+    //   ret.result = videos;
+    //   res.status(ret.status).json(ret);
+    // });
     /* end of new method */
   },
 
