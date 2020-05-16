@@ -50,7 +50,7 @@ const audioDescriptions = require("./routes/audioDescriptions");
 const audioDescriptionsRating = require("./routes/audioDescriptionsRating");
 const languages = require("./routes/languages");
 const admins = require("./routes/admins");
-const statistics = require("./routes/statistics");
+// const statistics = require("./routes/statistics");
 
 // Middleware for routes.
 app.use(`/${conf.apiVersion}/auth`, auth);
@@ -62,7 +62,7 @@ app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
 app.use(`/${conf.apiVersion}/admins`, admins);
-app.use(`/${conf.apiVersion}/statistics`, statistics);
+// app.use(`/${conf.apiVersion}/statistics`, statistics);
 
 // Static route for wav files.
 console.log('File path for wav files', conf.uploadsRootDirToServe);
