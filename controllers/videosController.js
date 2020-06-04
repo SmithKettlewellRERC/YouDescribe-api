@@ -147,6 +147,7 @@ const videosController = {
     AudioDescription.find(
       { user: userId }
     )
+    .limit(50).sort({updated_at: -1})
     .exec((err, ads) => {
       if (err) {
         const ret = apiMessages.getResponseByCode(1);
