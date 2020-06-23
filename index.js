@@ -24,7 +24,7 @@ const morgan = require("morgan");
 app.use(morgan("combined"));
 
 // Server HTTP port setup.
-const port = NODE_ENV === "dev" ? "8080" : "3000";
+const port = 8080;
 
 // CORS.
 if (NODE_ENV === "dev") {
