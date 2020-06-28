@@ -27,7 +27,7 @@ app.use(morgan("combined"));
 const port = 8080;
 
 // CORS.
-if (NODE_ENV === "dev") {
+// if (NODE_ENV === "dev") {
   app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
@@ -38,7 +38,7 @@ if (NODE_ENV === "dev") {
       return next();
     }
   });
-}
+// }
 
 // Our server routes.
 const auth = require("./routes/auth");
