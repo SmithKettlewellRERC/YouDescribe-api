@@ -12,6 +12,7 @@ const msleep = require("../shared/helperFunctions").msleep;
 const convertISO8601ToSeconds = require("../shared/helperFunctions").convertISO8601ToSeconds;
 const request = require("request");
 const conf = require("../shared/config")();
+let cache = require("memory-cache");
 
 // The controller itself.
 const videosController = {
@@ -189,53 +190,53 @@ const videosController = {
     let pgNumber = Number(req.query.page);
     let searchPage = (pgNumber === NaN || pgNumber === 0) ? 50 : (pgNumber * 50);
     /* start of old method */
-    Video.find({}).sort({created_at: -1}).skip(searchPage - 50).limit(50)
-    .populate({
-      path: 'audio_descriptions',
-      populate: {
-        path: 'user audio_clips',
-        // populate: {
-        //   path: 'user'
-        // }
-      }
-    })
-    .exec((errGetAll, videos) => {
-      if (errGetAll) {
-        const ret = apiMessages.getResponseByCode(1);
-        res.status(ret.status).json(ret);
-      }
-      const videosFiltered = [];
-      videos.forEach(video => {
-        let audioDescriptionsFiltered = [];
-        video.audio_descriptions.forEach(ad => {
-          if (ad.status === 'published') {
-            audioDescriptionsFiltered.push(ad);
-          }
-        });
-        video.audio_descriptions = audioDescriptionsFiltered;
-        if (audioDescriptionsFiltered.length > 0) {
-          videosFiltered.push(video);
-        }
-      });
-      const ret = apiMessages.getResponseByCode(1006);
-      ret.result = videosFiltered;
-      res.status(ret.status).json(ret);
-    })
+    // Video.find({}).sort({created_at: -1}).skip(searchPage - 50).limit(50)
+    // .populate({
+    //   path: 'audio_descriptions',
+    //   populate: {
+    //     path: 'user audio_clips',
+    //     // populate: {
+    //     //   path: 'user'
+    //     // }
+    //   }
+    // })
+    // .exec((errGetAll, videos) => {
+    //   if (errGetAll) {
+    //     const ret = apiMessages.getResponseByCode(1);
+    //     res.status(ret.status).json(ret);
+    //   }
+    //   const videosFiltered = [];
+    //   videos.forEach(video => {
+    //     let audioDescriptionsFiltered = [];
+    //     video.audio_descriptions.forEach(ad => {
+    //       if (ad.status === 'published') {
+    //         audioDescriptionsFiltered.push(ad);
+    //       }
+    //     });
+    //     video.audio_descriptions = audioDescriptionsFiltered;
+    //     if (audioDescriptionsFiltered.length > 0) {
+    //       videosFiltered.push(video);
+    //     }
+    //   });
+    //   const ret = apiMessages.getResponseByCode(1006);
+    //   ret.result = videosFiltered;
+    //   res.status(ret.status).json(ret);
+    // })
     /* end of old method */
     /* start of new method */
-    // Video.aggregate([
-    //   {$match: {"youtube_status": "available"}},
-    //   {$unwind: "$audio_descriptions"},
-    //   {$lookup: {from: "audio_descriptions", localField: "audio_descriptions", foreignField: "_id", as: "audio_description"}},
-    //   {$unwind: "$audio_description"},
-    //   {$match: {"audio_description.status": "published"}},
-    //   {$group: {_id: "$_id", youtube_id: {$first: "$youtube_id"}, created_at: {$first: "$created_at"}}},
-    //   {$sort: {created_at: -1}},
-    // ]).collation({locale: "en"}).skip(searchPage - 50).limit(50).exec((err, videos) => {
-    //   const ret = apiMessages.getResponseByCode(1006);
-    //   ret.result = videos;
-    //   res.status(ret.status).json(ret);
-    // });
+    Video.aggregate([
+      {$match: {"youtube_status": "available"}},
+      {$unwind: "$audio_descriptions"},
+      {$lookup: {from: "audio_descriptions", localField: "audio_descriptions", foreignField: "_id", as: "audio_description"}},
+      {$unwind: "$audio_description"},
+      {$match: {"audio_description.status": "published"}},
+      {$group: {_id: "$_id", youtube_id: {$first: "$youtube_id"}, created_at: {$first: "$created_at"}}},
+      {$sort: {created_at: -1}},
+    ]).collation({locale: "en"}).skip(searchPage - 50).limit(50).exec((err, videos) => {
+      const ret = apiMessages.getResponseByCode(1006);
+      ret.result = videos;
+      res.status(ret.status).json(ret);
+    });
     /* end of new method */
   },
 
@@ -289,6 +290,7 @@ const videosController = {
         $match: {
           $or: [
             {"language.name": {$regex: searchTerm, $options: "$i"}},
+            {"video.youtube_id": {$regex: searchTerm, $options: "$i"}},
             {"video.category": {$regex: searchTerm, $options: "$i"}},
             {"video.title": {$regex: searchTerm, $options: "$i"}},
             {"video.tags": {$elemMatch: {$regex: searchTerm, $options: "$i"}}},
@@ -332,6 +334,7 @@ const videosController = {
       {
         $match: {
           $or: [
+            {"youtube_id": {$regex: keyword, $options: "$i"}},
             {"category": {$regex: keyword, $options: "$i"}},
             {"title": {$regex: keyword, $options: "$i"}},
             {"tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
@@ -582,6 +585,28 @@ const videosController = {
       ret.result = videos;
       res.status(ret.status).json(ret);
     });
+  },
+  
+  getYoutubeDataFromCache: (req, res) => {
+    const youtubeIds = req.query.youtubeids;
+    const key = req.query.key;
+    const youtubeIdsCacheKey = key + "YoutubeIds";
+    const youtubeDataCacheKey = key + "YoutubeData";
+    if (youtubeIds == cache.get(youtubeIdsCacheKey)) {
+      console.log(`loading ${key} from cache`);
+      const ret = {status: 200};
+      ret.result = cache.get(youtubeDataCacheKey);
+      res.status(ret.status).json(ret);
+    } else {
+      cache.put(youtubeIdsCacheKey, youtubeIds);
+      request.get(`${conf.youTubeApiUrl}/videos?id=${youtubeIds}&part=contentDetails,snippet,statistics&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+        console.log(`loading ${key} from youtube; quota consumption: ${youtubeIds.split(",").length}`);
+        cache.put(youtubeDataCacheKey, body);
+        const ret = {status: 200};
+        ret.result = body;
+        res.status(ret.status).json(ret);
+      });
+    }
   },
 };
 

@@ -163,6 +163,50 @@ const audioDesriptionsController = {
                 const ret = apiMessages.getResponseByCode(1);
                 res.status(ret.status).json(ret);
               }
+              /* start of new youtube infocard */
+              request.get(`${conf.youTubeApiUrl}/videos?id=${newVideoCreated.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                if (!err) {
+                  const jsonObj = JSON.parse(body);
+                  if (jsonObj.items.length > 0) {
+                    const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
+                    const tags = (jsonObj.items[0].snippet.tags || []);
+                    const categoryId = jsonObj.items[0].snippet.categoryId;
+                    request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                      const jsonObj = JSON.parse(body);
+                      let category = "";
+                      for (var i = 0; i < jsonObj.items.length; ++i) {
+                        if (i > 0) {
+                          category += ",";
+                        }
+                        category += jsonObj.items[i].snippet.title;
+                      }
+                      const toUpdate = {
+                        tags: tags,
+                        category_id: categoryId,
+                        category: category,
+                        duration: duration,
+                        youtube_status: "available",
+                      };
+                      Video.findOneAndUpdate(
+                        {youtube_id: newVideoCreated.youtube_id},
+                        {$set: toUpdate},
+                        {new: true}
+                      ).exec();
+                    });
+                  } else {
+                    const toUpdate = {
+                      youtube_status: "unavailable",
+                    };
+                    Video.findOneAndUpdate(
+                      {youtube_id: newVideoCreated.youtube_id},
+                      {$set: toUpdate},
+                      {new: true}
+                    ).exec();
+                  }
+                }
+              });
+              /* end of new youtube infocard */
+
               const newVideoIdCreated = newVideoCreated._id;
 
               // Let's update the audio description with the video id.
@@ -297,6 +341,7 @@ const audioDesriptionsController = {
         $match: {
           $or: [
             {"language.name": {$regex: keyword, $options: "$i"}},
+            {"video.youtube_id": {$regex: keyword, $options: "$i"}},
             {"video.category": {$regex: keyword, $options: "$i"}},
             {"video.title": {$regex: keyword, $options: "$i"}},
             {"video.tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},

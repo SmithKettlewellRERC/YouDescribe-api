@@ -248,7 +248,7 @@ const statisticsController = {
     WishList.aggregate([
       {$match: {$and: [{created_at: {$gte: startDate}}, {created_at: {$lt: endDate}}]}},
       {$project: {"status": 1, "category": 1}},
-      {$match: {"category": {$ne: ""}}},
+      {$match: {$and: [{"category": {$exists: true}}, {"category": {$ne: ""}}]}},
     ]).exec((err, wishListVideos) => {
       wishListVideos.forEach(wishListVideo => {
         if (wishListVideo.status == "dequeued") {
@@ -260,7 +260,7 @@ const statisticsController = {
       Video.aggregate([
         {$match: {$and: [{created_at: {$gte: startDate}}, {created_at: {$lt: endDate}}]}},
         {$project: {"category": 1}},
-        {$match: {"category": {$ne: ""}}},
+        {$match: {$and: [{"category": {$exists: true}}, {"category": {$ne: ""}}]}},
       ]).exec((err, videos) => {
         const ret = {status: 200};
         ret.result = {

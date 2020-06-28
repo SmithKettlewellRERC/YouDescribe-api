@@ -7,6 +7,7 @@ const webVisitCounter = require("./../middlewares/webVisitCounter");
 const videoVisitCounter = require("./../middlewares/videoVisitCounter");
 
 router.get("/", webVisitCounter, videosController.getAll);
+router.get("/getyoutubedatafromcache", videosController.getYoutubeDataFromCache);
 router.get("/getallbypage", adminTokenValidator, videosController.getAllByPage);
 router.get("/getbyid", adminTokenValidator, videosController.getById);
 router.get("/getnext", adminTokenValidator, videosController.getNext);
