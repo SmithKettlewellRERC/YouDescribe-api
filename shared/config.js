@@ -21,13 +21,11 @@ module.exports = () => {
   const cryptoSeed = '#@2$d32467ERvdd';
   const listenByCodeAppKey = "yAOzHAy9LQBJQGtshcIGJX368IbC4Enx";
   const youTubeApiUrl = 'https://www.googleapis.com/youtube/v3';
-  // const youTubeApiKey = 'AIzaSyCG7xsho1pmQavWYYglY9E2VILAnOGsZls';
-  // const youTubeApiKey = "AIzaSyCEMAn_7h1wgIgZ4xhLbQUDuLKlkmvgLHs";                                   // project youdescribe in youdescribesfsu@gmail.com
-  const youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE";                                      // project youdescribe-0126 in youdescribeadm@gmail.com
-  // const youTubeApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U";                                   // project youdescribe-0127 in youdescribeadm@gmail.com
-  // const youTubeApiKey = "AIzaSyBWQ2o3N0MVc8oP96JvWVVwqjxpEOgkhQU";                                   // project youdescribe-0612 in youdescribeadm@gmail.com
-  // const youTubeApiKey = "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q";                                   // project youdescribe-0613 in youdescribeadm@gmail.com
-  // const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w";                                   // project youdescribe-0616 in youdescribeadm@gmail.com
+  // const youTubeApiKey = "AIzaSyCEMAn_7h1wgIgZ4xhLbQUDuLKlkmvgLHs";     // !!! occupied by ios app !!! (google cloud project: youdescribesfsu@gmail.com -> youdescribe)
+  // const youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE";     // !!! occupied by https://youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0126)
+  const youTubeApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U";        // !!! occupied by https://dev.youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0127)
+  // const youTubeApiKey = "AIzaSyBWQ2o3N0MVc8oP96JvWVVwqjxpEOgkhQU";     // !!! occupied by https://18.221.192.73:3001 !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0612)
+  // const youTubeApiKey = "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q";     // free to use (google cloud project: youdescribeadm@gmail.com -> youdescribe-0613)
   const googleCloudStorageKeyFilename = "shared/youdescribe-stats-846041efde0c.json";
   const googleCloudStorageProjectId = "youdescribe-stat-1569864136126";
 
