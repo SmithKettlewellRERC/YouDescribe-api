@@ -8,5 +8,4 @@ deploy.sh
 /audio-descriptions-files
 /uploads
 /tmp
-package-lock.json
 

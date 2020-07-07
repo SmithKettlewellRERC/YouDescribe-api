@@ -8,6 +8,7 @@ const http = require("http");
 const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
 const app = express();
+const cors = require("cors");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -28,6 +29,7 @@ const port = 8080;
 
 // CORS.
 // if (NODE_ENV === "dev") {
+app.use(cors());
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
