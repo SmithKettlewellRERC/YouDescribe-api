@@ -29,14 +29,14 @@ const port = 8080;
 // CORS.
 // if (NODE_ENV === "dev") {
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://dev.youdescribe.org/");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,PATCH,OPTIONS"
   );
   res.header(
     "Access-Control-Allow-Headers",
-    "Accept, authorization, Content-Type, X-Requested-With, Range, Content-Length, visit"
+    "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
   );
   if (req.method === "OPTIONS") {
     return next();
