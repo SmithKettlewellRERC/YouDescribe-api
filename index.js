@@ -8,6 +8,18 @@ const http = require("http");
 const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
 const app = express();
+const cors = require("cors");
+
+// global number of videos fetched from youtube api service
+// reset at 0 am everyday
+numOfVideosFromYoutube = 0;
+setInterval(function() {
+  const date = new Date();
+  if (date.getHours() == 0 && date.getMinutes() == 0) {
+    console.log("number of videos fetched from youtube api service" + numOfVideosFromYoutube);
+    numOfVideosFromYoutube = 0;
+  }
+}, 15 * 60 * 1000);
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -28,17 +40,22 @@ const port = 8080;
 
 // CORS.
 // if (NODE_ENV === "dev") {
-  app.use(function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit');
-    if (req.method === 'OPTIONS') {
-      return next();
-    } else {
-      return next();
-    }
-  });
+//   app.use(function(req, res, next) {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+//     res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit');
+//     if (req.method === 'OPTIONS') {
+//       return next();
+//     } else {
+//       return next();
+//     }
+//   });
 // }
+app.use(cors({
+  origin: true,
+  methods: ["GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Accept", "Authorization", "Content-Type", "X-Requested-With", "Range", "Content-Length", "Visit"],
+}));
 
 // Our server routes.
 const auth = require("./routes/auth");

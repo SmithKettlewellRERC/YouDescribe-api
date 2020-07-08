@@ -29,9 +29,9 @@ module.exports = () => {
   const googleCloudStorageKeyFilename = "shared/youdescribe-stats-846041efde0c.json";
   const googleCloudStorageProjectId = "youdescribe-stat-1569864136126";
 
-  const jsonWebTokenSecret = "youdescribe"
+  const jsonWebTokenSecret = "youdescribe";
   const nodeMailerAuthUser = "youdescribeadm@gmail.com";
-  const nodeMailerAuthPass = "Youdescribe@123"; 
+  const nodeMailerAuthPass = "Youdescribe@123";
 
   return {
     apiVersion,

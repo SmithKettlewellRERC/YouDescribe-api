@@ -600,7 +600,8 @@ const videosController = {
     } else {
       cache.put(youtubeIdsCacheKey, youtubeIds);
       request.get(`${conf.youTubeApiUrl}/videos?id=${youtubeIds}&part=contentDetails,snippet,statistics&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
-        console.log(`loading ${key} from youtube; quota consumption: ${youtubeIds.split(",").length}`);
+        console.log(`loading ${key} from youtube`);
+        numOfVideosFromYoutube += youtubeIds.split(",").length;
         cache.put(youtubeDataCacheKey, body);
         const ret = {status: 200};
         ret.result = body;
