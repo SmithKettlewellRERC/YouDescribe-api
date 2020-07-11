@@ -512,12 +512,13 @@ const videosController = {
   },
 
   // update tags, category_id, category, youtube_status, duration for each video
-  // https://www.googleapis.com/youtube/v3/videos?id=CKwUNBEFI0E&part=contentDetails,snippet,statistics&key=AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE
+  // use a different youtube api key to avoid daliy limit
   updateYoutubeInfoCards: (req, res) => {
+    const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w";      // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
     const Model = (req.query.type == "Videos") ? Video : WishList;
     Model.find({youtube_status: ""}).limit(1000).exec((err, videos) => {
       videos.forEach(video => {
-        request.get(`${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+        request.get(`${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${youTubeApiKey}`, function optionalCallback(err, response, body) {
           if (!err) {
             const jsonObj = JSON.parse(body);
             if (jsonObj.items.length > 0) {
