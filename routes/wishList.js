@@ -8,8 +8,8 @@ const videoVisitCounter = require("./../middlewares/videoVisitCounter");
 router.get("/getbycategories", wishListController.getByCategories);
 
 router.post('/', userTokenValidator, wishListController.addOne);
-router.get('/:youTubeId', videoVisitCounter, wishListController.getOne);
-router.get('/', webVisitCounter, wishListController.getAll);
+router.get('/:youTubeId', wishListController.getOne);
+router.get('/', wishListController.getAll);
 router.put('/:youTubeId', userTokenValidator, wishListController.updateOne);
 
 module.exports = router;
