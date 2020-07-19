@@ -16,7 +16,7 @@ const userSchema = new Schema({
   token: String,
   opt_in: [],
   policy_review: String,
-  alias: String,
+  admin: Number,
 }, { collection: "users" });
 
 const User = mongoose.model("User", userSchema);

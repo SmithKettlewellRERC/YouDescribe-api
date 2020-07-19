@@ -9,6 +9,17 @@ const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
 const app = express();
 
+// global number of videos fetched from youtube api service
+// reset at 0 am everyday
+numOfVideosFromYoutube = 0;
+setInterval(function() {
+  const date = new Date();
+  if (date.getHours() == 0 && date.getMinutes() == 0) {
+    console.log("number of videos fetched from youtube api service" + numOfVideosFromYoutube);
+    numOfVideosFromYoutube = 0;
+  }
+}, 15 * 60 * 1000);
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
@@ -27,18 +38,18 @@ app.use(morgan("combined"));
 const port = 8080;
 
 // CORS.
-if (NODE_ENV === "dev") {
+// if (NODE_ENV === "dev") {
   app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length');
+    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit');
     if (req.method === 'OPTIONS') {
       return next();
     } else {
       return next();
     }
   });
-}
+// }
 
 // Our server routes.
 const auth = require("./routes/auth");
@@ -50,7 +61,7 @@ const audioDescriptions = require("./routes/audioDescriptions");
 const audioDescriptionsRating = require("./routes/audioDescriptionsRating");
 const languages = require("./routes/languages");
 const admins = require("./routes/admins");
-// const statistics = require("./routes/statistics");
+const statistics = require("./routes/statistics");
 
 // Middleware for routes.
 app.use(`/${conf.apiVersion}/auth`, auth);
@@ -62,7 +73,7 @@ app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
 app.use(`/${conf.apiVersion}/admins`, admins);
-// app.use(`/${conf.apiVersion}/statistics`, statistics);
+app.use(`/${conf.apiVersion}/statistics`, statistics);
 
 // Static route for wav files.
 console.log('File path for wav files', conf.uploadsRootDirToServe);

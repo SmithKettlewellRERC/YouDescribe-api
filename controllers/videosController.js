@@ -12,6 +12,7 @@ const msleep = require("../shared/helperFunctions").msleep;
 const convertISO8601ToSeconds = require("../shared/helperFunctions").convertISO8601ToSeconds;
 const request = require("request");
 const conf = require("../shared/config")();
+let cache = require("memory-cache");
 
 // The controller itself.
 const videosController = {
@@ -289,6 +290,7 @@ const videosController = {
         $match: {
           $or: [
             {"language.name": {$regex: searchTerm, $options: "$i"}},
+            {"video.youtube_id": {$regex: searchTerm, $options: "$i"}},
             {"video.category": {$regex: searchTerm, $options: "$i"}},
             {"video.title": {$regex: searchTerm, $options: "$i"}},
             {"video.tags": {$elemMatch: {$regex: searchTerm, $options: "$i"}}},
@@ -332,6 +334,7 @@ const videosController = {
       {
         $match: {
           $or: [
+            {"youtube_id": {$regex: keyword, $options: "$i"}},
             {"category": {$regex: keyword, $options: "$i"}},
             {"title": {$regex: keyword, $options: "$i"}},
             {"tags": {$elemMatch: {$regex: keyword, $options: "$i"}}},
@@ -509,19 +512,20 @@ const videosController = {
   },
 
   // update tags, category_id, category, youtube_status, duration for each video
-  // https://www.googleapis.com/youtube/v3/videos?id=CKwUNBEFI0E&part=contentDetails,snippet,statistics&key=AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE
+  // use a different youtube api key to avoid daliy limit
   updateYoutubeInfoCards: (req, res) => {
+    const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w";      // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
     const Model = (req.query.type == "Videos") ? Video : WishList;
     Model.find({youtube_status: ""}).limit(1000).exec((err, videos) => {
       videos.forEach(video => {
-        request.get(`${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+        request.get(`${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${youTubeApiKey}`, function optionalCallback(err, response, body) {
           if (!err) {
             const jsonObj = JSON.parse(body);
             if (jsonObj.items.length > 0) {
               const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
               const tags = (jsonObj.items[0].snippet.tags || []);
               const categoryId = jsonObj.items[0].snippet.categoryId;
-              request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+              request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${youTubeApiKey}`, function optionalCallback(err, response, body) {
                 const jsonObj = JSON.parse(body);
                 let category = "";
                 for (var i = 0; i < jsonObj.items.length; ++i) {
@@ -582,6 +586,29 @@ const videosController = {
       ret.result = videos;
       res.status(ret.status).json(ret);
     });
+  },
+  
+  getYoutubeDataFromCache: (req, res) => {
+    const youtubeIds = req.query.youtubeids;
+    const key = req.query.key;
+    const youtubeIdsCacheKey = key + "YoutubeIds";
+    const youtubeDataCacheKey = key + "YoutubeData";
+    if (youtubeIds == cache.get(youtubeIdsCacheKey)) {
+      console.log(`loading ${key} from cache`);
+      const ret = {status: 200};
+      ret.result = cache.get(youtubeDataCacheKey);
+      res.status(ret.status).json(ret);
+    } else {
+      cache.put(youtubeIdsCacheKey, youtubeIds);
+      request.get(`${conf.youTubeApiUrl}/videos?id=${youtubeIds}&part=contentDetails,snippet,statistics&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+        console.log(`loading ${key} from youtube`);
+        numOfVideosFromYoutube += youtubeIds.split(",").length;
+        cache.put(youtubeDataCacheKey, body);
+        const ret = {status: 200};
+        ret.result = body;
+        res.status(ret.status).json(ret);
+      });
+    }
   },
 };
 

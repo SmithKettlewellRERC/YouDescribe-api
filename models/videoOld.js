@@ -14,6 +14,9 @@ const videoSchema = new Schema({
   category_id: String,
   category: String,
   youtube_status: String,
+  duration: Number,
+  custom_category: String,
+  custom_tags: [],
 }, { collection: 'videos_old' });
 
 const VideoOld = mongoose.model('VideoOld', videoSchema);

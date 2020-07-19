@@ -3,6 +3,7 @@ const nowUtc = require("../shared/helperFunctions").nowUtc;
 const utcToLongInt = require("../shared/helperFunctions").utcToLongInt;
 const VideoOld = require("../models/videoOld");
 const AudioClipOld = require("../models/audioClipOld");
+const WishListOld = require("../models/wishListOld");
 const Video = require("../models/video");
 const User = require("../models/user");
 const AudioDescription = require("../models/audioDescription");
@@ -87,15 +88,52 @@ const statisticsController = {
   },
 
   syncVideos: (req, res) => {
-    VideoOld.find({}).exec((err, videos) => {
+    VideoOld.find({youtube_status: {$ne: ""}}).exec((err, videos) => {
       videos.forEach(video => {
-        const toUpdate = {
-          tags: video.tags,
-          category_id: video.category_id,
-          category: video.category,
-          youtube_status: video.youtube_status,
-        };
+        let toUpdate = {};
+        if (video.youtube_status == "available") {
+          toUpdate = {
+            tags: video.tags,
+            category_id: video.category_id,
+            category: video.category,
+            youtube_status: video.youtube_status,
+            duration: video.duration,
+          };
+        } else if (video.youtube_status == "unavailable") {
+          toUpdate = {
+            youtube_status: video.youtube_status,
+          };
+        }
         Video.findOneAndUpdate(
+          {_id: video._id},
+          {$set: toUpdate},
+          {new: true}
+        ).exec((err, ac) => {
+          console.log("video successfully synchronized!!!");
+        });
+      });
+      res.end("done");
+    });
+  },
+
+  syncWishList: (req, res) => {
+    WishListOld.find({youtube_status: {$ne: ""}}).exec((err, videos) => {
+      videos.forEach(video => {
+        let toUpdate = {};
+        if (video.youtube_status == "available") {
+          toUpdate = {
+            tags: video.tags,
+            category_id: video.category_id,
+            category: video.category,
+            youtube_status: video.youtube_status,
+            duration: video.duration,
+          };
+        } else if (video.youtube_status == "unavailable") {
+          toUpdate = {
+            youtube_status: video.youtube_status,
+          };
+        }
+        WishList.findOneAndUpdate(
           {_id: video._id},
           {$set: toUpdate},
           {new: true}
@@ -248,7 +286,7 @@ const statisticsController = {
     WishList.aggregate([
       {$match: {$and: [{created_at: {$gte: startDate}}, {created_at: {$lt: endDate}}]}},
       {$project: {"status": 1, "category": 1}},
-      {$match: {"category": {$ne: ""}}},
+      {$match: {$and: [{"category": {$exists: true}}, {"category": {$ne: ""}}]}},
     ]).exec((err, wishListVideos) => {
       wishListVideos.forEach(wishListVideo => {
         if (wishListVideo.status == "dequeued") {
@@ -260,7 +298,7 @@ const statisticsController = {
       Video.aggregate([
         {$match: {$and: [{created_at: {$gte: startDate}}, {created_at: {$lt: endDate}}]}},
         {$project: {"category": 1}},
-        {$match: {"category": {$ne: ""}}},
+        {$match: {$and: [{"category": {$exists: true}}, {"category": {$ne: ""}}]}},
       ]).exec((err, videos) => {
         const ret = {status: 200};
         ret.result = {

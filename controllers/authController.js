@@ -49,6 +49,7 @@ const authController = {
                 google_user_id: googleUserId,
                 last_login: nowUtc(),
                 token: newToken,
+                opt_in: [],
               });
               newUser.save((errNewUser, newUser) => {
                 if (errNewUser) {
