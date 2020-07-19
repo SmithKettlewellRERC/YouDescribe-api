@@ -589,6 +589,7 @@ const videosController = {
   },
   
   getYoutubeDataFromCache: (req, res) => {
+    cache.clear();
     const youtubeIds = req.query.youtubeids;
     const key = req.query.key;
     const youtubeIdsCacheKey = key + "YoutubeIds";
