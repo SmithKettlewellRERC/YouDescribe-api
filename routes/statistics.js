@@ -23,6 +23,7 @@ router.get("/getdailycountofwords", adminTokenValidator, statisticsController.ge
 router.get("/syncaudioclips", statisticsController.syncAudioClips);
 router.get("/synctranscriptions", statisticsController.syncTranscriptions);
 router.get("/syncvideos", statisticsController.syncVideos);
+router.get("/syncwishlist", statisticsController.syncWishList);
 router.get("/syncwords", statisticsController.syncWords);
 router.get("/syncusers", statisticsController.syncUsers);
 router.get("/synccategories", statisticsController.syncCategories);

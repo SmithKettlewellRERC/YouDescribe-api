@@ -525,7 +525,7 @@ const videosController = {
               const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
               const tags = (jsonObj.items[0].snippet.tags || []);
               const categoryId = jsonObj.items[0].snippet.categoryId;
-              request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+              request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${youTubeApiKey}`, function optionalCallback(err, response, body) {
                 const jsonObj = JSON.parse(body);
                 let category = "";
                 for (var i = 0; i < jsonObj.items.length; ++i) {
