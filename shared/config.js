@@ -1,13 +1,16 @@
+const fetch = require("node-fetch");
 const path = require("path");
 // const NODE_ENV = process.env.NODE_ENV;
 const NODE_ENV = "prd";
 
-testApiKey(key => {
+function testApiKey(key) {
   fetch(`https://www.googleapis.com/youtube/v3/search?key=${key}`)
     .then(res => res.json())
     .then(
       result => {
-        console.log(result);
+        if (result.error.code !== undefined) {
+          console.log(result.error.code);
+        }
       },
       // Note: it's important to handle errors here
       // instead of a catch() block so that we don't swallow
@@ -17,7 +20,7 @@ testApiKey(key => {
       }
     );
   return true;
-});
+}
 
 module.exports = () => {
   let currentApiKeyIndex = 0;
@@ -30,11 +33,12 @@ module.exports = () => {
   setInterval(function() {
     if (!testApiKey(youTubeApiKeys[currentApiKeyIndex])) {
       currentApiKeyIndex += 1;
-
       if (currentApiKeyIndex >= youTubeApiKeys.length) {
         currentApiKeyIndex = 0;
+        console.log(`API keys all used up!`);
       }
     }
+    console.log(`API keys used: ${currentApiKeyIndex}\n`);
   }, 60 * 2 * 1000);
 
   const apiVersion = "v1";
