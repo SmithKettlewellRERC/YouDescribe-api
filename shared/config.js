@@ -2,45 +2,48 @@ const fetch = require("node-fetch");
 const path = require("path");
 // const NODE_ENV = process.env.NODE_ENV;
 const NODE_ENV = "prd";
+let currentApiKeyIndex = 0;
 
-function testApiKey(key) {
-  fetch(`https://www.googleapis.com/youtube/v3/search?key=${key}`)
+const youTubeApiKeys = [
+  "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U",
+  "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q"
+];
+
+// reset to first key at midnight, when all keys are reset.
+var midnight = "0:00:00";
+var now = null;
+setInterval(function() {
+  now = moment().format("H:mm:ss");
+  if (now === midnight) {
+    currentApiKeyIndex = 0;
+  }
+  $("#time").text(now);
+}, 1000);
+
+setInterval(function() {
+  fetch(
+    `https://www.googleapis.com/youtube/v3/search?key=${youTubeApiKeys[currentApiKeyIndex]}`
+  )
     .then(res => res.json())
-    .then(
-      result => {
-        if (result.error.code !== undefined) {
-          console.log(result.error.code);
+    .then(result => {
+      try {
+        if (result.error.code === 403) {
+          currentApiKeyIndex += 1;
+          if (currentApiKeyIndex >= youTubeApiKeys.length) {
+            currentApiKeyIndex = 0;
+          }
+          console.log(result);
+          return false;
         }
-      },
-      // Note: it's important to handle errors here
-      // instead of a catch() block so that we don't swallow
-      // exceptions from actual bugs in components.
-      error => {
-        return false;
+      } catch (err) {
+        console.log("api key works!");
       }
-    );
-  return true;
-}
+    });
+
+  console.log(`API keys used: ${currentApiKeyIndex}\n\n`);
+}, 20 * 1000);
 
 module.exports = () => {
-  let currentApiKeyIndex = 0;
-  const youTubeApiKeys = [
-    "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U",
-    "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q"
-  ];
-
-  //Switches api keys in case of YouTube API key quota, check every 2 seconds
-  setInterval(function() {
-    if (!testApiKey(youTubeApiKeys[currentApiKeyIndex])) {
-      currentApiKeyIndex += 1;
-      if (currentApiKeyIndex >= youTubeApiKeys.length) {
-        currentApiKeyIndex = 0;
-        console.log(`API keys all used up!`);
-      }
-    }
-    console.log(`API keys used: ${currentApiKeyIndex}\n`);
-  }, 60 * 2 * 1000);
-
   const apiVersion = "v1";
   let uploadsRootDirToServe = path.join(
     __dirname,
@@ -82,10 +85,9 @@ module.exports = () => {
   const youTubeApiUrl = "https://www.googleapis.com/youtube/v3";
   // const youTubeApiKey = "AIzaSyCEMAn_7h1wgIgZ4xhLbQUDuLKlkmvgLHs";     // !!! occupied by ios app !!! (google cloud project: youdescribesfsu@gmail.com -> youdescribe)
   // const youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE";     // !!! occupied by https://youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0126)
-
+  // const currentApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U"; // !!! occupied by https://dev.youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0127)
   // const youTubeApiKey = "AIzaSyBWQ2o3N0MVc8oP96JvWVVwqjxpEOgkhQU";     // !!! occupied by http://18.221.192.73:3001 !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0612)
   // const youTubeApiKey = "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q";     // free to use (google cloud project: youdescribeadm@gmail.com -> youdescribe-0613)
-  //const currentApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U"; // !!! occupied by https://dev.youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0127)
 
   const googleCloudStorageKeyFilename =
     "shared/youdescribe-stats-846041efde0c.json";
