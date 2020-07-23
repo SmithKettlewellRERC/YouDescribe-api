@@ -4,10 +4,20 @@ const path = require("path");
 const NODE_ENV = "prd";
 let currentApiKeyIndex = 0;
 
-const youTubeApiKeys = [
-  "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U",
-  "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q"
-];
+/// IOS KEYS
+// const youTubeApiKeys = [
+//
+//
+// ];
+
+// DEV SITE KEYS
+const youTubeApiKeys = ["AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U"];
+
+// Live SITE KEYS
+// const youTubeApiKeys = [
+//   "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE",
+//   "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q"
+// ];
 
 // reset to first key at midnight, when all keys are reset.
 var midnight = "0:00:00";
@@ -20,9 +30,10 @@ setInterval(function() {
   $("#time").text(now);
 }, 1000);
 
+//check if current api key has hit quota, cycle between api keys.
 setInterval(function() {
   fetch(
-    `https://www.googleapis.com/youtube/v3/search?key=${youTubeApiKeys[currentApiKeyIndex]}`
+    `https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key=${youTubeApiKeys[currentApiKeyIndex]}`
   )
     .then(res => res.json())
     .then(result => {
@@ -32,16 +43,16 @@ setInterval(function() {
           if (currentApiKeyIndex >= youTubeApiKeys.length) {
             currentApiKeyIndex = 0;
           }
-          console.log(result);
+          console.log(`key ${currentApiKeyIndex} has been used up!`);
           return false;
         }
       } catch (err) {
-        console.log("api key works!");
+        console.log("api key still works!");
       }
     });
 
   console.log(`API keys used: ${currentApiKeyIndex}\n\n`);
-}, 20 * 1000);
+}, 60 * 5 * 1000);
 
 module.exports = () => {
   const apiVersion = "v1";
