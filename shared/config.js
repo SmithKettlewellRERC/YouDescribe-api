@@ -21,7 +21,6 @@ setInterval(function() {
   if (now === midnight) {
     currentApiKeyIndex = 0;
   }
-  $("#time").text(now);
 }, 1000);
 
 //check if current api key has hit quota, cycle between api keys.
