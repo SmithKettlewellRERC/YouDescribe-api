@@ -21,7 +21,6 @@ setInterval(function() {
   if (now === midnight) {
     currentApiKeyIndex = 0;
   }
-  $("#time").text(now);
 }, 1000);
 
 //check if current api key has hit quota, cycle between api keys.
@@ -41,11 +40,9 @@ setInterval(function() {
           return false;
         }
       } catch (err) {
-        console.log("api key still works!");
+        console.log(`api key ${currentApiKeyIndex} still works!`);
       }
     });
-
-  console.log(`API keys used: ${currentApiKeyIndex}\n\n`);
 }, 60 * 5 * 1000);
 
 module.exports = () => {
