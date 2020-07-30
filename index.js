@@ -8,19 +8,28 @@ const http = require("http");
 const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
 const app = express();
+var moment = require("moment");
 
 // global number of videos fetched from youtube api service
-// reset at 0 am everyday
 numOfVideosFromYoutube = 0;
+var midnight = "0:00:00";
+var now = null;
 setInterval(function() {
-  const date = new Date();
-  if (date.getHours() == 0 && date.getMinutes() == 0) {
-    console.log("number of videos fetched from youtube api service" + numOfVideosFromYoutube);
+  now = moment().format("H:mm:ss");
+  console.log(
+    "number of videos fetched from youtube api service" + numOfVideosFromYoutube
+  );
+}, 60 * 15 * 1000);
+
+//reset videos at midnight
+setInterval(function() {
+  now = moment().format("H:mm:ss");
+  if (now === midnight) {
     numOfVideosFromYoutube = 0;
   }
-}, 15 * 60 * 1000);
+}, 1000);
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Database.
@@ -39,16 +48,22 @@ const port = 8080;
 
 // CORS.
 // if (NODE_ENV === "dev") {
-  app.use(function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit');
-    if (req.method === 'OPTIONS') {
-      return next();
-    } else {
-      return next();
-    }
-  });
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
+  );
+  if (req.method === "OPTIONS") {
+    return next();
+  } else {
+    return next();
+  }
+});
 // }
 
 // Our server routes.
@@ -76,25 +91,28 @@ app.use(`/${conf.apiVersion}/admins`, admins);
 app.use(`/${conf.apiVersion}/statistics`, statistics);
 
 // Static route for wav files.
-console.log('File path for wav files', conf.uploadsRootDirToServe);
-app.use('/audio-descriptions-files', express.static(conf.uploadsRootDirToServe));
+console.log("File path for wav files", conf.uploadsRootDirToServe);
+app.use(
+  "/audio-descriptions-files",
+  express.static(conf.uploadsRootDirToServe)
+);
 
 // The Restful API drain.
-app.get('*', (req, res) => {
+app.get("*", (req, res) => {
   res.status(200).json('{"status":"not found"}');
 });
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
+  if (error.syscall !== "listen") {
     throw error;
   }
-  const bind = typeof port === 'string' ? `Pipe  ${port}` : `Port ${port}`;
+  const bind = typeof port === "string" ? `Pipe  ${port}` : `Port ${port}`;
   switch (error.code) {
-    case 'EACCES':
+    case "EACCES":
       console.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
-    case 'EADDRINUSE':
+    case "EADDRINUSE":
       console.error(`${bind} is already in use`);
       process.exit(1);
       break;
@@ -111,16 +129,18 @@ if (cluster.isMaster) {
     cluster.fork();
   }
 
-  cluster.on('online', (worker) => {
+  cluster.on("online", worker => {
     console.log(`Worker (child process) ${worker.process.pid} is running.`);
   });
 
   /**
    * To make sure we do not loose any workers.
    */
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}.`);
-    console.log('Starting a new worker.');
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(
+      `Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}.`
+    );
+    console.log("Starting a new worker.");
     cluster.fork();
   });
 } else {
@@ -129,16 +149,18 @@ if (cluster.isMaster) {
    */
   const httpServer = http.createServer(app);
   httpServer.listen(port, () => {
-    console.log(`Child process ${process.pid} is listening to all incoming requests on port ${port}.`);
+    console.log(
+      `Child process ${process.pid} is listening to all incoming requests on port ${port}.`
+    );
   });
 
   /**
    * Errors listener.
    */
-  httpServer.on('error', onError);
+  httpServer.on("error", onError);
 }
 
-process.on('uncaughtException', function (err) {
+process.on("uncaughtException", function(err) {
   console.log(err);
   console.log(err.stack);
 });
