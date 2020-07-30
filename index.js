@@ -12,7 +12,7 @@ var moment = require("moment");
 
 // global number of videos fetched from youtube api service
 numOfVideosFromYoutube = 0;
-var midnight = "0:00:00";
+var midnight = "12:00:00";
 var now = null;
 setInterval(function() {
   now = moment().format("H:mm:ss");
