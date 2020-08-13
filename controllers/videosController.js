@@ -14,6 +14,7 @@ const convertISO8601ToSeconds = require("../shared/helperFunctions")
 const request = require("request");
 const conf = require("../shared/config")();
 let cache = require("memory-cache");
+var moment = require("moment");
 
 //updating videos at midnight
 var midnight = "00:00:00";
