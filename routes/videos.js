@@ -6,7 +6,7 @@ const adminTokenValidator = require("./../middlewares/adminTokenValidator");
 const webVisitCounter = require("./../middlewares/webVisitCounter");
 const videoVisitCounter = require("./../middlewares/videoVisitCounter");
 
-router.get("/", webVisitCounter, videosController.getAll);
+router.get("/", videoVisitCounter, videosController.getAll);
 router.get(
   "/getyoutubedatafromcache",
   videosController.getYoutubeDataFromCache

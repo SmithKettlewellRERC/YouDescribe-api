@@ -567,7 +567,9 @@ const videosController = {
   updateYoutubeInfoCards: (req, res) => {
     const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w"; // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
     const Model = req.query.type == "Videos" ? Video : WishList;
-    Model.find({ youtube_status: "" })
+    Model.find({
+      $or: [{ youtube_status: "" }, { youtube_status: { $exists: false } }]
+    })
       .limit(1000)
       .exec((err, videos) => {
         videos.forEach(video => {
