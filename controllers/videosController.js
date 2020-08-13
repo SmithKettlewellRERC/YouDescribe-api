@@ -16,7 +16,7 @@ const conf = require("../shared/config")();
 let cache = require("memory-cache");
 
 //updating videos at midnight
-var midnight = "12:00:00";
+var midnight = "00:00:00";
 var now = null;
 setInterval(function() {
   now = moment().format("H:mm:ss");
