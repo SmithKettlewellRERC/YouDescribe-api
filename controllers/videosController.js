@@ -15,6 +15,76 @@ const request = require("request");
 const conf = require("../shared/config")();
 let cache = require("memory-cache");
 
+//updating videos at midnight
+setInterval(function() {
+  now = moment().format("H:mm:ss");
+  if (now === midnight) {
+    const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w"; // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
+    Video.find({
+      $or: [{ youtube_status: "" }, { youtube_status: { $exists: false } }]
+    })
+      .limit(1000)
+      .exec((err, videos) => {
+        videos.forEach(video => {
+          request.get(
+            `${conf.youTubeApiUrl}/videos?id=${video.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${youTubeApiKey}`,
+            function optionalCallback(err, response, body) {
+              if (!err) {
+                const jsonObj = JSON.parse(body);
+                if (jsonObj.items.length > 0) {
+                  const duration = convertISO8601ToSeconds(
+                    jsonObj.items[0].contentDetails.duration
+                  );
+                  const tags = jsonObj.items[0].snippet.tags || [];
+                  const categoryId = jsonObj.items[0].snippet.categoryId;
+                  request.get(
+                    `${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${youTubeApiKey}`,
+                    function optionalCallback(err, response, body) {
+                      const jsonObj = JSON.parse(body);
+                      let category = "";
+                      for (var i = 0; i < jsonObj.items.length; ++i) {
+                        if (i > 0) {
+                          category += ",";
+                        }
+                        category += jsonObj.items[i].snippet.title;
+                      }
+                      const toUpdate = {
+                        tags: tags,
+                        category_id: categoryId,
+                        category: category,
+                        duration: duration,
+                        youtube_status: "available"
+                      };
+                      Video.findOneAndUpdate(
+                        { youtube_id: video.youtube_id },
+                        { $set: toUpdate },
+                        { new: true }
+                      ).exec((err, ac) => {
+                        console.log(video.youtube_id + "; available");
+                      });
+                    }
+                  );
+                } else {
+                  const toUpdate = {
+                    youtube_status: "unavailable"
+                  };
+                  Video.findOneAndUpdate(
+                    { youtube_id: video.youtube_id },
+                    { $set: toUpdate },
+                    { new: true }
+                  ).exec((err, ac) => {
+                    console.log(video.youtube_id + "; unavailable");
+                  });
+                }
+              }
+            }
+          );
+          msleep(10);
+        });
+      });
+  }
+}, 1000);
+
 // The controller itself.
 const videosController = {
   // addOne: (req, res) => {
