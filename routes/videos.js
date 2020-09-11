@@ -26,6 +26,7 @@ router.get(
 );
 router.get("/:id", videosController.getOne);
 router.get("/user/:userId", videosController.getVideosByUserId);
+router.get("/currentkey", videosController.getCurrentKey);
 // router.post("/", videosController.addOne);
 // router.put("/:id", videosController.updateOne);
 // router.post("/:id", userTokenValidator, videosController.publish);
