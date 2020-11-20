@@ -750,11 +750,6 @@ const videosController = {
         }
       );
     }
-  },
-
-  getCurrentKey: (req, res) => {
-    print(res);
-    res.send(conf.youTubeApiKey);
   }
 };
 
