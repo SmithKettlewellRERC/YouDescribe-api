@@ -116,6 +116,7 @@ const usersController = {
   },
 
   sendMail: (req, res) => {
+    //for testing!
     const email = req.body.email;
     const body = req.body.mailbody;
     console.log(req.body);
