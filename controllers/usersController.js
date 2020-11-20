@@ -10,29 +10,30 @@ const sendEmailByNodeMailer = (emailAddress, emailBody) => {
     service: "gmail",
     auth: {
       user: conf.nodeMailerAuthUser,
-      pass: conf.nodeMailerAuthPass,
+      pass: conf.nodeMailerAuthPass
     }
   });
   const mailOptions = {
     from: conf.nodeMailerAuthUser,
-    to: "youdescribesfsu@gmail.com",  // emailAddress
+    to: emailAddress,
     subject: "Notification From YouDescribe",
-    text: emailBody,
+    text: emailBody
   };
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
       console.log(error);
     } else {
-      console.log("email sent to: " + emailAddress + "; response:" + info.response);
+      console.log(
+        "email sent to: " + emailAddress + "; response:" + info.response
+      );
     }
   });
-}
+};
 
 const usersController = {
   getOne: (req, res) => {
     const userId = req.params.userId;
-    User.findOne({ _id: userId })
-    .exec((errGetOne, user) => {
+    User.findOne({ _id: userId }).exec((errGetOne, user) => {
       if (errGetOne) {
         const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
@@ -40,12 +41,12 @@ const usersController = {
       if (user) {
         const ret = apiMessages.getResponseByCode(1014);
         ret.result = user;
-        res.status(ret.status).json(ret);  
+        res.status(ret.status).json(ret);
       } else {
         const ret = apiMessages.getResponseByCode(65);
         res.status(ret.status).json(ret);
       }
-    })
+    });
   },
 
   updateOptIn: (req, res) => {
@@ -59,56 +60,69 @@ const usersController = {
     }
     const toUpdate = {
       opt_in: optIn,
-      policy_review: "reviewed",
+      policy_review: "reviewed"
     };
-    User.findOneAndUpdate(
-      {_id: id},
-      {$set: toUpdate},
-      {new: true}
-    ).exec((err, ac) => {
-      const ret = {status: 200};
-      ret.result = {};
-      res.status(ret.status).json(ret);
-    });
+    User.findOneAndUpdate({ _id: id }, { $set: toUpdate }, { new: true }).exec(
+      (err, ac) => {
+        const ret = { status: 200 };
+        ret.result = {};
+        res.status(ret.status).json(ret);
+      }
+    );
   },
 
   sendOptInEmail: (req, res) => {
     const optIn = parseInt(req.body.optin);
     const id = req.body.id;
     const emailBody = req.body.emailbody;
-    const query = (optIn == 0) ? UserVotes.find({youtube_id: id}) : AudioDescription.find({_id: id});
+    const query =
+      optIn == 0
+        ? UserVotes.find({ youtube_id: id })
+        : AudioDescription.find({ _id: id });
     query.exec((err, results) => {
       results.forEach(result => {
-        User.findOne({_id: result.user, opt_in: {$elemMatch: {$eq: optIn}}}).exec((err, user) => {
+        User.findOne({
+          _id: result.user,
+          opt_in: { $elemMatch: { $eq: optIn } }
+        }).exec((err, user) => {
           if (user) {
             const emailAddress = user.email;
             sendEmailByNodeMailer(emailAddress, emailBody);
           }
         });
       });
-      const ret = {status: 200};
-      ret.info = "User will receive the notification if s/he has chosen to opt in.";
+      const ret = { status: 200 };
+      ret.info =
+        "User will receive the notification if s/he has chosen to opt in.";
       res.status(ret.status).json(ret);
     });
   },
 
-  sendVideoRemappingEmail: (req, res) => {
-  },
+  sendVideoRemappingEmail: (req, res) => {},
 
   sendVideoIndexerEmail: (req, res) => {
     const id = req.body.id;
-    const delay = (req.body.delay || 30);
+    const delay = req.body.delay || 30;
     const emailBody = req.body.emailbody;
-    User.findOne({_id: id}).exec((err, user) => {
+    User.findOne({ _id: id }).exec((err, user) => {
       setTimeout(function() {
         const emailAddress = user.email;
         sendEmailByNodeMailer(emailAddress, emailBody);
       }, 1000 * 60 * delay);
-      const ret = {status: 200};
+      const ret = { status: 200 };
       ret.info = `User will receive the notification after ${delay} min.`;
       res.status(ret.status).json(ret);
     });
   },
+
+  sendMail: (req, res) => {
+    //for testing!
+    const email = req.body.email;
+    const body = req.body.mailbody;
+    console.log(req.body);
+    sendEmailByNodeMailer(email, body);
+    res.send();
+  }
 };
 
 module.exports = usersController;
