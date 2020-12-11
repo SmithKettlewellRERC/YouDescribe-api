@@ -7,10 +7,19 @@ const UserVotes = require("./../models/userVotes");
 
 const sendEmailByNodeMailer = (emailAddress, emailBody) => {
   const transporter = nodeMailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
+      type: "OAuth2",
       user: conf.nodeMailerAuthUser,
-      pass: conf.nodeMailerAuthPass
+      clientId:
+        "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com",
+      clientSecret: "emqt6gfCSMNlhHfpADZCEgqf",
+      refreshToken:
+        "1//04G0CRHoEeHbCCgYIARAAGAQSNwF-L9IrDLVaWgtTRx14lUgXKHIiiZLqTt_63ocFkF22VOCGXdkCrci56XYmPCmK19yo_Bhr64w",
+      accessToken:
+        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk"
     }
   });
   const mailOptions = {
