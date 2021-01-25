@@ -28,15 +28,19 @@ const cluster = require("cluster");
 
 //weekly summary email
 
-cron.schedule("57 14 * * 1", async () => {
+cron.schedule("00 15 * * 1", async () => {
   if (cluster.isMaster) {
     weeklyVideos = await weeklyStatistics.weeklyVideoCount();
     weeklyUsers = await weeklyStatistics.weeklyUserCount();
     weeklyWishlist = await weeklyStatistics.weeklyWishlistCount();
 
-    let text = `This is an automated summary of YouDescribe statistics. In the last 7 days, there have been ${weeklyVideos.count} videos described. The average duration of these videos is ${weeklyVideos.avgduration} minutes. ${weeklyWishlist.count} videos have been added to the wishlist. ${weeklyUsers.count} users have logged into YouDescribe in the last 7 days.`;
+    let text = `This is an automated summary of YouDescribe statistics. In the last 7 days, there have been ${weeklyVideos.count} videos described. ${weeklyWishlist.count} videos have been added to the wishlist. ${weeklyUsers.count} users have logged into YouDescribe in the last 7 days.`;
 
-    const emailList = ["jcastan6@mail.sfsu.edu"];
+    const emailList = [
+      "jcastan6@mail.sfsu.edu",
+      "ilmiyoon@gmail.com",
+      "cpc@ski.org"
+    ];
     const mailOptions = {
       from: conf.nodeMailerAuthUser,
       to: emailList,
