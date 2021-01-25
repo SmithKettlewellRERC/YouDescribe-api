@@ -25,14 +25,15 @@ module.exports = {
         $group: {
           _id: null,
           count: { $sum: 1 },
-          avgduration: { $avg: "$duration" }
+          duration: { $sum: "$duration" }
         }
       }
     ]);
     const result = await videos.exec();
     let result2 = {
       count: result.length > 0 ? result[0].count : 0,
-      avgduration: result.length > 0 ? result[0].avgduration / 60 : 0
+      avgduration:
+        result.length > 0 ? result[0].duration / result[0].count / 60 : 0
     };
     return result2;
   },
