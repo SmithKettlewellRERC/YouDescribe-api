@@ -1,5 +1,7 @@
 const conf = require("../shared/config")();
 const nowUtc = require("../shared/helperFunctions").nowUtc;
+const weeklyStatistics = require("./helpers/weeklyStatistics");
+
 const utcToLongInt = require("../shared/helperFunctions").utcToLongInt;
 const VideoOld = require("../models/videoOld");
 const AudioClipOld = require("../models/audioClipOld");
@@ -20,6 +22,42 @@ const msleep = require("../shared/helperFunctions").msleep;
 const convertISO8601ToSeconds = require("../shared/helperFunctions")
   .convertISO8601ToSeconds;
 const fs = require("fs");
+let cron = require("node-cron");
+const transporter = conf.nodeMailerTransporter;
+const cluster = require("cluster");
+
+//weekly summary email
+
+cron.schedule("35 14 * * 1", async () => {
+  if (cluster.isMaster) {
+    weeklyVideos = await weeklyStatistics.weeklyVideoCount();
+    weeklyUsers = await weeklyStatistics.weeklyUserCount();
+    weeklyWishlist = await weeklyStatistics.weeklyWishlistCount();
+
+    let text = `This is an automated summary of YouDescribe statistics. In the last 7 days, there have been
+              ${weeklyVideos.count} videos described. The average duration of these videos is ${weeklyVideos.avgduration} minutes. ${weeklyWishlist.count} videos have been added to the wishlist.
+              \n 
+              ${weeklyUserCount.count} users have logged into YouDescribe in the last 7 days. 
+              `;
+
+    const emailList = ["jcastan6@mail.sfsu.edu"];
+    const mailOptions = {
+      from: conf.nodeMailerAuthUser,
+      to: emailList,
+      subject: "YouDescribe Weekly Summary",
+      text: text
+    };
+
+    // Send e-mail
+    transporter.sendMail(mailOptions, function(error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+  }
+});
 
 const statisticsController = {
   syncAudioClips: (req, res) => {

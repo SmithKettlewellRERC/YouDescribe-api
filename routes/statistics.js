@@ -2,6 +2,7 @@ const express = require("express");
 const statisticsController = require("../controllers/statisticsController");
 const router = express.Router();
 const adminTokenValidator = require("./../middlewares/adminTokenValidator");
+let nodeMailer = require("nodemailer");
 
 router.get(
   "/getcountofdatarecords",
