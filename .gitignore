@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 db/config.js
+db/connection.js
 db/dumps
 db/scripts
 db/var
@@ -8,3 +9,4 @@ deploy.sh
 /audio-descriptions-files
 /uploads
 /tmp
+index.js

@@ -3,6 +3,8 @@ const path = require("path");
 var moment = require("moment");
 // const NODE_ENV = process.env.NODE_ENV;
 const NODE_ENV = "prd";
+const nodeMailer = require("nodemailer");
+require("https").globalAgent.options.ca = require("ssl-root-cas").create();
 
 module.exports = () => {
   const apiVersion = "v1";
@@ -58,6 +60,23 @@ module.exports = () => {
   const nodeMailerAuthUser = "youdescribeadm@gmail.com";
   const nodeMailerAuthPass = "Youdescribe@123";
 
+  const nodeMailerTransporter = nodeMailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      type: "OAuth2",
+      user: nodeMailerAuthUser,
+      clientId:
+        "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com",
+      clientSecret: "emqt6gfCSMNlhHfpADZCEgqf",
+      refreshToken:
+        "1//04G0CRHoEeHbCCgYIARAAGAQSNwF-L9IrDLVaWgtTRx14lUgXKHIiiZLqTt_63ocFkF22VOCGXdkCrci56XYmPCmK19yo_Bhr64w",
+      accessToken:
+        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk"
+    }
+  });
+
   return {
     apiVersion,
     uploadsRootDirToServe,
@@ -76,6 +95,7 @@ module.exports = () => {
     googleCloudStorageKeyFilename,
     jsonWebTokenSecret,
     nodeMailerAuthUser,
-    nodeMailerAuthPass
+    nodeMailerAuthPass,
+    nodeMailerTransporter
   };
 };
