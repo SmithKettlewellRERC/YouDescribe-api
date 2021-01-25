@@ -1,6 +1,7 @@
 const nowUtc = require("../../shared/dateTime").nowUtc;
 const Video = require("../../models/video");
 const User = require("../../models/user");
+const Wishlist = require("../../models/wishList");
 const utcToLongInt = require("../../shared/helperFunctions").utcToLongInt;
 module.exports = {
   weeklyVideoCount: async () => {
