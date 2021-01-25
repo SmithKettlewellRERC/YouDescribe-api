@@ -31,7 +31,8 @@ module.exports = {
     const result = await videos.exec();
     let result2 = {
       count: result.length > 0 ? result[0].count : 0,
-      avgduration: result.length > 0 ? round(result[0].avgduration) / 60 : 0
+      avgduration:
+        result.length > 0 ? Math.round(result[0].avgduration) / 60 : 0
     };
     return result2;
   },
@@ -63,7 +64,8 @@ module.exports = {
     const result = await videos.exec();
     let result2 = {
       count: result.length > 0 ? result[0].count : 0,
-      avgduration: result.length > 0 ? round(result[0].avgduration) / 60 : 0
+      avgduration:
+        result.length > 0 ? Math.round(result[0].avgduration) / 60 : 0
     };
     return result2;
   },
