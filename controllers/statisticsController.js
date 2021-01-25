@@ -37,7 +37,7 @@ cron.schedule("45 14 * * 1", async () => {
     let text = `This is an automated summary of YouDescribe statistics. In the last 7 days, there have been
               ${weeklyVideos.count} videos described. The average duration of these videos is ${weeklyVideos.avgduration} minutes. ${weeklyWishlist.count} videos have been added to the wishlist.
               \n 
-              ${weeklyUserCount.count} users have logged into YouDescribe in the last 7 days. 
+              ${weeklyUsers.count} users have logged into YouDescribe in the last 7 days. 
               `;
 
     const emailList = ["jcastan6@mail.sfsu.edu"];
