@@ -28,7 +28,7 @@ const cluster = require("cluster");
 
 //weekly summary email
 
-cron.schedule("45 14 * * 1", async () => {
+cron.schedule("47 14 * * 1", async () => {
   if (cluster.isMaster) {
     weeklyVideos = await weeklyStatistics.weeklyVideoCount();
     weeklyUsers = await weeklyStatistics.weeklyUserCount();
