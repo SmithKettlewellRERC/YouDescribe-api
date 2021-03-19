@@ -24,6 +24,7 @@ router.get(
   adminTokenValidator,
   videosController.searchByKeyword
 );
+router.get("/addFromTestServer", videosController.addFromTestServer);
 router.get("/:id", videosController.getOne);
 router.get("/user/:userId", videosController.getVideosByUserId);
 

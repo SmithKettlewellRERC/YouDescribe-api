@@ -6,7 +6,7 @@ const conf = require("./shared/config")();
 const express = require("express");
 const http = require("http");
 const cluster = require("cluster");
-const numWorkers = require("os").cpus().length;
+const numWorkers = 1;
 const app = express();
 var moment = require("moment");
 

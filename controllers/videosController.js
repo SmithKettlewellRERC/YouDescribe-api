@@ -15,6 +15,7 @@ const request = require("request");
 const conf = require("../shared/config")();
 let cache = require("memory-cache");
 var moment = require("moment");
+const https = require("https");
 
 //updating videos at midnight
 var midnight = "00:00:00";
@@ -750,6 +751,34 @@ const videosController = {
         }
       );
     }
+  },
+  addFromTestServer: (req, res2) => {
+    const videoId = req.query.videoId;
+
+    const url2 = `dev.youdescribe.org`;
+    const url3 = `/getSentences?videoId=${videoId}&userId=f03cb948-474b-4084-9192-650ba62d396b`;
+
+    const options = {
+      host: url2,
+      path: url3,
+      method: "GET",
+      rejectUnauthorized: false,
+      requestCert: true
+    };
+    https.get(options, res => {
+      res.setEncoding("utf8");
+      let body = "";
+      res.on("data", data => {
+        body += data;
+      });
+      res.on("end", () => {
+        //do stuff here with JSON
+        body = JSON.parse(body);
+        console.log(body[0]);
+
+        res2.send(body);
+      });
+    });
   }
 };
 
