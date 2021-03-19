@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 
 const db = mongoose.connect(
-  `mongodb://localhost:27017/youdescribe`,
+  `mongodb://${config.username}:${config.password}@${config.hostname}/${config.database}`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
