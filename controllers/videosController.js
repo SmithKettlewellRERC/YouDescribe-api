@@ -774,8 +774,41 @@ const videosController = {
       res.on("end", () => {
         //do stuff here with JSON
         body = JSON.parse(body);
-        console.log(body[0]);
-
+        const vid = {};
+        vid["video_id"] = body[0]["video_id"];
+        const audio_description = {};
+        const audio_clips = [];
+        audio_description["status"] = "published";
+        audio_description["language"] = "en-US";
+        AudioDescription.insertMany(audio_description, function(err,result) {
+          if (err) {
+            // handle error
+            console.log("Error occured");
+          } else {
+            // handle success
+            console.log(result);
+            audio_description["_id"] = result["_id"]
+          }
+       });
+        vid["audio_descriptions"] = [{"_id" : audio_description["_id"]}]
+        for (let i = 0; i < body.length; i++) {
+          const clip = body[i];
+          clip["audio_description"] = audio_description["_id"];
+          clip["file_path"] = "/current/";
+          AudioClip.insertMany(clip, function(err, result){
+            if (err) {
+              //handle error
+              console.log("Error occured");
+              console.log(err);
+            } else {
+              // handle success
+              console.log("Success");
+              clip["_id"] = result["_id"];
+            }
+          });
+          audio_clips.push(clip);
+        }
+        audio_description["audio_clips"] = audio_clips;
         res2.send(body);
       });
     });
