@@ -778,38 +778,86 @@ const videosController = {
         vid["video_id"] = body[0]["video_id"];
         const audio_description = {};
         const audio_clips = [];
+
         audio_description["status"] = "published";
         audio_description["language"] = "en-US";
-        AudioDescription.insertMany(audio_description, function(err,result) {
+        audio_description["audio_clips"] = [];
+        audio_description["created_at"] = nowUtc();
+        audio_description["updated_at"] = nowUtc();
+        AudioDescription.insertMany(audio_description, function(err, result) {
+          //this process has to be laid out so that tasks are finished in a certain order, otherwise data is getting sent back before we modify it.
           if (err) {
             // handle error
             console.log("Error occured");
+            console.log(err);
           } else {
             // handle success
-            console.log(result);
-            audio_description["_id"] = result["_id"]
-          }
-       });
-        vid["audio_descriptions"] = [{"_id" : audio_description["_id"]}]
-        for (let i = 0; i < body.length; i++) {
-          const clip = body[i];
-          clip["audio_description"] = audio_description["_id"];
-          clip["file_path"] = "/current/";
-          AudioClip.insertMany(clip, function(err, result){
-            if (err) {
-              //handle error
-              console.log("Error occured");
-              console.log(err);
-            } else {
-              // handle success
-              console.log("Success");
-              clip["_id"] = result["_id"];
+            audio_description["_id"] = result[0]["_id"];
+            vid["audio_descriptions"] = [{ $oid: audio_description["_id"] }];
+            let clips = 0;
+            for (let i = 0; i < body.length; i++) {
+              const clip = body[i];
+              const newClip = {}; //old clip has values that we do not want in the db
+
+              newClip["audio_description"] = audio_description["_id"];
+              //old clip contains audio path, this has to be changed into file path and file name
+
+              newClip["file_name"] = clip["audio_path"].replace(
+                /^.*[\\\/]/,
+                ""
+              ); // this will give us file name
+
+              newClip["playback_type"] = clip["audio_type"];
+              newClip["start_time"] = clip["start_time"];
+              newClip["end_time"] = clip["end_time"];
+              newClip["duration"] = clip["audio_length"];
+              newClip["file_size_bytes"] = 0;
+              newClip["file_mime_type"] = "audio/mp3"; //all of the descrition files should be mp3, let's check on this later
+              newClip["file_path"] =
+                clip["audio_path"].substring(
+                  0,
+                  clip["audio_path"].lastIndexOf("/")
+                ) + "/"; //this will return the path without the file name
+
+              AudioClip.insertMany(newClip, function(err, result) {
+                if (err) {
+                  //handle error
+                  console.log(err);
+                  console.log("Error occured");
+                } else {
+                  // handle success
+                  console.log("Success");
+                  newClip["_id"] = result[0]["_id"];
+                  console.log(newClip);
+                  audio_clips.push(newClip);
+                  //for loops are odd in javascript, they wont always finish before we send back data, make sure that the loop finishes by keeping an extra counter
+                  clips += 1;
+                  if (clips === body.length) {
+                    clip_ids = []; //these will be added to the descriptions as an oid array
+                    audio_clips.forEach(clip => {
+                      clip_ids.push(ObjectId(clip["_id"]));
+                    });
+                    console.log(clip_ids);
+                    //we have all the audio clip ids and the video id, now we can add the clip ids to the description, as well as the video
+                    AudioDescription.findOne(function(err, doc) {
+                      if (err) {
+                        console.log(err);
+                      }
+                      clip_ids.forEach(id => {
+                        doc.audio_clips.push(id);
+                      });
+                      doc.save(function(err, doc) {
+                        if (err) return res.send(err);
+                        //continue to add audio desc id to video
+                        res2.send(doc);
+                      });
+                    });
+                  }
+                }
+              });
             }
-          });
-          audio_clips.push(clip);
-        }
-        audio_description["audio_clips"] = audio_clips;
-        res2.send(body);
+          }
+        });
       });
     });
   }
