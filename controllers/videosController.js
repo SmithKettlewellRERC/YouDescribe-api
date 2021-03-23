@@ -782,8 +782,7 @@ const videosController = {
         audio_description["status"] = "published";
         audio_description["language"] = "en-US";
         audio_description["audio_clips"] = [];
-        audio_description["created_at"] = nowUtc();
-        audio_description["updated_at"] = nowUtc();
+
         AudioDescription.insertMany(audio_description, function(err, result) {
           //this process has to be laid out so that tasks are finished in a certain order, otherwise data is getting sent back before we modify it.
           if (err) {
@@ -843,6 +842,7 @@ const videosController = {
                       if (err) {
                         console.log(err);
                       }
+                      //loop thrugh and add each id to the audio clips array. If you look at the models, audio description has an audio clips array. The id's are automatically converted into object ids for us.
                       clip_ids.forEach(id => {
                         doc.audio_clips.push(id);
                       });
