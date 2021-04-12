@@ -754,9 +754,10 @@ const videosController = {
   },
   addFromTestServer: (req, res2) => {
     const videoId = req.query.videoId;
-
+    //f03cb948-474b-4084-9192-650ba62d396b
+    const userId = req.query.userId;
     const url2 = `dev.youdescribe.org`;
-    const url3 = `/getSentences?videoId=${videoId}&userId=f03cb948-474b-4084-9192-650ba62d396b`;
+    const url3 = `/getSentences?videoId=${videoId}&userId=${userId}`;
 
     const options = {
       host: url2,
@@ -845,48 +846,76 @@ const videosController = {
                     });
                     console.log(clip_ids);
                     //we have all the audio clip ids and the video id, now we can add the clip ids to the description, as well as the video
-                    AudioDescription.findOne({ '_id': audio_description["_id"] }, function(err, doc) {
-                      if (err) {
-                        console.log(err);
-                      }
-                      //loop thrugh and add each id to the audio clips array. If you look at the models, audio description has an audio clips array. The id's are automatically converted into object ids for us.
-                      clip_ids.forEach(id => {
-                        doc.audio_clips.push(id);
-                      });
-                      doc.save(function(err, doc) {
-                        if (err) return res.send(err);
-                        //continue to add audio desc id to video
-                        Video.count({youtube_id: vid["youtube_id"]}, function (err, count){ 
-                          if(count>0){
-                              //get video by id
-                              Video.findOne({"youtube_id": vid["youtube_id"]}, function(err, doc){
-                                doc.audio_descriptions.push(audio_description["_id"]);
-                                doc.save(function(err, document){
-                                  console.log(document);
-                                  AudioDescription.findOneAndUpdate({_id: audio_description["_id"]},{video: document["_id"]});
-                                });
-                              });
-                          }
-                          else{
-                            console.log(err);
-                            Video.insertMany(vid, function(err, result){
-                              if (err) {
+                    AudioDescription.findOne(
+                      { _id: audio_description["_id"] },
+                      function(err, doc) {
+                        if (err) {
+                          console.log(err);
+                        }
+                        //loop thrugh and add each id to the audio clips array. If you look at the models, audio description has an audio clips array. The id's are automatically converted into object ids for us.
+                        clip_ids.forEach(id => {
+                          doc.audio_clips.push(id);
+                        });
+                        doc.save(function(err, doc) {
+                          if (err) return res.send(err);
+                          //continue to add audio desc id to video
+                          Video.count(
+                            { youtube_id: vid["youtube_id"] },
+                            function(err, count) {
+                              if (count > 0) {
+                                //get video by id
+                                Video.findOne(
+                                  { youtube_id: vid["youtube_id"] },
+                                  function(err, doc) {
+                                    doc.audio_descriptions.push(
+                                      audio_description["_id"]
+                                    );
+                                    doc.save(function(err, document) {
+                                      console.log(document);
+                                      AudioDescription.findOneAndUpdate(
+                                        { _id: audio_description["_id"] },
+                                        { video: doc["_id"] },
+                                        function(err, result) {
+                                          console.log(result);
+                                          res2.send(doc);
+                                        }
+                                      );
+                                    });
+                                  }
+                                );
+                              } else {
                                 console.log(err);
-                              }
-                              Video.findOne({"youtube_id": vid["youtube_id"]}, function(err, doc){
-                                doc.audio_descriptions.push(audio_description["_id"]);
-                                doc.save(function(err, document){
-                                  console.log(document);
-                                  AudioDescription.findOneAndUpdate({_id: audio_description["_id"]},{video: document["_id"]});
+                                Video.insertMany(vid, function(err, result) {
+                                  if (err) {
+                                    console.log(err);
+                                  }
+                                  Video.findOne(
+                                    { youtube_id: vid["youtube_id"] },
+                                    function(err, doc) {
+                                      doc.audio_descriptions.push(
+                                        audio_description["_id"]
+                                      );
+                                      doc.save(function(err, document) {
+                                        console.log(doc);
+
+                                        AudioDescription.findOneAndUpdate(
+                                          { _id: audio_description["_id"] },
+                                          { video: doc["_id"] },
+                                          function(err, result) {
+                                            console.log(result);
+                                            res2.send(doc);
+                                          }
+                                        );
+                                      });
+                                    }
+                                  );
                                 });
-                                
-                              });
-                            });
-                          }
-                      });
-                        res2.send(doc);
-                      });
-                    });
+                              }
+                            }
+                          );
+                        });
+                      }
+                    );
                   }
                 }
               });
