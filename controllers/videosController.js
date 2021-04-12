@@ -778,6 +778,14 @@ const videosController = {
         vid["youtube_id"] = body[0]["video_id"];
         const audio_description = {};
         const audio_clips = [];
+        //Finds the manually created user in the local database to add to the audio description.
+        User.findOne({"_id": ObjectId("604ac76c9e6b943ca83528d4")}, function(err, doc){
+          if (err) {
+            console.log("Error finding user")
+          }
+          else {
+            console.log(doc["_id"])
+            audio_description["user"] = doc["_id"]
 
         audio_description["status"] = "published";
         audio_description["language"] = "en-US";
@@ -883,6 +891,8 @@ const videosController = {
                 }
               });
             }
+          }
+        });
           }
         });
       });
