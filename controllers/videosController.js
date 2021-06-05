@@ -777,6 +777,7 @@ const videosController = {
         body = JSON.parse(body);
         const vid = {};
         vid["youtube_id"] = body[0]["video_id"];
+        vid["title"] = body[0]["title"]
         const audio_description = {};
         const audio_clips = [];
         //Finds the manually created user in the local database to add to the audio description.
