@@ -818,22 +818,24 @@ const videosController = {
                       newClip["audio_description"] = audio_description["_id"];
                       //old clip contains audio path, this has to be changed into file path and file name
 
-                      newClip["file_name"] = clip["audio_path"].replace(
-                        /^.*[\\\/]/,
-                        ""
-                      ); // this will give us file name
+              var filename = clip["audio_path"].replace(
+                /^.*[\\\/]/,
+                ""
+              );// this will give us file name
+              newClip["file_name"] = clip["sentence_id"]; //this is to give unique name to all audioclips
 
-                      newClip["playback_type"] = clip["audio_type"];
-                      newClip["start_time"] = clip["start_time"];
-                      newClip["end_time"] = clip["end_time"];
-                      newClip["duration"] = clip["audio_length"];
-                      newClip["file_size_bytes"] = 0;
-                      newClip["file_mime_type"] = "audio/mp3"; //all of the descrition files should be mp3, let's check on this later
-                      newClip["file_path"] =
-                        clip["audio_path"].substring(
-                          0,
-                          clip["audio_path"].lastIndexOf("/")
-                        ) + "/"; //this will return the path without the file name
+              newClip["playback_type"] = clip["audio_type"];
+              newClip["start_time"] = clip["start_time"];
+              newClip["end_time"] = clip["end_time"];
+              newClip["duration"] = clip["audio_length"];
+              newClip["file_size_bytes"] = 0;
+              newClip["file_mime_type"] = "audio/mp3"; //all of the descrition files should be mp3, let's check on this later
+              newClip["file_path"] =
+                clip["audio_path"].substring(
+                  8,
+                  clip["audio_path"].lastIndexOf("/")
+                ) + "/"; //this will return the path without the file name
+              console.log("clipnames",newClip["file_name"]);
 
                       AudioClip.insertMany(newClip, function (err, result) {
                         if (err) {
