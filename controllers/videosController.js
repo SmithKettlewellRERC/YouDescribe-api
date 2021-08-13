@@ -763,8 +763,8 @@ const videosController = {
     const url2 = `dev.youdescribe.org`;
     const url3 = `/getSentences?videoId=${videoId}&userId=${userId}`;
     //uncomment this after creating the user for baseline AI and assigning the id here
-    //const userMap = {"f03cb948-474b-4084-9192-650ba62d396b":"604ac76c9e6b943ca83528d4",
-    //                 "c833874d-e2f1-45b3-afd1-16ac6d7fa0b4":"6115a6587443a03b2238e0b1"};
+    const userMap = {"f03cb948-474b-4084-9192-650ba62d396b":"604ac76c9e6b943ca83528d4",
+                     "c833874d-e2f1-45b3-afd1-16ac6d7fa0b4":"6115c5a87443a03b2238e0c0"};
 
     const options = {
       host: url2,
@@ -789,7 +789,7 @@ const videosController = {
         const audio_clips = [];
         //Finds the manually created user in the local database to add to the audio description.
         User.findOne(
-          { _id: ObjectId("604ac76c9e6b943ca83528d4")},
+          { _id: ObjectId(userMap[userId])},
           function (err, doc) {
             if (err) {
               console.log("Error finding user");
@@ -1035,7 +1035,7 @@ const videosController = {
                   clip["audiopath"].lastIndexOf("/")
                 ) + "/" + filename; //this will return the path without the file name
               console.log("clipnames",newClip["file_name"]);
-              console.log("clip paths are: ", newClip["audiopath"]);
+              console.log("clip paths are: ", newClip["file_path"]);
 
                       AudioClip.insertMany(newClip, function (err, result) {
                         if (err) {
