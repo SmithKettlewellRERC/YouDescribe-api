@@ -762,6 +762,9 @@ const videosController = {
     const userId = req.query.userId;
     const url2 = `dev.youdescribe.org`;
     const url3 = `/getSentences?videoId=${videoId}&userId=${userId}`;
+    //uncomment this after creating the user for baseline AI and assigning the id here
+    //const userMap = {"f03cb948-474b-4084-9192-650ba62d396b":"604ac76c9e6b943ca83528d4",
+    //                 "c833874d-e2f1-45b3-afd1-16ac6d7fa0b4":"6115a6587443a03b2238e0b1"};
 
     const options = {
       host: url2,
@@ -787,7 +790,7 @@ const videosController = {
         const audio_clips = [];
         //Finds the manually created user in the local database to add to the audio description.
         User.findOne(
-          { _id: ObjectId("604ac76c9e6b943ca83528d4") },
+          { _id: ObjectId("604ac76c9e6b943ca83528d4")},
           function (err, doc) {
             if (err) {
               console.log("Error finding user");
@@ -953,6 +956,202 @@ const videosController = {
       });
     });
   },
-};
+  addFromPipeLine: (req, res2) => {
+    const videoId = req.query.videoId;
+    //f03cb948-474b-4084-9192-650ba62d396b
+    const userId = req.query.userId;
+    const url2 = `dev.youdescribe.org`;
+    const url3 = `/getSentencesFromDescriptionSentences?videoId=${videoId}&userId=${userId}`;
 
-module.exports = videosController;
+    const options = {
+      host: url2,
+      path: url3,
+      method: "GET",
+      rejectUnauthorized: false,
+      requestCert: true,
+    };
+    https.get(options, (res) => {
+      res.setEncoding("utf8");
+      let body = "";
+      res.on("data", (data) => {
+        body += data;
+      });
+      res.on("end", () => {
+        //do stuff here with JSON
+        body = JSON.parse(body);
+        const vid = {};
+        vid["youtube_id"] = body[0]["video_id"];
+        vid["title"] = body[0]["title"];
+        console.log(vid);
+        const audio_description = {};
+        const audio_clips = [];
+        //Finds the manually created user in the local database to add to the audio description.
+        User.findOne(
+          { _id: ObjectId("604ac76c9e6b943ca83528d4") },
+          function (err, doc) {
+            if (err) {
+              console.log("Error finding user");
+            } else {
+              console.log(doc["_id"]);
+              audio_description["user"] = doc["_id"];
+
+              audio_description["status"] = "published";
+              audio_description["language"] = "en-US";
+              audio_description["audio_clips"] = [];
+
+              AudioDescription.insertMany(
+                audio_description,
+                function (err, result) {
+                  //this process has to be laid out so that tasks are finished in a certain order, otherwise data is getting sent back before we modify it.
+                  if (err) {
+                    // handle error
+                    console.log("Error occured");
+                    console.log(err);
+                  } else {
+                    // handle success
+                    audio_description["_id"] = result[0]["_id"];
+                    let clips = 0;
+                    for (let i = 0; i < body.length; i++) {
+                      const clip = body[i];
+                      const newClip = {}; //old clip has values that we do not want in the db
+
+                      newClip["audio_description"] = audio_description["_id"];
+                      //old clip contains audio path, this has to be changed into file path and file name
+
+              var filename = clip["audiopath"].replace(
+                /^.*[\\\/]/,
+                ""
+              );// this will give us file name
+              newClip["file_name"] = clip["sentence_id"] + ".mp3"; //this is to give unique name to all audioclips
+
+              newClip["playback_type"] = clip["audio_type"];
+              newClip["start_time"] = clip["audio_start_time"];
+              newClip["end_time"] = clip["end_time"];
+              newClip["duration"] = clip["audio_length"];
+              newClip["file_size_bytes"] = 0;
+              newClip["file_mime_type"] = "audio/mp3"; //all of the descrition files should be mp3, let's check on this later
+              newClip["file_path"] =
+                clip["audiopath"].substring(
+                  8,
+                  clip["audiopath"].lastIndexOf("/")
+                ) + "/" + filename; //this will return the path without the file name
+              console.log("clipnames",newClip["file_name"]);
+              console.log("clip paths are: ", newClip["audiopath"]);
+
+                      AudioClip.insertMany(newClip, function (err, result) {
+                        if (err) {
+                          //handle error
+                          console.log(err);
+                          console.log("Error occured");
+                        } else {
+                          // handle success
+                          console.log("Success");
+                          newClip["_id"] = result[0]["_id"];
+                          console.log(newClip);
+                          audio_clips.push(newClip);
+                          //for loops are odd in javascript, they wont always finish before we send back data, make sure that the loop finishes by keeping an extra counter
+                          clips += 1;
+                          if (clips === body.length) {
+                            clip_ids = []; //these will be added to the descriptions as an oid array
+                            audio_clips.forEach((clip) => {
+                              clip_ids.push(ObjectId(clip["_id"]));
+                            });
+                            console.log(clip_ids);
+                            //we have all the audio clip ids and the video id, now we can add the clip ids to the description, as well as the video
+                            AudioDescription.findOne(
+                              { _id: audio_description["_id"] },
+                              function (err, doc) {
+                                if (err) {
+                                  console.log(err);
+                                }
+                                //loop thrugh and add each id to the audio clips array. If you look at the models, audio description has an audio clips array. The id's are automatically converted into object ids for us.
+                                clip_ids.forEach((id) => {
+                                  doc.audio_clips.push(id);
+                                });
+                                doc.save(function (err, doc) {
+                                  if (err) return res.send(err);
+                                  //continue to add audio desc id to video
+                                  Video.count(
+                                    { youtube_id: vid["youtube_id"] },
+                                    function (err, count) {
+                                      if (count > 0) {
+                                        //get video by id
+                                        Video.findOne(
+                                          { youtube_id: vid["youtube_id"] },
+                                          function (err, doc) {
+                                            doc.audio_descriptions.push(
+                                              audio_description["_id"]
+                                            );
+                                            doc.save(function (err, document) {
+                                              console.log(document);
+                                              AudioDescription.findOneAndUpdate(
+                                                {
+                                                  _id: audio_description["_id"],
+                                                },
+                                                { video: doc["_id"] },
+                                                function (err, result) {
+                                                  console.log(result);
+                                                  res2.send(doc);
+                                                }
+                                              );
+                                            });
+                                          }
+                                        );
+                                      } else {
+                                        console.log(err);
+                                        Video.insertMany(
+                                          vid,
+                                          function (err, result) {
+                                            if (err) {
+                                              console.log(err);
+                                            }
+                                            Video.findOne(
+                                              { youtube_id: vid["youtube_id"] },
+                                              function (err, doc) {
+                                                doc.audio_descriptions.push(
+                                                  audio_description["_id"]
+                                                );
+                                                doc.save(function (
+                                                  err,
+                                                  document
+                                                ) {
+                                                  console.log(doc);
+
+                                                  AudioDescription.findOneAndUpdate(
+                                                    {
+                                                      _id: audio_description[
+                                                        "_id"
+                                                      ],
+                                                    },
+                                                    { video: doc["_id"] },
+                                                    function (err, result) {
+                                                      console.log(result);
+                                                      res2.send(doc);
+                                                    }
+                                                  );
+                                                });
+                                              }
+                                            );
+                                          }
+                                        );
+                                      }
+                                    }
+                                  );
+                                });
+                              }
+                            );
+                          }
+                        }
+                      });
+                    }
+                  }
+                }
+              );
+            }
+          }
+        );
+      });
+    });
+  },
+}
+  module.exports = videosController;
