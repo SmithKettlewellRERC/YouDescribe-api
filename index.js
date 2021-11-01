@@ -7,22 +7,23 @@ const express = require("express");
 const http = require("http");
 const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
+const cors = require("cors");
+
 const app = express();
+
 var moment = require("moment");
 
 // global number of videos fetched from youtube api service
 numOfVideosFromYoutube = 0;
 var midnight = "12:00:00";
 var now = null;
-setInterval(function() {
+setInterval(function () {
   now = moment().format("H:mm:ss");
-  console.log(
-    "number of videos fetched from youtube api service" + numOfVideosFromYoutube
-  );
+  console.log("number of videos fetched from youtube api service" + numOfVideosFromYoutube);
 }, 60 * 15 * 1000);
 
 //reset videos at midnight
-setInterval(function() {
+setInterval(function () {
   now = moment().format("H:mm:ss");
   if (now === midnight) {
     numOfVideosFromYoutube = 0;
@@ -30,40 +31,47 @@ setInterval(function() {
 }, 1000);
 
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(bodyParser.json());
 
-// Database.
+const allowedDomains = ["http://localhost:3000"];
+
+app.use(cors({ origin: allowedDomains }));
+
+// Database
 const db = require("./db/connection");
 
-// Compression.
+// Compression
 const compression = require("compression");
 app.use(compression());
 
-// Logs library.
+// Logs library
 const morgan = require("morgan");
 app.use(morgan("combined"));
 
-// Server HTTP port setup.
+// Server HTTP port setup
 const port = 8080;
 
-// CORS.
+// CORS
 // if (NODE_ENV === "dev") {
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,PUT,POST,DELETE,PATCH,OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
-  );
-  if (req.method === "OPTIONS") {
-    return next();
-  } else {
-    return next();
-  }
-});
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+
+//   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
+
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
+//   );
+
+//   if (req.method === "OPTIONS") {
+//     return next();
+//   }
+//   //
+//   else {
+//     return next();
+//   }
+// });
 // }
 
 // Our server routes.
@@ -84,6 +92,7 @@ app.use(`/${conf.apiVersion}/wishlist`, wishList);
 app.use(`/${conf.apiVersion}/videos`, videos);
 app.use(`/${conf.apiVersion}/audioclips`, audioClips);
 app.use(`/${conf.apiVersion}/users`, users);
+
 app.use(`/${conf.apiVersion}/audiodescriptions`, audioDescriptions);
 app.use(`/${conf.apiVersion}/audiodescriptionsrating`, audioDescriptionsRating);
 app.use(`/${conf.apiVersion}/languages`, languages);
@@ -92,10 +101,8 @@ app.use(`/${conf.apiVersion}/statistics`, statistics);
 
 // Static route for wav files.
 console.log("File path for wav files", conf.uploadsRootDirToServe);
-app.use(
-  "/audio-descriptions-files",
-  express.static(conf.uploadsRootDirToServe)
-);
+
+app.use("/audio-descriptions-files", express.static(conf.uploadsRootDirToServe));
 
 // The Restful API drain.
 app.get("*", (req, res) => {
@@ -129,7 +136,7 @@ if (cluster.isMaster) {
     cluster.fork();
   }
 
-  cluster.on("online", worker => {
+  cluster.on("online", (worker) => {
     console.log(`Worker (child process) ${worker.process.pid} is running.`);
   });
 
@@ -137,9 +144,7 @@ if (cluster.isMaster) {
    * To make sure we do not loose any workers.
    */
   cluster.on("exit", (worker, code, signal) => {
-    console.log(
-      `Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}.`
-    );
+    console.log(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}.`);
     console.log("Starting a new worker.");
     cluster.fork();
   });
@@ -160,7 +165,7 @@ if (cluster.isMaster) {
   httpServer.on("error", onError);
 }
 
-process.on("uncaughtException", function(err) {
+process.on("uncaughtException", function (err) {
   console.log(err);
   console.log(err.stack);
 });

@@ -5,25 +5,29 @@ const userTokenValidator = require("./../middlewares/userTokenValidator");
 const adminTokenValidator = require("./../middlewares/adminTokenValidator");
 const webVisitCounter = require("./../middlewares/webVisitCounter");
 const videoVisitCounter = require("./../middlewares/videoVisitCounter");
+const videosCache = require("./../middlewares/cache/videos");
 
-router.get("/", videoVisitCounter, videosController.getAll);
-router.get(
-  "/getyoutubedatafromcache",
-  videosController.getYoutubeDataFromCache
-);
+router.get("/", videoVisitCounter, videosCache.allVideos, videosController.getAll);
+
+router.get("/getyoutubedatafromcache", videosController.getYoutubeDataFromCache);
+
 router.get("/getallbypage", adminTokenValidator, videosController.getAllByPage);
+
 router.get("/getbyid", adminTokenValidator, videosController.getById);
+
 router.get("/getnext", adminTokenValidator, videosController.getNext);
+
 router.get("/getyoutubetags", videosController.getYoutubeTags);
+
 router.get("/updateyoutubeinfocards", videosController.updateYoutubeInfoCards);
+
 router.post("/updatecustomtags", videosController.updateCustomTags);
+
 router.post("/updateyoutubeid", videosController.updateYoutubeId);
+
 router.get("/search", videosController.search);
-router.get(
-  "/searchbykeyword",
-  adminTokenValidator,
-  videosController.searchByKeyword
-);
+
+router.get("/searchbykeyword", adminTokenValidator, videosController.searchByKeyword);
 router.get("/:id", videosController.getOne);
 router.get("/user/:userId", videosController.getVideosByUserId);
 

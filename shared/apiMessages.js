@@ -9,241 +9,284 @@
 module.exports = {
   RESPONSE_CODES_MESSAGES: {
     1: {
-      message: 'Internal server error',
+      message: "Internal server error",
       status: 500,
-      type: 'system_error',
+      type: "system_error",
     },
     2: {
-      message: 'Unauthorized',
+      message: "Unauthorized",
       status: 401,
-      type: 'system_error',
+      type: "system_error",
     },
     3: {
-      message: 'Forbidden',
+      message: "Forbidden",
       status: 403,
-      type: 'system_error',
+      type: "system_error",
     },
     4: {
-      message: 'Not found',
+      message: "Not found",
       status: 404,
-      type: 'system_error',
+      type: "system_error",
     },
-    50: { // wishListController
-      message: 'The requested video already has audio description',
+    50: {
+      // wishListController
+      message: "The requested video already has audio description",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    52: { // wishListController
-      message: 'The requested wish list item does not exist',
+    52: {
+      // wishListController
+      message: "The requested wish list item does not exist",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    53: { // audioClipController
-      message: 'You are trying to add an audio clip to an existent video',
+    53: {
+      // audioClipController
+      message: "You are trying to add an audio clip to an existent video",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    54: { // wishListController
-      message: 'Error saving data',
+    54: {
+      // wishListController
+      message: "Error saving data",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    55: { // videoController
-      message: 'The requested video was not found',
+    55: {
+      // videoController
+      message: "The requested video was not found",
       status: 200, // ???????
-      type: 'error',
+      type: "error",
     },
-    56: { // videoController
-      message: 'The video you are trying to create already exists',
+    56: {
+      // videoController
+      message: "The video you are trying to create already exists",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    57: { // videoController
-      message: 'You are trying to update a video that does not exist',
+    57: {
+      // videoController
+      message: "You are trying to update a video that does not exist",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    58: {
-    },
-    59: { // videoController
-      message: 'No videos to delivery at this time',
+    58: {},
+    59: {
+      // videoController
+      message: "No videos to delivery at this time",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    60: { // audioClipsController
-      message: 'The audioclip just accepts requests with a file attached',
+    60: {
+      // audioClipsController
+      message: "The audioclip just accepts requests with a file attached",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    61: { // wishListController
-      message: 'No wish list items to delivery at this time',
+    61: {
+      // wishListController
+      message: "No wish list items to delivery at this time",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    62: { // wishListController
-      message: 'The wish list item you are trying to update does not exist',
+    62: {
+      // wishListController
+      message: "The wish list item you are trying to update does not exist",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    63: { // ALL
-      message: 'The token is invalid',
+    63: {
+      // ALL
+      message: "The token is invalid",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    64: { // audioClipsController
-      message: 'We have just removed the video as it does not have any more audio descriptions',
+    64: {
+      // audioClipsController
+      message:
+        "We have just removed the video as it does not have any more audio descriptions",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    65: { // userController
-      message: 'The user you requested does not exist',
+    65: {
+      // userController
+      message: "The user you requested does not exist",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    66: { // languagesController
-      message: 'There was a problem to retrieve the languages list',
+    66: {
+      // languagesController
+      message: "There was a problem to retrieve the languages list",
       status: 400,
-      type: 'error',
+      type: "error",
     },
-    67: { // wishListController
-      message: 'Just one vote per user',
+    67: {
+      // wishListController
+      message: "Just one vote per user",
       status: 403,
-      type: 'error',
+      type: "error",
     },
-    1000: { // videoController
-      message: 'Video metadata successfully retrieved',
+    1000: {
+      // videoController
+      message: "Video metadata successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1001: { // wishListController
-      message: 'Wish list item was saved successfully',
+    1001: {
+      // wishListController
+      message: "Wish list item was saved successfully",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1002: { // wishListController
-      message: 'Wish list item successfully retrieved',
+    1002: {
+      // wishListController
+      message: "Wish list item successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1003: { // videoController
-      message: 'Video metadata was successfully saved',
+    1003: {
+      // videoController
+      message: "Video metadata was successfully saved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1004: { // videoController
-      message: 'Video metadata was successfully updated',
+    1004: {
+      // videoController
+      message: "Video metadata was successfully updated",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1005: { // audioClipsController
-      message: 'Audio clip was successfully saved',
+    1005: {
+      // audioClipsController
+      message: "Audio clip was successfully saved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1006: { // videoController
-      message: 'Videos metadata successfully retrieved',
+    1006: {
+      // videoController
+      message: "Videos metadata successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1007: { // videoController
-      message: 'Videos metadata matching you query successfully retrieved',
+    1007: {
+      // videoController
+      message: "Videos metadata matching you query successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1008: { // wishListController
-      message: 'Wish list successfully retrieved',
+    1008: {
+      // wishListController
+      message: "Wish list successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1009: { // wishListController
-      message: 'The requested video is already in the wish list',
+    1009: {
+      // wishListController
+      message: "The requested video is already in the wish list",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1010: { // wishListController
-      message: 'The whis list status was updated successfully',
+    1010: {
+      // wishListController
+      message: "The whis list status was updated successfully",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1011: { // authController
-      message: 'The user was successfully created',
+    1011: {
+      // authController
+      message: "The user was successfully created",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1012: { // authController
-      message: 'The user was successfully updated',
+    1012: {
+      // authController
+      message: "The user was successfully updated",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1013: { // videoController
-      message: 'The videos for the selected user were successfully retrieved',
+    1013: {
+      // videoController
+      message: "The videos for the selected user were successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1014: { // userController
-      message: 'The user you requested was successfully retrieved',
+    1014: {
+      // userController
+      message: "The user you requested was successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1015: { // audioDescriptionsController
-      message: 'The audio descriptions was successfully updated',
+    1015: {
+      // audioDescriptionsController
+      message: "The audio descriptions was successfully updated",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1016: { // audioClipsController
-      message: 'Audio clip was successfully removed',
+    1016: {
+      // audioClipsController
+      message: "Audio clip was successfully removed",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1017: { // overallRatingController
-      message: 'Rating was successfully saved',
+    1017: {
+      // overallRatingController
+      message: "Rating was successfully saved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1018: { // audioDescriptionsController
-      message: 'The audio descriptions was successfully created',
+    1018: {
+      // audioDescriptionsController
+      message: "The audio descriptions was successfully created",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1019: { // audioClipsController
-      message: 'Audio clip was successfully update',
+    1019: {
+      // audioClipsController
+      message: "Audio clip was successfully update",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1020: { // audioDescriptionsController
-      message: 'The audio descriptions was successfully removed',
+    1020: {
+      // audioDescriptionsController
+      message: "The audio descriptions was successfully removed",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1021: { // languagesController
-      message: 'Languages successfully retrieved',
+    1021: {
+      // languagesController
+      message: "Languages successfully retrieved",
       status: 200,
-      type: 'success',
+      type: "success",
     },
-    1022: { // adminController
+    1022: {
+      // adminController
       message: "Admin login succeeded",
       status: 200,
       type: "success",
     },
-    1023: { // adminController
+    1023: {
+      // adminController
       message: "Admin login required",
       status: 200,
       type: "error",
     },
   },
 
-  getResponseByCode: function(code) {
+  getResponseByCode: function (code) {
     const content = this.RESPONSE_CODES_MESSAGES[code];
     const type = content.type;
+
     const ret = {
       type,
       code,
       status: this.RESPONSE_CODES_MESSAGES[code].status,
       message: this.RESPONSE_CODES_MESSAGES[code].message,
     };
-    if (type === 'success') {
+
+    if (type === "success") {
       ret.result = null;
     }
+
     return ret;
   },
 };
