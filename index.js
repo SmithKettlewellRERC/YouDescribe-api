@@ -9,6 +9,8 @@ const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
 const cors = require("cors");
 
+const db = require("./db/connection");
+
 const app = express();
 
 var moment = require("moment");
@@ -17,6 +19,7 @@ var moment = require("moment");
 numOfVideosFromYoutube = 0;
 var midnight = "12:00:00";
 var now = null;
+
 setInterval(function () {
   now = moment().format("H:mm:ss");
   console.log("number of videos fetched from youtube api service" + numOfVideosFromYoutube);
@@ -30,16 +33,12 @@ setInterval(function () {
   }
 }, 1000);
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const allowedDomains = ["http://localhost:3000"];
 
 app.use(cors({ origin: allowedDomains }));
-
-// Database
-const db = require("./db/connection");
 
 // Compression
 const compression = require("compression");

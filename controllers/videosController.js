@@ -259,15 +259,6 @@ const videosController = {
   getAll: (req, res) => {
     console.log("here");
     console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
-    console.log("here");
     let pgNumber = Number(req.query.page);
     let searchPage = pgNumber === NaN || pgNumber === 0 ? 50 : pgNumber * 50;
     /* start of old method */
@@ -306,6 +297,7 @@ const videosController = {
         const ret = apiMessages.getResponseByCode(1006);
         ret.result = videosFiltered;
         await CacheSystem.set("allVideos", JSON.stringify(videosFiltered), 3600);
+        console.log("------------------------------");
         res.status(ret.status).json(ret);
       });
     /* end of old method */
@@ -731,27 +723,35 @@ const videosController = {
       });
   },
 
-  getYoutubeDataFromCache: (req, res, next) => {
+  getYoutubeDataFromCache: async (req, res, next) => {
     cache.clear();
     const youtubeIds = req.query.youtubeids;
+    console.log("youtube ids", youtubeIds);
     const key = req.query.key;
+    console.log("key", key);
+
     const youtubeIdsCacheKey = key + "YoutubeIds";
     const youtubeDataCacheKey = key + "YoutubeData";
-    if (youtubeIds == cache.get(youtubeIdsCacheKey)) {
-      console.log(`loading ${key} from cache`);
+    const reply = await CacheSystem.get(key + youtubeIds);
+    if (reply) {
+      console.log("LOADING FROM CACHE");
+      console.log("LOADING FROM CACHE");
+      console.log(JSON.parse(reply));
+      console.log("LOADING FROM CACHE");
       const ret = { status: 200 };
-      ret.result = cache.get(youtubeDataCacheKey);
+      ret.result = JSON.parse(reply);
       res.status(ret.status).json(ret);
     } else {
       cache.put(youtubeIdsCacheKey, youtubeIds);
       request.get(
         `${conf.youTubeApiUrl}/videos?id=${youtubeIds}&part=contentDetails,snippet,statistics&key=${conf.youTubeApiKey}`,
-        function optionalCallback(err, response, body) {
+        async function optionalCallback(err, response, body) {
           console.log(`loading ${key} from youtube`);
           numOfVideosFromYoutube += youtubeIds.split(",").length;
           cache.put(youtubeDataCacheKey, body);
           const ret = { status: 200 };
           ret.result = body;
+          await CacheSystem.set(key + youtubeIds, JSON.stringify(body), 3600);
           res.status(ret.status).json(ret);
         }
       );

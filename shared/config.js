@@ -8,28 +8,10 @@ require("https").globalAgent.options.ca = require("ssl-root-cas").create();
 
 module.exports = () => {
   const apiVersion = "v1";
-  let uploadsRootDirToServe = path.join(
-    __dirname,
-    "..",
-    "/audio-descriptions-files"
-  );
-  let uploadsRootDirToSave = path.join(
-    __dirname,
-    "..",
-    "audio-descriptions-files",
-    "current"
-  );
-  let uploadsRootDirToSaveAI = path.join(
-    __dirname,
-    "..",
-    "audio-descriptions-files",
-    "ai"
-  );
-  let uploadsRootDirToDelete = path.join(
-    __dirname,
-    "..",
-    "audio-descriptions-files"
-  );
+  let uploadsRootDirToServe = path.join(__dirname, "..", "/audio-descriptions-files");
+  let uploadsRootDirToSave = path.join(__dirname, "..", "audio-descriptions-files", "current");
+  let uploadsRootDirToSaveAI = path.join(__dirname, "..", "audio-descriptions-files", "ai");
+  let uploadsRootDirToDelete = path.join(__dirname, "..", "audio-descriptions-files");
   if (NODE_ENV === "prd") {
     uploadsRootDirToServe = "/mnt/ebs/audio-descriptions-files";
     uploadsRootDirToSave = "/mnt/ebs/audio-descriptions-files/current";
@@ -48,12 +30,12 @@ module.exports = () => {
   const listenByCodeAppKey = "yAOzHAy9LQBJQGtshcIGJX368IbC4Enx";
   const youTubeApiUrl = "https://www.googleapis.com/youtube/v3";
   // const youTubeApiKey = "AIzaSyCEMAn_7h1wgIgZ4xhLbQUDuLKlkmvgLHs";     // !!! occupied by ios app !!! (google cloud project: youdescribesfsu@gmail.com -> youdescribe)
-  const youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE"; // !!! occupied by https://youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0126)
+  ////////////Original const youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE"; // !!! occupied by https://youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0126)
+  const youTubeApiKey = "AIzaSyAF622L8puUPISYEaksr1OBOnIHR8jG6P8"; // !!! occupied by https://youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0126)
   // const youTubeApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U";     // !!! occupied by https://dev.youdescribe.org !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0127)
   //const youTubeApiKey = "AIzaSyBWQ2o3N0MVc8oP96JvWVVwqjxpEOgkhQU";     // !!! occupied by http://18.221.192.73:3001 !!! (google cloud project: youdescribeadm@gmail.com -> youdescribe-0612)
   //const youTubeApiKey = "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q";     // free to use (google cloud project: youdescribeadm@gmail.com -> youdescribe-0613)
-  const googleCloudStorageKeyFilename =
-    "shared/youdescribe-stats-846041efde0c.json";
+  const googleCloudStorageKeyFilename = "shared/youdescribe-stats-846041efde0c.json";
   const googleCloudStorageProjectId = "youdescribe-stat-1569864136126";
 
   const jsonWebTokenSecret = "youdescribe";
@@ -67,14 +49,13 @@ module.exports = () => {
     auth: {
       type: "OAuth2",
       user: nodeMailerAuthUser,
-      clientId:
-        "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com",
+      clientId: "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com",
       clientSecret: "emqt6gfCSMNlhHfpADZCEgqf",
       refreshToken:
         "1//04G0CRHoEeHbCCgYIARAAGAQSNwF-L9IrDLVaWgtTRx14lUgXKHIiiZLqTt_63ocFkF22VOCGXdkCrci56XYmPCmK19yo_Bhr64w",
       accessToken:
-        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk"
-    }
+        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk",
+    },
   });
 
   return {
@@ -96,6 +77,6 @@ module.exports = () => {
     jsonWebTokenSecret,
     nodeMailerAuthUser,
     nodeMailerAuthPass,
-    nodeMailerTransporter
+    nodeMailerTransporter,
   };
 };
