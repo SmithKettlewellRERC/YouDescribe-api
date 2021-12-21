@@ -37,9 +37,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // const allowedDomains = ["http://localhost:3000"];
-const allowedDomains = ["*"];
+// const allowedDomains = ["*"];
 
-app.use(cors({ origin: allowedDomains }));
+app.use(cors({ origin: "*" }));
 
 // Compression
 const compression = require("compression");
@@ -54,24 +54,24 @@ const port = 8080;
 
 // CORS
 // if (NODE_ENV === "dev") {
-// app.use(function (req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
 
-//   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
 
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
-//   );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
+  );
 
-//   if (req.method === "OPTIONS") {
-//     return next();
-//   }
-//   //
-//   else {
-//     return next();
-//   }
-// });
+  if (req.method === "OPTIONS") {
+    return next();
+  }
+  //
+  else {
+    return next();
+  }
+});
 // }
 
 // Our server routes.
