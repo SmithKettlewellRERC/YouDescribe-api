@@ -36,7 +36,8 @@ setInterval(function () {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const allowedDomains = ["http://localhost:3000"];
+// const allowedDomains = ["http://localhost:3000"];
+const allowedDomains = ["*"];
 
 app.use(cors({ origin: allowedDomains }));
 
