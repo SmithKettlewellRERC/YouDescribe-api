@@ -6,13 +6,13 @@ const config = require("./config");
 //local
 //mongodb://localhost:27017/youdescribe
 const db = mongoose.connect(
-  `mongodb://localhost:27017/youdescribe`,
+  `mongodb://youdescribe:E2E32fgklsdfiefwefmm6gyT@localhost:27020/youdescribe`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    useFindAndModify: false
+    useFindAndModify: false,
   },
-  err => {
+  (err) => {
     if (err) return console.error(err);
     console.log("connected to mongoDB");
   }

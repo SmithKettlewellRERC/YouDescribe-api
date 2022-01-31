@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/YouDescribe/api",
   "dependencies": {
+    "@google-cloud/speech": "^4.10.0",
     "@google-cloud/storage": "^4.1.0",
     "body-parser": "^1.17.1",
     "compression": "^1.6.2",
