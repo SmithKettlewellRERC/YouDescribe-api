@@ -37,7 +37,7 @@ module.exports = () => {
     uploadsRootDirToDelete = "/mnt/ebs/audio-descriptions-files";
   }
   const googleClientId =
-    "1056671841574-e1r4soednlur8hl2sl0ooumpvftt1s2k.apps.googleusercontent.com";
+    "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com";
 
   const googleiOSClientId =
     "1056671841574-5qo81vnn336mlds8mjk33cpkron1pv80.apps.googleusercontent.com";
@@ -73,8 +73,8 @@ module.exports = () => {
       refreshToken:
         "1//04G0CRHoEeHbCCgYIARAAGAQSNwF-L9IrDLVaWgtTRx14lUgXKHIiiZLqTt_63ocFkF22VOCGXdkCrci56XYmPCmK19yo_Bhr64w",
       accessToken:
-        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk"
-    }
+        "ya29.a0AfH6SMCl2PFRyEO_6KZi6-o4aJBGtz3aXDPPEmjIC1w3BmMfqSWZIl0tRgqvEzXhAbwCydclQNQa-5dY5BehpQICTz7ypprurpDGwmHZ9J2lD6clRVkpFrgoX-al4-TGmamhYACN78ZZ3WDMEgBDO-j_vc3n3MWbvwGq-2X_3tk",
+    },
   });
 
   return {
@@ -96,6 +96,6 @@ module.exports = () => {
     jsonWebTokenSecret,
     nodeMailerAuthUser,
     nodeMailerAuthPass,
-    nodeMailerTransporter
+    nodeMailerTransporter,
   };
 };
