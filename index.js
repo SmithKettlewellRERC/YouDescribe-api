@@ -14,7 +14,7 @@ var moment = require("moment");
 numOfVideosFromYoutube = 0;
 var midnight = "12:00:00";
 var now = null;
-setInterval(function() {
+setInterval(function () {
   now = moment().format("H:mm:ss");
   console.log(
     "number of videos fetched from youtube api service" + numOfVideosFromYoutube
@@ -22,7 +22,7 @@ setInterval(function() {
 }, 60 * 15 * 1000);
 
 //reset videos at midnight
-setInterval(function() {
+setInterval(function () {
   now = moment().format("H:mm:ss");
   if (now === midnight) {
     numOfVideosFromYoutube = 0;
@@ -48,7 +48,7 @@ const port = 8080;
 
 // CORS.
 // if (NODE_ENV === "dev") {
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Methods",
@@ -129,7 +129,7 @@ if (cluster.isMaster) {
     cluster.fork();
   }
 
-  cluster.on("online", worker => {
+  cluster.on("online", (worker) => {
     console.log(`Worker (child process) ${worker.process.pid} is running.`);
   });
 
@@ -160,7 +160,7 @@ if (cluster.isMaster) {
   httpServer.on("error", onError);
 }
 
-process.on("uncaughtException", function(err) {
+process.on("uncaughtException", function (err) {
   console.log(err);
   console.log(err.stack);
 });

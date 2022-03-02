@@ -19,8 +19,8 @@ const request = require("request");
 const WordPOS = require("wordpos");
 const isJSON = require("./../shared/helperFunctions").isJSON;
 const msleep = require("../shared/helperFunctions").msleep;
-const convertISO8601ToSeconds = require("../shared/helperFunctions")
-  .convertISO8601ToSeconds;
+const convertISO8601ToSeconds =
+  require("../shared/helperFunctions").convertISO8601ToSeconds;
 const fs = require("fs");
 let cron = require("node-cron");
 const transporter = conf.nodeMailerTransporter;
@@ -39,17 +39,17 @@ cron.schedule("00 15 * * 1", async () => {
     const emailList = [
       "jcastan6@mail.sfsu.edu",
       "ilmiyoon@gmail.com",
-      "cpc@ski.org"
+      "cpc@ski.org",
     ];
     const mailOptions = {
       from: conf.nodeMailerAuthUser,
       to: emailList,
       subject: "YouDescribe Weekly Summary",
-      text: text
+      text: text,
     };
 
     // Send e-mail
-    transporter.sendMail(mailOptions, function(error, info) {
+    transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
       } else {
@@ -62,9 +62,9 @@ cron.schedule("00 15 * * 1", async () => {
 const statisticsController = {
   syncAudioClips: (req, res) => {
     AudioClipOld.find({}).exec((err, audioClips) => {
-      audioClips.forEach(audioClip => {
+      audioClips.forEach((audioClip) => {
         const toUpdate = {
-          transcript: audioClip.transcript
+          transcript: audioClip.transcript,
         };
         AudioClip.findOneAndUpdate(
           { _id: audioClip._id },
@@ -84,13 +84,13 @@ const statisticsController = {
       .populate({
         path: "audio_clip",
         populate: {
-          path: "audio_description"
-        }
+          path: "audio_description",
+        },
       })
       .exec((err, transcriptions) => {
-        transcriptions.forEach(transcription => {
+        transcriptions.forEach((transcription) => {
           const toUpdate = {
-            language: transcription.audio_clip.audio_description.language
+            language: transcription.audio_clip.audio_description.language,
           };
           Transcription.findOneAndUpdate(
             { _id: transcription._id },
@@ -129,7 +129,7 @@ const statisticsController = {
 
   syncVideos: (req, res) => {
     VideoOld.find({ youtube_status: { $ne: "" } }).exec((err, videos) => {
-      videos.forEach(video => {
+      videos.forEach((video) => {
         let toUpdate = {};
         if (video.youtube_status == "available") {
           toUpdate = {
@@ -137,11 +137,11 @@ const statisticsController = {
             category_id: video.category_id,
             category: video.category,
             youtube_status: video.youtube_status,
-            duration: video.duration
+            duration: video.duration,
           };
         } else if (video.youtube_status == "unavailable") {
           toUpdate = {
-            youtube_status: video.youtube_status
+            youtube_status: video.youtube_status,
           };
         }
         Video.findOneAndUpdate(
@@ -158,7 +158,7 @@ const statisticsController = {
 
   syncWishList: (req, res) => {
     WishListOld.find({ youtube_status: { $ne: "" } }).exec((err, videos) => {
-      videos.forEach(video => {
+      videos.forEach((video) => {
         let toUpdate = {};
         if (video.youtube_status == "available") {
           toUpdate = {
@@ -166,11 +166,11 @@ const statisticsController = {
             category_id: video.category_id,
             category: video.category,
             youtube_status: video.youtube_status,
-            duration: video.duration
+            duration: video.duration,
           };
         } else if (video.youtube_status == "unavailable") {
           toUpdate = {
-            youtube_status: video.youtube_status
+            youtube_status: video.youtube_status,
           };
         }
         WishList.findOneAndUpdate(
@@ -194,21 +194,21 @@ const statisticsController = {
           from: "audio_clips",
           localField: "audio_clip",
           foreignField: "_id",
-          as: "audio_clip"
-        }
+          as: "audio_clip",
+        },
       },
       { $unwind: "$audio_clip" },
       {
         $match: {
           language: /en/,
           "audio_clip.transcript": { $ne: [] },
-          words: []
-        }
-      }
+          words: [],
+        },
+      },
     ])
       .limit(10000)
       .exec((err, transcriptions) => {
-        transcriptions.forEach(transcription => {
+        transcriptions.forEach((transcription) => {
           const audioClip = transcription.audio_clip;
           const transcript = audioClip.transcript;
           var sentences = "";
@@ -216,7 +216,7 @@ const statisticsController = {
           var words = [];
           var wordCloudArr = []; // this will be saved finally
           var wordCloudDict = {}; // this must be {} not [], as wordCloudDict[length] will cause problems
-          transcript.forEach(item => {
+          transcript.forEach((item) => {
             sentences += " " + item.sentence;
             length += item.sentence.split(" ").length - 1;
           });
@@ -224,7 +224,7 @@ const statisticsController = {
             .toLowerCase()
             .replace(/[']/g, " ")
             .replace(/[^a-z0-9\s+]/g, "");
-          sentences.split(" ").forEach(item => {
+          sentences.split(" ").forEach((item) => {
             if (isNaN(wordCloudDict[item])) {
               wordCloudDict[item] = 1;
             } else {
@@ -234,14 +234,14 @@ const statisticsController = {
           });
 
           const promise = wordpos.getPOS(sentences);
-          promise.then(function(pos) {
+          promise.then(function (pos) {
             words.push(...pos.nouns);
             words.push(...pos.adjectives);
-            words.forEach(item => {
+            words.forEach((item) => {
               if (!isNaN(wordCloudDict[item]) && isNaN(item)) {
                 wordCloudArr.push({
                   key: item,
-                  value: wordCloudDict[item]
+                  value: wordCloudDict[item],
                 });
                 delete wordCloudDict[item];
               }
@@ -250,7 +250,7 @@ const statisticsController = {
 
             const toUpdate = {
               words: wordCloudArr,
-              length: length
+              length: length,
             };
             Transcription.findOneAndUpdate(
               { audio_clip: audioClip._id },
@@ -270,7 +270,7 @@ const statisticsController = {
   syncUsers: (req, res) => {
     var cnt = 0;
     User.find({ created_at: { $exists: false } }).exec((err, users) => {
-      users.forEach(user => {
+      users.forEach((user) => {
         var created_at =
           user.updated_at && user.last_login
             ? Math.min(user.last_login, user.updated_at)
@@ -293,10 +293,10 @@ const statisticsController = {
       function optionalCallback(err, response, body) {
         const jsonObj = JSON.parse(body);
         const items = jsonObj.items;
-        items.forEach(item => {
+        items.forEach((item) => {
           new Category({
             category_id: item.id,
-            title: item.snippet.title
+            title: item.snippet.title,
           }).save();
         });
         res.end("done");
@@ -314,7 +314,7 @@ const statisticsController = {
             ret.result = {
               countOfVideos: countOfVideos,
               countOfDescriptions: countOfDescriptions,
-              countOfAudioClips: countOfAudioClips
+              countOfAudioClips: countOfAudioClips,
             };
             res.status(ret.status).json(ret);
           }
@@ -365,18 +365,18 @@ const statisticsController = {
         $match: {
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+          ],
+        },
       },
       { $project: { status: 1, category: 1 } },
       {
         $match: {
-          $and: [{ category: { $exists: true } }, { category: { $ne: "" } }]
-        }
-      }
+          $and: [{ category: { $exists: true } }, { category: { $ne: "" } }],
+        },
+      },
     ]).exec((err, wishListVideos) => {
-      wishListVideos.forEach(wishListVideo => {
+      wishListVideos.forEach((wishListVideo) => {
         if (wishListVideo.status == "dequeued") {
           wishListDescribedVideos.push(wishListVideo);
         } else {
@@ -388,22 +388,22 @@ const statisticsController = {
           $match: {
             $and: [
               { created_at: { $gte: startDate } },
-              { created_at: { $lt: endDate } }
-            ]
-          }
+              { created_at: { $lt: endDate } },
+            ],
+          },
         },
         { $project: { category: 1 } },
         {
           $match: {
-            $and: [{ category: { $exists: true } }, { category: { $ne: "" } }]
-          }
-        }
+            $and: [{ category: { $exists: true } }, { category: { $ne: "" } }],
+          },
+        },
       ]).exec((err, videos) => {
         const ret = { status: 200 };
         ret.result = {
           describedVideos: videos,
           wishListDescribedVideos: wishListDescribedVideos,
-          wishListNotDescribedVideos: wishListNotDescribedVideos
+          wishListNotDescribedVideos: wishListNotDescribedVideos,
         };
         res.status(ret.status).json(ret);
       });
@@ -421,14 +421,14 @@ const statisticsController = {
           $match: {
             $and: [
               { created_at: { $gte: startDate } },
-              { created_at: { $lt: endDate } }
-            ]
-          }
+              { created_at: { $lt: endDate } },
+            ],
+          },
         },
         { $match: { category: category } },
         { $unwind: "$tags" },
         { $group: { _id: "$tags", count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
+        { $sort: { count: -1 } },
       ])
         .limit(10)
         .exec((err, videos) => {
@@ -444,14 +444,14 @@ const statisticsController = {
             status: status,
             $and: [
               { created_at: { $gte: startDate } },
-              { created_at: { $lt: endDate } }
-            ]
-          }
+              { created_at: { $lt: endDate } },
+            ],
+          },
         },
         { $match: { category: category } },
         { $unwind: "$tags" },
         { $group: { _id: "$tags", count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
+        { $sort: { count: -1 } },
       ])
         .limit(10)
         .exec((err, videos) => {
@@ -470,16 +470,16 @@ const statisticsController = {
         youtube_id: { $ne: "" },
         $and: [
           { created_at: { $gte: startDate } },
-          { created_at: { $lt: endDate } }
-        ]
+          { created_at: { $lt: endDate } },
+        ],
       },
       (err, countOfVideoVisits) => {
         Visit.find({
           //FIGURING OUT ERROR WITH IP TRACKING, WILL FIX LATER
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
+            { created_at: { $lt: endDate } },
+          ],
         }).exec((err, countOfWebVisits) => {
           Visit.aggregate([
             {
@@ -487,9 +487,9 @@ const statisticsController = {
                 youtube_id: { $ne: "" },
                 $and: [
                   { created_at: { $gte: startDate } },
-                  { created_at: { $lt: endDate } }
-                ]
-              }
+                  { created_at: { $lt: endDate } },
+                ],
+              },
             },
             { $group: { _id: "$youtube_id", count: { $sum: 1 } } },
             {
@@ -497,11 +497,11 @@ const statisticsController = {
                 from: "videos",
                 localField: "_id",
                 foreignField: "youtube_id",
-                as: "video"
-              }
+                as: "video",
+              },
             },
             { $unwind: "$video" },
-            { $sort: { count: -1 } }
+            { $sort: { count: -1 } },
           ])
             .limit(5)
             .exec((err, topVideos) => {
@@ -509,7 +509,7 @@ const statisticsController = {
               ret.result = {
                 countOfVideoVisits,
                 countOfWebVisits: countOfWebVisits.length || 0,
-                topVideos
+                topVideos,
               };
               res.status(ret.status).json(ret);
             });
@@ -526,23 +526,23 @@ const statisticsController = {
         $match: {
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+          ],
+        },
       },
       {
         $group: {
           _id: null,
           count: { $sum: 1 },
-          duration: { $sum: "$duration" }
-        }
-      }
+          duration: { $sum: "$duration" },
+        },
+      },
     ]).exec((err, audioClips) => {
       console.log(audioClips);
       const ret = { status: 200 };
       ret.result = {
         count: audioClips.length > 0 ? audioClips[0].count : 0,
-        duration: audioClips.length > 0 ? audioClips[0].duration.toFixed(0) : 0
+        duration: audioClips.length > 0 ? audioClips[0].duration.toFixed(0) : 0,
       };
       res.status(ret.status).json(ret);
     });
@@ -551,20 +551,22 @@ const statisticsController = {
   getCountOfAudioDescriptions: (req, res) => {
     const startDate = utcToLongInt(req.query.startdate);
     const endDate = utcToLongInt(req.query.enddate);
+    const status = req.query.status;
     AudioDescription.aggregate([
       {
         $match: {
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+            { status: status },
+          ],
+        },
       },
-      { $group: { _id: null, count: { $sum: 1 } } }
+      { $group: { _id: null, count: { $sum: 1 } } },
     ]).exec((err, audioDescriptions) => {
       const ret = { status: 200 };
       ret.result = {
-        count: audioDescriptions.length > 0 ? audioDescriptions[0].count : 0
+        count: audioDescriptions.length > 0 ? audioDescriptions[0].count : 0,
       };
       res.status(ret.status).json(ret);
     });
@@ -578,23 +580,23 @@ const statisticsController = {
         $match: {
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+          ],
+        },
       },
       // {$match: {"duration": {$gt: 0}}},
       {
         $group: {
           _id: null,
           count: { $sum: 1 },
-          duration: { $sum: "$duration" }
-        }
-      }
+          duration: { $sum: "$duration" },
+        },
+      },
     ]).exec((err, videos) => {
       const ret = { status: 200 };
       ret.result = {
         count: videos.length > 0 ? videos[0].count : 0,
-        duration: videos.length > 0 ? videos[0].duration : 0
+        duration: videos.length > 0 ? videos[0].duration : 0,
       };
       res.status(ret.status).json(ret);
     });
@@ -609,23 +611,23 @@ const statisticsController = {
           from: "audio_clips",
           localField: "audio_clip",
           foreignField: "_id",
-          as: "audio_clip"
-        }
+          as: "audio_clip",
+        },
       },
       { $unwind: "$audio_clip" },
       {
         $match: {
           $and: [
             { "audio_clip.created_at": { $gte: startDate } },
-            { "audio_clip.created_at": { $lt: endDate } }
-          ]
-        }
+            { "audio_clip.created_at": { $lt: endDate } },
+          ],
+        },
       },
-      { $group: { _id: null, count: { $sum: "$length" } } }
+      { $group: { _id: null, count: { $sum: "$length" } } },
     ]).exec((err, transcriptions) => {
       const ret = { status: 200 };
       ret.result = {
-        count: transcriptions.length > 0 ? transcriptions[0].count : 0
+        count: transcriptions.length > 0 ? transcriptions[0].count : 0,
       };
       res.status(ret.status).json(ret);
     });
@@ -640,13 +642,13 @@ const statisticsController = {
           feedback: { $ne: [] },
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+          ],
+        },
       },
       { $unwind: "$feedback" },
       { $group: { _id: "$feedback", count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ])
       .limit(5)
       .exec((err, feedbacks) => {
@@ -665,16 +667,16 @@ const statisticsController = {
           {
             $and: [
               { updated_at: { $gte: startDate } },
-              { updated_at: { $lt: endDate } }
-            ]
+              { updated_at: { $lt: endDate } },
+            ],
           },
           {
             $and: [
               { created_at: { $gte: startDate } },
-              { created_at: { $lt: endDate } }
-            ]
-          }
-        ]
+              { created_at: { $lt: endDate } },
+            ],
+          },
+        ],
       },
       (err, countOfUsers) => {
         const ret = { status: 200 };
@@ -707,17 +709,17 @@ const statisticsController = {
           youtube_id: { [comparator]: "" },
           $and: [
             { created_at: { $gte: startDate } },
-            { created_at: { $lt: endDate } }
-          ]
-        }
+            { created_at: { $lt: endDate } },
+          ],
+        },
       },
       {
         $group: {
           _id: { $toLong: { $divide: ["$created_at", 1000000] } },
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]).exec((err, dailyOfDataRecords) => {
       const ret = { status: 200 };
       ret.result = dailyOfDataRecords;
@@ -734,25 +736,25 @@ const statisticsController = {
           from: "audio_clips",
           localField: "audio_clip",
           foreignField: "_id",
-          as: "audio_clip"
-        }
+          as: "audio_clip",
+        },
       },
       { $unwind: "$audio_clip" },
       {
         $match: {
           $and: [
             { "audio_clip.created_at": { $gte: startDate } },
-            { "audio_clip.created_at": { $lt: endDate } }
-          ]
-        }
+            { "audio_clip.created_at": { $lt: endDate } },
+          ],
+        },
       },
       {
         $group: {
           _id: { $toLong: { $divide: ["$audio_clip.created_at", 1000000] } },
-          count: { $sum: "$length" }
-        }
+          count: { $sum: "$length" },
+        },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]).exec((err, dailyOfWords) => {
       const ret = { status: 200 };
       ret.result = dailyOfWords;
@@ -783,8 +785,8 @@ const statisticsController = {
           from: "audio_clips",
           localField: "audio_clip",
           foreignField: "_id",
-          as: "audio_clip"
-        }
+          as: "audio_clip",
+        },
       },
       { $unwind: "$audio_clip" },
       {
@@ -792,8 +794,8 @@ const statisticsController = {
           from: "users",
           localField: "audio_clip.user",
           foreignField: "_id",
-          as: "user"
-        }
+          as: "user",
+        },
       },
       { $unwind: "$user" },
       {
@@ -802,13 +804,13 @@ const statisticsController = {
           "user.name": { $regex: user, $options: "$i" },
           $and: [
             { "audio_clip.created_at": { $gte: startDate } },
-            { "audio_clip.created_at": { $lt: endDate } }
-          ]
-        }
+            { "audio_clip.created_at": { $lt: endDate } },
+          ],
+        },
       },
       { $unwind: "$words" },
       { $group: { _id: "$words.key", count: { $sum: "$words.value" } } },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ])
       .limit(150)
       .exec((err, words) => {
@@ -817,9 +819,9 @@ const statisticsController = {
             startdate: parseInt(startDate / 1000000),
             enddate: parseInt(endDate / 1000000),
             user: user,
-            words: words
+            words: words,
           };
-          fs.writeFile("wordcloud.json", JSON.stringify(ret), err => {
+          fs.writeFile("wordcloud.json", JSON.stringify(ret), (err) => {
             res.download("wordcloud.json");
           });
         } else {
@@ -828,7 +830,7 @@ const statisticsController = {
           res.status(ret.status).json(ret);
         }
       });
-  }
+  },
 };
 
 module.exports = statisticsController;
