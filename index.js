@@ -58,6 +58,8 @@ app.use(function (req, res, next) {
     "Access-Control-Allow-Headers",
     "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
   );
+
+  res.set("Access-Control-Allow-Origin", '*');
   if (req.method === "OPTIONS") {
     return next();
   } else {
