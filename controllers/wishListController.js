@@ -173,6 +173,72 @@ const wishListController = {
     });
   },
 
+  getAllWithSearch: (req, res) => {
+    const pgNumber = Number(req.query.page);
+    const perPage = Number(req.query.per_page);
+    let searchQuery = "";
+    let categoryQuery = "";
+    if (req.query.search) {
+      searchQuery = req.query.search.split("%20").join(" ");
+    }
+    if (req.query.category) {
+      const queryCategories = req.query.category.split(",");
+      const categories = queryCategories.map((category) =>
+        category.split("%20").join(" ")
+      );
+      categoryQuery = categories.join("|");
+    }
+    const requestedVideoAmount =
+      pgNumber === NaN || pgNumber === 0 ? perPage : pgNumber * perPage;
+    WishList.aggregate()
+      .facet({
+        items: [
+          {
+            $match: {
+              $and: [
+                { status: "queued" },
+                { tags: { $regex: searchQuery, $options: "i" } },
+                { category: { $regex: categoryQuery, $options: "i" } },
+              ],
+            },
+          },
+          { $sort: { votes: -1 } },
+          { $skip: requestedVideoAmount - perPage },
+          { $limit: perPage },
+        ],
+        count: [
+          {
+            $match: {
+              $and: [
+                { status: "queued" },
+                { tags: { $regex: searchQuery, $options: "i" } },
+                { category: { $regex: categoryQuery, $options: "i" } },
+              ],
+            },
+          },
+          { $count: "count" },
+        ],
+      })
+      .then((items) => {
+        const pageItems = items[0].items;
+        const count = items[0].count[0].count;
+        if (pageItems) {
+          const ret = apiMessages.getResponseByCode(1008);
+          ret.result = { items: pageItems, count: count };
+          res.status(ret.status).json(ret);
+        } else {
+          const ret = apiMessages.getResponseByCode(61);
+          res.status(ret.status).json(ret);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
+        ret.result = { items: [], count: 0 };
+        res.status(ret.status).json(ret);
+      });
+  },
+
   getAll: (req, res) => {
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 15 : (pgNumber * 15);
@@ -194,6 +260,27 @@ const wishListController = {
       const ret = apiMessages.getResponseByCode(1);
       res.status(ret.status).json(ret);
     });
+  },
+
+  getTop: (req, res) => {
+    WishList.find({ status: "queued" })
+      .sort({ votes: -1 })
+      .limit(5)
+      .then((items) => {
+        if (items) {
+          const ret = apiMessages.getResponseByCode(1008);
+          ret.result = items;
+          res.status(ret.status).json(ret);
+        } else {
+          const ret = apiMessages.getResponseByCode(61);
+          res.status(ret.status).json(ret);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+      });
   },
 
   updateOne: (req, res) => {
