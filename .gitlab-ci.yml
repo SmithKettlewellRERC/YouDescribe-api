@@ -1,0 +1,101 @@
+image: 
+  name: node:14
+
+variables:
+    CI_PROJECT_NAME: youdescribe-api
+
+stages:
+  - build
+  # - test # Will add this test stage when automated tests are created
+  - deploy
+ 
+cache:
+  paths:
+    - node_modules/
+
+build-stage:
+  stage: build
+  tags:
+    - backend
+    - staging
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      when: always
+
+  script:
+    - echo "Building YouDescribe-API in staging" 
+    - docker build --build-arg DB_HOST=host.docker.internal --build-arg NODE_ENV=dev -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}" .
+    - echo "Build complete"
+
+build-prod:
+  stage: build
+  tags:
+    - backend
+    - prod
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: always
+  
+  script:
+    - echo "Building YouDescribe-API in prod" 
+    - docker build --build-arg DB_HOST=host.docker.internal --build-arg NODE_ENV=prod -t "${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}" .
+    - echo "Build completed"
+
+
+# We don't have any unit tests for now, but
+# when we do add unit tests, such as verifying that
+# the backend returns the correct info/format, then
+# need to run those tests automatically.
+
+# test:
+#   stage: test
+
+#   script:
+#     - echo "Running tests against new YouDescribe-API build"
+#     - docker stop ${CI_PROJECT_NAME}
+#     - docker rm ${CI_PROJECT_NAME}
+#     - echo "Finished running tests"
+
+deploy-stage:
+  stage: deploy
+  tags:
+    - backend
+    - staging
+
+  rules:
+  - if: $CI_COMMIT_BRANCH == "dev"
+    when: on_success
+    
+  script:
+    - echo "Stopping old YouDescribe-API instance"
+    # Stop the currently running YouDescribe-API container if there is one running
+    - docker stop $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}") || true
+    - echo "Deleting old YouDescribe-API container"
+    # Delete the last YouDescribe-API container if one exists
+    - docker rm $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}") || true
+    - echo "Starting up/Deploying newest YouDescribe-API build"
+    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME} --restart unless-stopped -d -p 0.0.0.0:8080:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
+    - echo "Finished deploying YouDescribe-API build to staging"
+
+deploy-prod:
+  stage: deploy
+  tags:
+    - backend
+    - prod
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: on_success
+    
+  script:
+    - echo "Stopping old YouDescribe-API instance"
+    # Stop the currently running YouDescribe-API container if there is one running
+    - docker stop $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}") || true
+    - echo "Deleting old YouDescribe-API container"
+    # Delete the last YouDescribe-API container if one exists
+    - docker rm $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}") || true
+    - echo "Starting up/Deploying newest YouDescribe-API build"
+    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME} --restart unless-stopped -d -p 0.0.0.0:8080:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
+    - echo "Finished deploying YouDescribe-API build to prod"
