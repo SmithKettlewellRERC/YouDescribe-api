@@ -198,6 +198,7 @@ const wishListController = {
             $match: {
               $and: [
                 { status: "queued" },
+                { youtube_status: "available" },
                 { tags: { $regex: searchQuery, $options: "i" } },
                 { category: { $regex: categoryQuery, $options: "i" } },
               ],
@@ -212,6 +213,7 @@ const wishListController = {
             $match: {
               $and: [
                 { status: "queued" },
+                { youtube_status: "available" },
                 { tags: { $regex: searchQuery, $options: "i" } },
                 { category: { $regex: categoryQuery, $options: "i" } },
               ],
@@ -264,7 +266,7 @@ const wishListController = {
   },
 
   getTop: (req, res) => {
-    WishList.find({ status: "queued" })
+    WishList.find({ status: "queued", youtube_status: "available" })
       .sort({ votes: -1 })
       .limit(5)
       .then((items) => {
