@@ -30,7 +30,9 @@ module.exports = () => {
     "..",
     "audio-descriptions-files"
   );
-  if (NODE_ENV === "prod") {
+
+
+  if (NODE_ENV === "prod" || NODE_ENV === "dev") {
     uploadsRootDirToServe = "/mnt/ebs/audio-descriptions-files";
     uploadsRootDirToSave = "/mnt/ebs/audio-descriptions-files/current";
     uploadsRootDirToSaveAI = "/mnt/ebs/audio-descriptions-files/ai";
