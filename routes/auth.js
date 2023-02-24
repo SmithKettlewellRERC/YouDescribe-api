@@ -1,8 +1,33 @@
 const express = require('express');
+const passport = require("passport");
+const apiMessages = require("../shared/apiMessages");
 
 const router = express.Router();
-const authController = require('../controllers/authController');
 
-router.post('/', authController.googleAuth);
+router.get("/google",
+  passport.authenticate("google", { scope: ["profile","email","openid"] })
+);
+router.get("/google/callback",
+  passport.authenticate("google",
+                        {
+                            successRedirect: "http://localhost:3000",
+                            failureRedirect: "https://google.com"
+                        })
+);
+router.get("/login/success", (req, res) => {
+    console.log("Request on /auth/login/success ", req);
+    if(req.user){
+        const ret = apiMessages.getResponseByCode(1012);
+        ret.result = req.user;
+        res.status(ret.status).json(ret);
+    } else {
+        const ret = apiMessages.getResponseByCode(1);
+        res.status(ret.status).json(ret);
+    }
+});
+router.get("/logout", (req,res) => {
+    req.logout();
+    res.redirect("http://localhost:3000");
+});
 
 module.exports = router;
