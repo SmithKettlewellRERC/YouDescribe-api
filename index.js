@@ -34,7 +34,7 @@ setInterval(function () {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors({origin: "http://localhost:3000", credentials: true}));
+app.use(cors({origin: "https://test.youdescribe.org", credentials: true}));
 app.use(cookieSession({
   name: 'auth-session',
   maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -60,7 +60,7 @@ const port = 8080;
 // CORS.
 // if (NODE_ENV === "dev") {
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", "https://test.youdescribe.org");
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,PATCH,OPTIONS"
@@ -69,7 +69,7 @@ app.use(function (req, res, next) {
     "Access-Control-Allow-Headers",
     "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
   );
-  res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.set('Access-Control-Allow-Origin', 'https://test.youdescribe.org');
   if (req.method === "OPTIONS") {
     return next();
   } else {

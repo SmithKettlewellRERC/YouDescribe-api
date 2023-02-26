@@ -10,8 +10,9 @@ router.get("/google",
 router.get("/google/callback",
   passport.authenticate("google",
                         {
-                            successRedirect: "http://localhost:3000",
-                            failureRedirect: "https://google.com"
+                            successRedirect: "https://test.youdescribe.org",
+                            failureRedirect: "https://test.youdescribe.org",
+                            failureFlash: "Sign In Unsuccessful. Please try again!"
                         })
 );
 router.get("/login/success", (req, res) => {
@@ -27,7 +28,7 @@ router.get("/login/success", (req, res) => {
 });
 router.get("/logout", (req,res) => {
     req.logout();
-    res.redirect("http://localhost:3000");
+    res.redirect("https://test.youdescribe.org");
 });
 
 module.exports = router;
