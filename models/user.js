@@ -25,6 +25,7 @@ const userSchema = new Schema({
   admin: Number,
 }, { collection: "users" });
 
+// passportLocalMongoose is a middleware that adds the createStrategy method when plugged in to the user schema.
 userSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model("User", userSchema);

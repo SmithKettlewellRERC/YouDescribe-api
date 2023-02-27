@@ -13,7 +13,7 @@ router.get("/google/callback",
                             successRedirect: "https://test.youdescribe.org",
                             failureRedirect: "https://test.youdescribe.org",
                             failureFlash: "Sign In Unsuccessful. Please try again!"
-                        })
+                        }) //TODO: Change success and failure redirect URLs to prod link.
 );
 router.get("/login/success", (req, res) => {
     console.log("Request on /auth/login/success ", req);
@@ -28,7 +28,7 @@ router.get("/login/success", (req, res) => {
 });
 router.get("/logout", (req,res) => {
     req.logout();
-    res.redirect("https://test.youdescribe.org");
+    res.redirect("https://test.youdescribe.org"); //TODO: Change URL to prod link.
 });
 
 module.exports = router;
