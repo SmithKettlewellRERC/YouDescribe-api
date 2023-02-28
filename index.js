@@ -4,6 +4,9 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const conf = require("./shared/config")();
 const express = require("express");
+const cors = require("cors");
+const cookieSession = require("cookie-session");
+const passport = require("passport");
 const http = require("http");
 const cluster = require("cluster");
 const numWorkers = require("os").cpus().length;
@@ -31,6 +34,14 @@ setInterval(function () {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors({origin: "https://test.youdescribe.org", credentials: true})); //TODO: Change URL to prod link.
+app.use(cookieSession({
+  name: 'auth-session',
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+  secret: "YouDescribe Secret"
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Database.
 const db = require("./db/connection");
@@ -49,7 +60,7 @@ const port = 8080;
 // CORS.
 // if (NODE_ENV === "dev") {
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "https://test.youdescribe.org"); //TODO: Change URL to prod link.
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,PATCH,OPTIONS"
@@ -58,7 +69,7 @@ app.use(function (req, res, next) {
     "Access-Control-Allow-Headers",
     "Accept, Authorization, Content-Type, X-Requested-With, Range, Content-Length, Visit"
   );
-  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Origin', 'https://test.youdescribe.org'); //TODO: Change URL to prod link.
   if (req.method === "OPTIONS") {
     return next();
   } else {
