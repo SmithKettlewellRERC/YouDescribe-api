@@ -33,7 +33,7 @@ setInterval(function () {
 }, 1000);
 
 
-const allowedOrigins = ["https://youdescribe.org", "https://test.youdescribe.org"]
+const allowedOrigins = ["https://youdescribe.org", "https://test.youdescribe.org", "https://ydx.youdescribe.org", "https://ydx-dev.youdescribe.org"]
 
 var corsOptions = {
   origin: (origin, callback) => {
