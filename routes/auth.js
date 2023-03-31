@@ -10,10 +10,10 @@ router.get("/google",
 router.get("/google/callback",
   passport.authenticate("google",
                         {
-                            successRedirect: "https://test.youdescribe.org",
-                            failureRedirect: "https://test.youdescribe.org",
+                            successRedirect: "https://youdescribe.org",
+                            failureRedirect: "https://youdescribe.org",
                             failureFlash: "Sign In Unsuccessful. Please try again!"
-                        }) //TODO: Change success and failure redirect URLs to prod link.
+                        })
 );
 router.get("/login/success", (req, res) => {
     console.log("Request on /auth/login/success ", req);
@@ -28,7 +28,7 @@ router.get("/login/success", (req, res) => {
 });
 router.get("/logout", (req,res) => {
     req.logout();
-    res.redirect("https://test.youdescribe.org"); //TODO: Change URL to prod link.
+    res.redirect("https://youdescribe.org");
 });
 
 module.exports = router;
