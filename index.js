@@ -37,7 +37,7 @@ const allowedOrigins = ["https://youdescribe.org", "https://test.youdescribe.org
 
 var corsOptions = {
   origin: (origin, callback) => {
-    if(allowedOrigins.includes(origin)) {
+    if(!origin || allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
       callback(new Error(`${origin} Not allowed by CORS`))
@@ -124,6 +124,10 @@ app.use(
   "/audio-descriptions-files",
   express.static(conf.uploadsRootDirToServe)
 );
+
+app.use((err, req, res, next) => {
+  res.status(500).send("Something went wrong.");
+});
 
 // The Restful API drain.
 app.get("*", (req, res) => {
