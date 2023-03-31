@@ -31,6 +31,10 @@ module.exports = () => {
     "audio-descriptions-files"
   );
 
+  const passportRedirectUrl = "https://youdescribe.org";
+  const passportCallbackUrl = "https://api.youdescribe.org/v1/auth/google/callback"
+
+
 
   if (NODE_ENV === "prod" || NODE_ENV === "dev") {
     uploadsRootDirToServe = "/mnt/ebs/audio-descriptions-files";
@@ -94,6 +98,8 @@ module.exports = () => {
     uploadsRootDirToSave,
     uploadsRootDirToSaveAI,
     uploadsRootDirToDelete,
+    passportCallbackUrl,
+    passportRedirectUrl,
     cryptoSeed,
     cryptoSecret,
     googleClientId,

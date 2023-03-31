@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require("passport");
 const apiMessages = require("../shared/apiMessages");
+const config = require("../shared/config")();
 
 const router = express.Router();
 
@@ -10,8 +11,8 @@ router.get("/google",
 router.get("/google/callback",
   passport.authenticate("google",
                         {
-                            successRedirect: "https://youdescribe.org",
-                            failureRedirect: "https://youdescribe.org",
+                            successRedirect: config.passportRedirectUrl,
+                            failureRedirect: config.passportRedirectUrl,
                             failureFlash: "Sign In Unsuccessful. Please try again!"
                         })
 );
@@ -28,7 +29,7 @@ router.get("/login/success", (req, res) => {
 });
 router.get("/logout", (req,res) => {
     req.logout();
-    res.redirect("https://youdescribe.org");
+    res.redirect(config.passportRedirectUrl);
 });
 
 module.exports = router;
