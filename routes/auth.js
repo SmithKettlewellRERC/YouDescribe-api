@@ -2,8 +2,11 @@ const express = require('express');
 const passport = require("passport");
 const apiMessages = require("../shared/apiMessages");
 const config = require("../shared/config")();
+const authController = require('../controllers/authController');
 
 const router = express.Router();
+
+router.post("/", authController.googleAuth);
 
 router.get("/google",
   passport.authenticate("google", { scope: ["profile","email","openid"] })

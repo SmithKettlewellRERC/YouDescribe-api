@@ -31,8 +31,8 @@ module.exports = () => {
     "audio-descriptions-files"
   );
 
-  const passportRedirectUrl = "https://test.youdescribe.org";
-  const passportCallbackUrl = "https://test-api.youdescribe.org/v1/auth/google/callback"
+  const passportRedirectUrl = "https://youdescribe.org";
+  const passportCallbackUrl = "https://api.youdescribe.org/v1/auth/google/callback"
 
 
 
