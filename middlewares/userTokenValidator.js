@@ -13,7 +13,7 @@ function userTokenValidator(req, res, next) {
   User.findOne({ _id: userId, token: userToken })
   .exec((err, user) => {
     if (err) {
-      console.log(errGetUserByToken);
+      console.log(err);
       const ret = apiMessages.getResponseByCode(1);
       res.status(ret.status).json(ret);
     }
