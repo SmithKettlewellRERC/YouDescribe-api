@@ -48,7 +48,7 @@ module.exports = () => {
   const googleiOSClientIdOld = "1056671841574-5qo81vnn336mlds8mjk33cpkron1pv80.apps.googleusercontent.com";
   const googleiOSClientIdNew = "3158679793-l94a8t4asb14ar54ud9a93164sulh56l.apps.googleusercontent.com";
   const googleAndroidClientId =
-    "460424020444-9fn04ktboesvvbd3p99mdc2tn5759nb0.apps.googleusercontent.com";
+    "3158679793-rlr3itj0rt0j36eqt2tcucaslvl19oob.apps.googleusercontent.com";
   const cryptoSecret = "8c628449c5102aeabd49b5dc3a2a516ea6";
   const cryptoSeed = "#@2$d32467ERvdd";
   const listenByCodeAppKey = "yAOzHAy9LQBJQGtshcIGJX368IbC4Enx";
