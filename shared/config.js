@@ -45,8 +45,8 @@ module.exports = () => {
   const googleClientId =
     "1061361249208-9799kv6172rjgmk4gad077639dfrck82.apps.googleusercontent.com";
 
-  const googleiOSClientId =
-    "3158679793-l94a8t4asb14ar54ud9a93164sulh56l.apps.googleusercontent.com";
+  const googleiOSClientIdOld = "1056671841574-5qo81vnn336mlds8mjk33cpkron1pv80.apps.googleusercontent.com";
+  const googleiOSClientIdNew = "3158679793-l94a8t4asb14ar54ud9a93164sulh56l.apps.googleusercontent.com";
   const googleAndroidClientId =
     "3158679793-rlr3itj0rt0j36eqt2tcucaslvl19oob.apps.googleusercontent.com";
   const cryptoSecret = "8c628449c5102aeabd49b5dc3a2a516ea6";
@@ -103,7 +103,8 @@ module.exports = () => {
     cryptoSeed,
     cryptoSecret,
     googleClientId,
-    googleiOSClientId,
+    googleiOSClientIdOld,
+    googleiOSClientIdNew,
     googleAndroidClientId,
     listenByCodeAppKey,
     youTubeApiUrl,
