@@ -266,6 +266,8 @@ const wishListController = {
   },
 
   getTop: (req, res) => {
+    console.log("========GET TOP========")
+    console.log(req.user);
     WishList.find({ status: "queued", youtube_status: "available" })
       .sort({ votes: -1 })
       .limit(5)
