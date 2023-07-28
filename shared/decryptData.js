@@ -1,8 +1,9 @@
 const CryptoJS = require('crypto-js');
 
 const decryptData = (encryptedData) => {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, "8c628449c5102aeabd49b5dc3a2a516ea6");
-    const userDataString = bytes.toString(CryptoJS.enc.Utf8);
-    return userDataString;
+    console.log("encryptedData", encryptedData)
+    const decryptedData = CryptoJS.AES.decrypt(encryptedData, "050cf42ee14d597188b0695a94df5e866d7eda5d06af32ff3ac329ddbcf7ca8a").toString(CryptoJS.enc.Utf8);
+    console.log("userDataString", decryptedData);
+    return decryptedData;
 };
-export default decryptData;
+module.exports = decryptData;

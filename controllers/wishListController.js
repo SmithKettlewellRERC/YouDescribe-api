@@ -9,6 +9,7 @@ const msleep = require("../shared/helperFunctions").msleep;
 const convertISO8601ToSeconds = require("../shared/helperFunctions").convertISO8601ToSeconds;
 const request = require("request");
 const conf = require("../shared/config")();
+const decryptData = require("../shared/decryptData");
 
 // The controller itself.
 const wishListController = {
@@ -17,7 +18,7 @@ const wishListController = {
     const youTubeId = req.body.youTubeId;
 
     // Let's first search in videos collection.
-    Video.findOne({youtube_id: youTubeId}).populate({path: "audio_descriptions"}).exec((err1, video) => { /* updated on 03/08/2020 */
+    Video.findOne({ youtube_id: youTubeId }).populate({ path: "audio_descriptions" }).exec((err1, video) => { /* updated on 03/08/2020 */
       if (err1) {
         console.log(err1);
         const ret = apiMessages.getResponseByCode(1);
@@ -49,104 +50,104 @@ const wishListController = {
           } else {
             // Vote accepted.
             userVotesHelper.add(userId, youTubeId)
-            .then(userVotes => {
+              .then(userVotes => {
 
-              // Let's now search at wishlist collection.
-              WishList.findOne({ youtube_id: youTubeId }, (err2, wishListItem) => {
+                // Let's now search at wishlist collection.
+                WishList.findOne({ youtube_id: youTubeId }, (err2, wishListItem) => {
 
-                // Error handling.
-                if (err2) {
-                  console.log(err2);
-                  const ret = apiMessages.getResponseByCode(1);
-                  res.status(ret.status).json(ret);
-                  return;
-                }
-
-                // We already have in the database the video requested.
-                if (wishListItem) {
-                  // Let's increment the requested cunter.
-                  wishListItem.votes += 1;
-                  wishListItem.updated_at = nowUtc();
-                  wishListItem.save()
-                  .then((item) => {
-                    const ret = apiMessages.getResponseByCode(1009);
-                    ret.result = item;
-                    res.status(ret.status).json(ret);
-                  })
-                  .catch((errSave) => {
-                    console.log(errSave);
+                  // Error handling.
+                  if (err2) {
+                    console.log(err2);
                     const ret = apiMessages.getResponseByCode(1);
                     res.status(ret.status).json(ret);
                     return;
-                  });
-                } else {
-                  // Let's create.
-                  const newWishList = new WishList({
-                    youtube_id: youTubeId,
-                    votes: 1,
-                    status: 'queued',
-                    created_at: nowUtc(),
-                    updated_at: nowUtc(),
-                  });
-                  newWishList.save((errSaving, wishListItemSaved) => {
-                    if (errSaving) {
-                      console.log(errSaving);
-                      const ret = apiMessages.getResponseByCode(1);
-                      res.status(ret.status).json(ret);
-                    }
-                    /* start of new youtube infocard */
-                    request.get(`${conf.youTubeApiUrl}/videos?id=${wishListItemSaved.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
-                      if (!err) {
-                        const jsonObj = JSON.parse(body);
-                        if (jsonObj.items.length > 0) {
-                          const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
-                          const tags = (jsonObj.items[0].snippet.tags || []);
-                          const categoryId = jsonObj.items[0].snippet.categoryId;
-                          request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
-                            const jsonObj = JSON.parse(body);
-                            let category = "";
-                            for (var i = 0; i < jsonObj.items.length; ++i) {
-                              if (i > 0) {
-                                category += ",";
+                  }
+
+                  // We already have in the database the video requested.
+                  if (wishListItem) {
+                    // Let's increment the requested cunter.
+                    wishListItem.votes += 1;
+                    wishListItem.updated_at = nowUtc();
+                    wishListItem.save()
+                      .then((item) => {
+                        const ret = apiMessages.getResponseByCode(1009);
+                        ret.result = item;
+                        res.status(ret.status).json(ret);
+                      })
+                      .catch((errSave) => {
+                        console.log(errSave);
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);
+                        return;
+                      });
+                  } else {
+                    // Let's create.
+                    const newWishList = new WishList({
+                      youtube_id: youTubeId,
+                      votes: 1,
+                      status: 'queued',
+                      created_at: nowUtc(),
+                      updated_at: nowUtc(),
+                    });
+                    newWishList.save((errSaving, wishListItemSaved) => {
+                      if (errSaving) {
+                        console.log(errSaving);
+                        const ret = apiMessages.getResponseByCode(1);
+                        res.status(ret.status).json(ret);
+                      }
+                      /* start of new youtube infocard */
+                      request.get(`${conf.youTubeApiUrl}/videos?id=${wishListItemSaved.youtube_id}&part=contentDetails,snippet,statistics&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                        if (!err) {
+                          const jsonObj = JSON.parse(body);
+                          if (jsonObj.items.length > 0) {
+                            const duration = convertISO8601ToSeconds(jsonObj.items[0].contentDetails.duration);
+                            const tags = (jsonObj.items[0].snippet.tags || []);
+                            const categoryId = jsonObj.items[0].snippet.categoryId;
+                            request.get(`${conf.youTubeApiUrl}/videoCategories?id=${categoryId}&part=snippet&forUsername=iamOTHER&key=${conf.youTubeApiKey}`, function optionalCallback(err, response, body) {
+                              const jsonObj = JSON.parse(body);
+                              let category = "";
+                              for (var i = 0; i < jsonObj.items.length; ++i) {
+                                if (i > 0) {
+                                  category += ",";
+                                }
+                                category += jsonObj.items[i].snippet.title;
                               }
-                              category += jsonObj.items[i].snippet.title;
-                            }
+                              const toUpdate = {
+                                tags: tags,
+                                category_id: categoryId,
+                                category: category,
+                                duration: duration,
+                                youtube_status: "available",
+                              };
+                              WishList.findOneAndUpdate(
+                                { youtube_id: wishListItemSaved.youtube_id },
+                                { $set: toUpdate },
+                                { new: true }
+                              ).exec();
+                            });
+                          } else {
                             const toUpdate = {
-                              tags: tags,
-                              category_id: categoryId,
-                              category: category,
-                              duration: duration,
-                              youtube_status: "available",
+                              youtube_status: "unavailable",
                             };
                             WishList.findOneAndUpdate(
-                              {youtube_id: wishListItemSaved.youtube_id},
-                              {$set: toUpdate},
-                              {new: true}
+                              { youtube_id: wishListItemSaved.youtube_id },
+                              { $set: toUpdate },
+                              { new: true }
                             ).exec();
-                          });
-                        } else {
-                          const toUpdate = {
-                            youtube_status: "unavailable",
-                          };
-                          WishList.findOneAndUpdate(
-                            {youtube_id: wishListItemSaved.youtube_id},
-                            {$set: toUpdate},
-                            {new: true}
-                          ).exec();
+                          }
                         }
-                      }
-                    });
-                    /* end of new youtube infocard */
-                    const ret = apiMessages.getResponseByCode(1001);
-                    ret.result = wishListItemSaved;
-                    res.status(ret.status).json(ret);
-                  })
-                }
-              });
-            })
-            .catch(err => {
-              console.log('Error', err);
-            })
+                      });
+                      /* end of new youtube infocard */
+                      const ret = apiMessages.getResponseByCode(1001);
+                      ret.result = wishListItemSaved;
+                      res.status(ret.status).json(ret);
+                    })
+                  }
+                });
+              })
+              .catch(err => {
+                console.log('Error', err);
+              })
           }
         });
       }
@@ -156,21 +157,21 @@ const wishListController = {
   getOne: (req, res) => {
     const youTubeId = req.params.youTubeId;
     WishList.findOne({ youtube_id: youTubeId })
-    .then((wishListItem) => {
-      if (wishListItem) {
-        const ret = apiMessages.getResponseByCode(1002);
-        ret.result = wishListItem;
+      .then((wishListItem) => {
+        if (wishListItem) {
+          const ret = apiMessages.getResponseByCode(1002);
+          ret.result = wishListItem;
+          res.status(ret.status).json(ret);
+        } else {
+          const ret = apiMessages.getResponseByCode(52);
+          res.status(ret.status).json(ret);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
-      } else {
-        const ret = apiMessages.getResponseByCode(52);
-        res.status(ret.status).json(ret);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      const ret = apiMessages.getResponseByCode(1);
-      res.status(ret.status).json(ret);
-    });
+      });
   },
 
   getAllWithSearch: (req, res) => {
@@ -246,28 +247,42 @@ const wishListController = {
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 15 : (pgNumber * 15);
     WishList.find({ status: 'queued' })
-    // .sort({ votes: -1 }).skip(requestedVideoAmount - 15).limit(15)
-    .sort({ created_at: -1 }).skip(requestedVideoAmount - 15).limit(15)
-    .then((items) => {
-      if (items) {
-        const ret = apiMessages.getResponseByCode(1008);
-        ret.result = items;
+      // .sort({ votes: -1 }).skip(requestedVideoAmount - 15).limit(15)
+      .sort({ created_at: -1 }).skip(requestedVideoAmount - 15).limit(15)
+      .then((items) => {
+        if (items) {
+          const ret = apiMessages.getResponseByCode(1008);
+          ret.result = items;
+          res.status(ret.status).json(ret);
+        } else {
+          const ret = apiMessages.getResponseByCode(61);
+          res.status(ret.status).json(ret);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        const ret = apiMessages.getResponseByCode(1);
         res.status(ret.status).json(ret);
-      } else {
-        const ret = apiMessages.getResponseByCode(61);
-        res.status(ret.status).json(ret);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      const ret = apiMessages.getResponseByCode(1);
-      res.status(ret.status).json(ret);
-    });
+      });
   },
 
   getTop: (req, res) => {
     console.log("========GET TOP========")
-    console.log(req);
+    console.log(req.headers.user_creds);
+    let user_id = null;
+    if (req.headers.user_creds) {
+      user_id = decryptData(req.headers.user_creds);
+      console.log("user_id", user_id)
+    }
+    if (user_id != null) {
+      UserVotes.find({ user: user_id }).then((userVotes) => {
+        console.log("userVotes", userVotes)
+
+      }).catch((err) => {
+        console.log("err", err)
+      })
+    }
+
     WishList.find({ status: "queued", youtube_status: "available" })
       .sort({ votes: -1 })
       .limit(5)
@@ -311,25 +326,25 @@ const wishListController = {
     const limit = req.query.limit || 7;
     const slice = req.query.slice || 4;
     WishList.aggregate([
-      {$match: {category: {$ne: ""}, status: "queued"}},
-      {$sort: {votes: -1}},
+      { $match: { category: { $ne: "" }, status: "queued" } },
+      { $sort: { votes: -1 } },
       {
         $group: {
           _id: "$category",
-          data: {$push: {"youtube_id": "$youtube_id", "votes": "$votes"}},
-          count: {$sum: 1}
+          data: { $push: { "youtube_id": "$youtube_id", "votes": "$votes" } },
+          count: { $sum: 1 }
         }
       },
-      {$sort: {count: -1}},
-      {$limit: limit},
+      { $sort: { count: -1 } },
+      { $limit: limit },
       {
         $project: {
-          data: {$slice: ["$data", slice]},
+          data: { $slice: ["$data", slice] },
           count: "$count"
         }
       }
-    ]).collation({locale: "en"}).exec((err, videos) => {
-      const ret = {status: 200};
+    ]).collation({ locale: "en" }).exec((err, videos) => {
+      const ret = { status: 200 };
       ret.result = videos;
       res.status(ret.status).json(ret);
     });
