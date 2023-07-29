@@ -292,7 +292,11 @@ const wishListController = {
         if (items) {
           const ret = apiMessages.getResponseByCode(1008);
           const new_items = items.map((item) => {
-            if (user_votes.find(vote => vote.youtube_id == item.youtube_id)) {
+            console.log(item);
+            if (user_votes.find(vote => {
+              console.log("vote", vote)
+              return vote.youtube_id == item.youtube_id
+            })) {
               // item.voted = true;
               return {
                 ...item,
