@@ -268,7 +268,7 @@ const wishListController = {
 
   getTop: (req, res) => {
     console.log("========GET TOP========")
-    console.log(req.headers.user_creds);
+    console.log(req.headers);
     let user_id = null;
     if (req.headers.user_creds) {
       user_id = decryptData(req.headers.user_creds);
