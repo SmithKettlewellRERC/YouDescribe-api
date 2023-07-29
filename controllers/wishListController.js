@@ -270,6 +270,7 @@ const wishListController = {
     console.log("========GET TOP========")
     console.log(req.headers);
     let user_id = null;
+    let user_votes = [];
     if (req.headers.authorization) {
       user_id = decryptData(req.headers.authorization);
       console.log("user_id", user_id)
@@ -277,6 +278,7 @@ const wishListController = {
     if (user_id != null) {
       UserVotes.find({ user: user_id }).then((userVotes) => {
         console.log("userVotes", userVotes)
+        user_votes = userVotes;
 
       }).catch((err) => {
         console.log("err", err)
@@ -289,7 +291,12 @@ const wishListController = {
       .then((items) => {
         if (items) {
           const ret = apiMessages.getResponseByCode(1008);
-          ret.result = items;
+          const new_items = items.map((item) => {
+            if (user_votes.find(vote => vote.youtube_id == item.youtube_id)) {
+              item.voted = true;
+            }
+          });
+          ret.result = new_items;
           res.status(ret.status).json(ret);
         } else {
           const ret = apiMessages.getResponseByCode(61);
