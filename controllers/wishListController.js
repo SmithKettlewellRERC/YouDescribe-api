@@ -266,57 +266,48 @@ const wishListController = {
       });
   },
 
-  getTop: (req, res) => {
+  getTop: async (req, res) => {
     console.log("========GET TOP========")
-    console.log(req.headers);
+    // console.log(req.headers);
     let user_id = null;
     let user_votes = [];
     if (req.headers.authorization) {
       user_id = decryptData(req.headers.authorization);
       console.log("user_id", user_id)
     }
-    if (user_id != null) {
-      UserVotes.find({ user: user_id }).then((userVotes) => {
-        console.log("userVotes", userVotes)
-        user_votes = userVotes;
-
-      }).catch((err) => {
-        console.log("err", err)
-      })
-    }
-
-    WishList.find({ status: "queued", youtube_status: "available" })
-      .sort({ votes: -1 })
-      .limit(5)
-      .then((items) => {
-        if (items) {
-          const ret = apiMessages.getResponseByCode(1008);
-          const new_items = items.map((item) => {
-            console.log(item);
-            if (user_votes.find(vote => {
-              console.log("vote", vote)
-              return vote.youtube_id == item.youtube_id
-            })) {
-              // item.voted = true;
-              return {
-                ...item,
-                voted: true
-              }
-            }
-            return item;
-          });
-          ret.result = new_items;
-          res.status(ret.status).json(ret);
-        } else {
-          const ret = apiMessages.getResponseByCode(61);
-          res.status(ret.status).json(ret);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        const ret = apiMessages.getResponseByCode(1);
+    try {
+      let user_votes = [];
+      if (user_id) {
+        user_votes = await UserVotes.find({ user: user_id });
+      }
+  
+      const items = await WishList.find({ status: "queued", youtube_status: "available" })
+        .sort({ votes: -1 })
+        .limit(5);
+  
+      if (items.length > 0) {
+        const ret = apiMessages.getResponseByCode(1008);  
+        const new_items = items.map(element => {
+          const isVoted = user_votes.some(vote => vote.youtube_id === element.youtube_id);
+        
+          if (isVoted) {
+            return { ...element.toObject(), voted: true };
+          }
+        
+          return element;
+        });
+  
+        ret.result = new_items;
         res.status(ret.status).json(ret);
-      });
+      } else {
+        const ret = apiMessages.getResponseByCode(61);
+        res.status(ret.status).json(ret);
+      }
+    } catch (err) {
+      console.log("Error:", err);
+      const ret = apiMessages.getResponseByCode(1);
+      res.status(ret.status).json(ret);
+    }
   },
 
   updateOne: (req, res) => {
