@@ -280,23 +280,23 @@ const wishListController = {
       if (user_id) {
         user_votes = await UserVotes.find({ user: user_id });
       }
-  
+
       const items = await WishList.find({ status: "queued", youtube_status: "available" })
         .sort({ votes: -1 })
         .limit(5);
-  
+
       if (items.length > 0) {
-        const ret = apiMessages.getResponseByCode(1008);  
+        const ret = apiMessages.getResponseByCode(1008);
         const new_items = items.map(element => {
           const isVoted = user_votes.some(vote => vote.youtube_id === element.youtube_id);
-        
+
           if (isVoted) {
             return { ...element.toObject(), voted: true };
           }
-        
+
           return element;
         });
-  
+
         ret.result = new_items;
         res.status(ret.status).json(ret);
       } else {
@@ -356,6 +356,75 @@ const wishListController = {
       res.status(ret.status).json(ret);
     });
   },
+
+  removeOne: (req, res) => {
+    const userId = req.body.userId;
+    const youTubeId = req.body.youTubeId;
+    WishList.findOne({ youtube_id: youTubeId })
+      .exec((err, wishListItem) => {
+        if (err) {
+          console.log(err);
+          const ret = apiMessages.getResponseByCode(1);
+          res.status(ret.status).json(ret);
+          return;
+        }
+
+        // console.log("wishListItem", wishListItem);
+        // res.status(200).json({ message: "success" });
+        if (!wishListItem) {
+          // Video not found in the wishlist.
+          const ret = apiMessages.getResponseByCode(404);
+          res.status(ret.status).json(ret);
+          return;
+        }
+
+        if (wishListItem.votes === 1) {
+          // If the vote count is already zero, remove the video from the wishlist.
+          WishList.deleteOne({ youtube_id: youTubeId })
+            .exec((errDelete) => {
+              if (errDelete) {
+                console.log(errDelete);
+                const ret = apiMessages.getResponseByCode(1);
+                res.status(ret.status).json(ret);
+                return;
+              }
+
+              // Video successfully removed from the wishlist.
+              userVotesHelper.remove(userId, youTubeId).then(() => {
+                const ret = apiMessages.getResponseByCode(1010);
+                res.status(ret.status).json(ret);
+              }).catch((errRemove) => {
+                console.log(errRemove);
+                const ret = apiMessages.getResponseByCode(1);
+                res.status(ret.status).json(ret);
+              })
+
+            });
+        } else {
+          // Decrease the vote count by 1 and update the wishlist item.
+          wishListItem.votes -= 1;
+          wishListItem.updated_at = nowUtc();
+
+          wishListItem.save()
+            .then((item) => {
+              // Wishlist item updated successfully.
+              userVotesHelper.remove(userId, youTubeId).then(() => {
+                const ret = apiMessages.getResponseByCode(1010);
+                res.status(ret.status).json(ret);
+              }).catch((errRemove) => {
+                console.log(errRemove);
+                const ret = apiMessages.getResponseByCode(1);
+                res.status(ret.status).json(ret);
+              })
+            })
+            .catch((errSave) => {
+              console.log(errSave);
+              const ret = apiMessages.getResponseByCode(1);
+              res.status(ret.status).json(ret);
+            });
+        }
+      })
+  }
 };
 
 module.exports = wishListController;

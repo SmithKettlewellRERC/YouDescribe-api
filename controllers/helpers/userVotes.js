@@ -10,5 +10,8 @@ module.exports = {
       created_at: nowUtc(),    
     });
     return modelInstance.save();
-  }
+  },
+  remove: (userId, youTubeId) => {
+    return UserVotes.findOneAndDelete({ user: userId, youtube_id: youTubeId });
+  },
 };
