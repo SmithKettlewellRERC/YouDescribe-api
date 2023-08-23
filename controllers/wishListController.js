@@ -243,16 +243,32 @@ const wishListController = {
       });
   },
 
-  getAll: (req, res) => {
+  getAll: async (req, res) => {
+    const userId = req.user ? req.user._id : null;
     const pgNumber = Number(req.query.page);
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 15 : (pgNumber * 15);
+    let user_votes = [];
+    console.log("userId :: ", userId);
+    if(!userId) {
+      user_votes = await UserVotes.find({ user: userId });
+    }
+    
     WishList.find({ status: 'queued' })
       // .sort({ votes: -1 }).skip(requestedVideoAmount - 15).limit(15)
       .sort({ created_at: -1 }).skip(requestedVideoAmount - 15).limit(15)
       .then((items) => {
         if (items) {
           const ret = apiMessages.getResponseByCode(1008);
-          ret.result = items;
+          const new_items = items.map(element => {
+            const isVoted = user_votes.some(vote => vote.youtube_id === element.youtube_id);
+  
+            if (isVoted) {
+              return { ...element.toObject(), voted: true };
+            }
+  
+            return element;
+          });
+          ret.result = new_items;
           res.status(ret.status).json(ret);
         } else {
           const ret = apiMessages.getResponseByCode(61);
@@ -270,7 +286,6 @@ const wishListController = {
     console.log("========GET TOP========")
     // console.log(req.headers);
     let user_id = null;
-    let user_votes = [];
     if (req.headers.authorization) {
       user_id = decryptData(req.headers.authorization);
       console.log("user_id", user_id)
