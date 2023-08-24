@@ -13,5 +13,6 @@ router.get('/search/', webVisitCounter, wishListController.getAllWithSearch);
 router.get("/:youTubeId", wishListController.getOne);
 router.get("/", webVisitCounter, wishListController.getAll);
 router.put("/:youTubeId", userTokenValidator, wishListController.updateOne);
+router.delete("/removeone", userTokenValidator, wishListController.removeOne);
 
 module.exports = router;
