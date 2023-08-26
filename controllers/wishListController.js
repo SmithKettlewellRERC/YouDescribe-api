@@ -249,7 +249,7 @@ const wishListController = {
     const requestedVideoAmount = (pgNumber === NaN || pgNumber === 0) ? 15 : (pgNumber * 15);
     let user_votes = [];
     console.log("userId :: ", userId);
-    if(!userId) {
+    if(userId) {
       user_votes = await UserVotes.find({ user: userId });
     }
     
