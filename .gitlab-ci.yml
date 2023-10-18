@@ -76,7 +76,7 @@ deploy-stage:
     # Delete the last YouDescribe-API container if one exists
     - docker rm $(docker ps -a | grep ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1) || true
     - echo "Starting up/Deploying newest YouDescribe-API build"
-    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME} --restart unless-stopped -d -p 0.0.0.0:8081:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
+    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} --restart unless-stopped -d -p 0.0.0.0:8081:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
     - echo "Finished deploying YouDescribe-API build to staging"
 
 deploy-prod:
@@ -97,5 +97,5 @@ deploy-prod:
     # Delete the last YouDescribe-API container if one exists
     - docker rm $(docker ps -a | grep ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1) || true
     - echo "Starting up/Deploying newest YouDescribe-API build"
-    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME} --restart unless-stopped -d -p 0.0.0.0:8080:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
+    - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} --restart unless-stopped -d -p 0.0.0.0:8080:8080 --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
     - echo "Finished deploying YouDescribe-API build to prod"
