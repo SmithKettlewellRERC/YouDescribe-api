@@ -71,10 +71,10 @@ deploy-stage:
   script:
     - echo "Stopping old YouDescribe-API instance"
     # Stop the currently running YouDescribe-API container if there is one running
-    - docker stop $(docker ps -a | grep ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
+    - docker stop $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
     - echo "Deleting old YouDescribe-API container"
     # Delete the last YouDescribe-API container if one exists
-    - docker rm $(docker ps -a | grep ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
+    - docker rm $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
     - echo "Starting up/Deploying newest YouDescribe-API build"
     - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} --restart unless-stopped -d -p 0.0.0.0:8081:8080 -e DB_PORT=${DB_PORT} --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
     - echo "Finished deploying YouDescribe-API build to staging"
@@ -92,10 +92,10 @@ deploy-prod:
   script:
     - echo "Stopping old YouDescribe-API instance"
     # Stop the currently running YouDescribe-API container if there is one running
-    - docker stop $(docker ps -a | grep ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} || true
+    - docker stop $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
     - echo "Deleting old YouDescribe-API container"
     # Delete the last YouDescribe-API container if one exists
-    - docker rm $(docker ps -a | grep ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} || true
+    - docker rm $(docker ps -a -q --filter="name=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH}) || true
     - echo "Starting up/Deploying newest YouDescribe-API build"
     - docker run -v /mnt/ebs/audio-descriptions-files:/mnt/ebs/audio-descriptions-files --name ${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH} --restart unless-stopped -d -p 0.0.0.0:8080:8080 -e DB_PORT=${DB_PORT} --add-host host.docker.internal:host-gateway ${CI_PROJECT_NAME}:${CI_COMMIT_REF_NAME}-1.${CI_PIPELINE_ID}
     - echo "Finished deploying YouDescribe-API build to prod"
