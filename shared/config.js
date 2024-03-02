@@ -56,9 +56,9 @@ module.exports = () => {
 
   var youTubeApiKey = "AIzaSyAfU2tpVpMKmIyTlRljnKfPUFWXrNXg21Q";
 
-  if(NODE_ENV == 'dev') {
+  if(NODE_ENV == 'prod') {
     youTubeApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U"
-  } else if (NODE_ENV == 'prod') {
+  } else if (NODE_ENV == 'dev') {
     youTubeApiKey = "AIzaSyDV8QMir3NE8S2jA1GyXvLXyTuSq72FPyE"
   }
 
