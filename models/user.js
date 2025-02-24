@@ -121,7 +121,7 @@ passport.use(
 
       try {
         User.findOneAndUpdate(
-          { google_user_id: googleUserId },
+          { apple_user_id: sub },
           { $set:
             {
               last_login: nowUtc(),
@@ -143,7 +143,7 @@ passport.use(
                 given_name: payload.given_name,
                 picture: payload.picture,
                 locale: payload.locale,
-                apple_user_id: appleUserId,
+                apple_user_id: sub,
                 last_login: nowUtc(),
                 token: newToken,
                 opt_in: [],
