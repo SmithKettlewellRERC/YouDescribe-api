@@ -21,32 +21,14 @@ router.get("/google/callback",
 );
 router.get("/apple", passport.authenticate('apple', { scope: ['name', 'email'] }));
 
-router.post("/apple/callback", function(req, res, next) {
-    console.log("Handling Apple Callback");
-    console.log('Request Body:', req.body);
-    passport.authenticate('apple', function(err, user, info) {
-        if (err) {
-            if (err == "AuthorizationError") {
-                res.send("Oops! Looks like you didn't allow the app to proceed. Please sign in again! <br /> \
-                <a href=\"/login\">Sign in with Apple</a>");
-            } else if (err == "TokenError") {
-                res.send("Oops! Couldn't get a valid token from Apple's servers! <br /> \
-                <a href=\"/login\">Sign in with Apple</a>");
-            } else {
-                res.send(err);
-            }
-        } else {
-            if (req.body.user) {
-                res.json({
-                    user: req.body.user,
-                    idToken: user
-                });
-            } else {
-                res.json(user);
-            }			
-        }
-    })(req, res, next);
-});
+router.post("/apple/callback", 
+    passport.authenticate("google",
+        {
+            successRedirect: config.AppleRedirectUrl,
+            failureRedirect: config.AppleRedirectUrl,
+            failureFlash: "Sign In Unsuccessful. Please try again!"
+        })
+);
 
 router.get("/login/success", (req, res) => {
     console.log("Request on /auth/login/success ", req);
