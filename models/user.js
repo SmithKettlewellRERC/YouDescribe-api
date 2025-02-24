@@ -113,7 +113,7 @@ passport.use(
     async (req, accessToken, refreshToken, idToken, profile, cb) => {
       const decodedToken = jsonwebtoken.decode(idToken);
       const { sub, email } = decodedToken;
-      consonle.log("sub", sub);
+      console.log("sub", sub);
       console.log("email", email);
 
       const firstTimeUser = typeof req.query['user'] === 'string' ? JSON.parse(req.query['user']) : undefined;
