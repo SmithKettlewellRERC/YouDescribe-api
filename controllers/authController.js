@@ -4,7 +4,7 @@ const nowUtc = require('./../shared/dateTime').nowUtc;
 const GoogleAuth = require('google-auth-library');
 const User = require('../models/user');
 const crypto = require('crypto');
-
+const passport = require('passport');
 const authController = {
   googleAuth: (req, res, next) => {
     const googleToken = req.body.googleToken;
@@ -70,6 +70,50 @@ const authController = {
         );
       }
     );
+  },
+  initAppleAuthentication:  (req, res, next) => {
+    try {
+      console.log('Initiating Apple Authentication');
+      passport.authenticate('apple', { scope: ['name', 'email'] })(req, res, next);
+    } catch (error) {
+      console.error('Error signing in with Apple: ', error);
+      next(error);
+    }
+  },
+  handleAppleCallback:  (req, res, next) => {
+    try {
+      console.log('Handling Apple Callback');
+      passport.authenticate('apple', function (err, user, info) {
+        if (err) {
+          if (err == 'AuthorizationError') {
+            res.send(
+              'Oops! Looks like you didn\'t allow the app to proceed. Please sign in again! <br /> \
+                <a href="/login">Sign in with Apple</a>',
+            );
+          } else if (err == 'TokenError') {
+            res.send(
+              'Oops! Couldn\'t get a valid token from Apple\'s servers! <br /> \
+                <a href="/login">Sign in with Apple</a>',
+            );
+          } else {
+            res.send(err);
+          }
+        } else {
+          if (req.body.user) {
+            // Get the profile info (name and email) if the person is registering
+            res.json({
+              user: req.body.user,
+              idToken: user,
+            });
+          } else {
+            res.json(user);
+          }
+        }
+      })(req, res, next);
+    } catch (error) {
+      console.error('Error with Apple Callback: ', error);
+      next(error);
+    }
   }
 };
 

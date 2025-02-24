@@ -5,6 +5,8 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const conf = require("../shared/config")();
 const nowUtc = require("../shared/dateTime").nowUtc;
 const crypto = require('crypto');
+const AppleStrategy = require('passport-apple');
+const path = require('path');
 
 const Schema = mongoose.Schema;
 
@@ -15,6 +17,7 @@ const userSchema = new Schema({
   picture: String,
   locale: String,
   google_user_id: String,
+  apple_user_id: String,
   created_at: Number,
   updated_at: Number,
   last_login: Number,
@@ -96,5 +99,73 @@ passport.use(new GoogleStrategy({
     );
   }
 ));
+
+passport.use(
+  new AppleStrategy(
+    {
+      clientID: conf.AppleClientId,
+      teamID: conf.AppleTeamId,
+      keyID: conf.AppleKeyId,
+      privateKeyLocation: path.join(__dirname, '../AuthKey_57HVXW9Y8Z.p8'),
+      callbackURL: conf.AppleCallbackUrl,
+    },
+    async (req, accessToken, refreshToken, idToken, profile, cb) => {
+      const decodedToken = jsonwebtoken.decode(idToken);
+      const { sub, email } = decodedToken;
+
+      const firstTimeUser = typeof req.query['user'] === 'string' ? JSON.parse(req.query['user']) : undefined;
+      const newToken = crypto
+        .createHmac('sha256', CRYPTO_SECRET)
+        .update(CRYPTO_SEED + moment().utc().format('YYYYMMDDHHmmss'))
+        .digest('hex');
+
+      try {
+        User.findOneAndUpdate(
+          { google_user_id: googleUserId },
+          { $set:
+            {
+              last_login: nowUtc(),
+              updated_at: nowUtc(),
+              token: newToken,
+            }
+          },
+          { new: true },
+          (err, user) => {
+            if (err) {
+              return cb(err,null);
+            }
+            if (user) {
+              return cb(null,user);
+            } else {
+              const newUser = new User({
+                email: payload.email,
+                name: payload.name,
+                given_name: payload.given_name,
+                picture: payload.picture,
+                locale: payload.locale,
+                apple_user_id: appleUserId,
+                last_login: nowUtc(),
+                token: newToken,
+                opt_in: [],
+              });
+              newUser.save((errNewUser, newUser) => {
+                if (errNewUser) {
+                  return cb(errNewUser,null);
+                }
+                if (newUser) {
+                  return cb(null,newUser);
+                } else {
+                  return cb(err,null);                 
+                }
+              });
+            }
+          }
+        );
+      } catch (error) {
+        return cb(error, null);
+      }
+    },
+  ),
+);
 
 module.exports = User;
