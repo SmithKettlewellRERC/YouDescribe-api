@@ -34,7 +34,11 @@ module.exports = () => {
   const passportRedirectUrl = "https://youdescribe.org";
   const passportCallbackUrl = "https://api.youdescribe.org/v1/auth/google/callback"
 
-
+  const AppleRedirectUrl = "https://youdescribe.org";
+  const AppleCallbackUrl = "https://api.youdescribe.org/v1/auth/apple/callback"
+  const AppleClientId = "com.youdescribex.sv"
+  const AppleTeamId = "E9BKVZ8679"
+  const AppleKeyId = "57HVXW9Y8Z"
 
   if (NODE_ENV === "prod" || NODE_ENV === "dev") {
     uploadsRootDirToServe = "/mnt/ebs/audio-descriptions-files";
@@ -100,6 +104,11 @@ module.exports = () => {
     uploadsRootDirToDelete,
     passportCallbackUrl,
     passportRedirectUrl,
+    AppleRedirectUrl,
+    AppleCallbackUrl,
+    AppleClientId,
+    AppleTeamId,
+    AppleKeyId,
     cryptoSeed,
     cryptoSecret,
     googleClientId,

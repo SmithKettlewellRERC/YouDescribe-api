@@ -19,6 +19,15 @@ router.get("/google/callback",
                             failureFlash: "Sign In Unsuccessful. Please try again!"
                         })
 );
+router.get("/apple", authController.initAppleAuthentication);
+
+router.post("/apple/callback", 
+    passport.authenticate("apple",
+    {
+        successRedirect: config.AppleRedirectUrl,
+        failureRedirect: config.AppleRedirectUrl,
+        failureFlash: "Sign In Unsuccessful. Please try again!"
+    }));
 router.get("/login/success", (req, res) => {
     console.log("Request on /auth/login/success ", req);
     if(req.user){
