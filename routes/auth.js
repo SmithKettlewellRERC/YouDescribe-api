@@ -19,9 +19,10 @@ router.get("/google/callback",
                             failureFlash: "Sign In Unsuccessful. Please try again!"
                         })
 );
-router.get("/apple", authController.initAppleAuthentication);
+router.get("/apple", passport.authenticate('apple', { scope: ['name', 'email'] }));
 
 router.post("/apple/callback", function(req, res, next) {
+    console.log("Handling Apple Callback");
     passport.authenticate('apple', function(err, user, info) {
         if (err) {
             if (err == "AuthorizationError") {
