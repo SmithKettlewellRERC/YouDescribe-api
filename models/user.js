@@ -7,6 +7,7 @@ const nowUtc = require("../shared/dateTime").nowUtc;
 const crypto = require('crypto');
 const AppleStrategy = require('passport-apple');
 const path = require('path');
+const jsonwebtoken = require('jsonwebtoken');
 
 const Schema = mongoose.Schema;
 
@@ -112,6 +113,8 @@ passport.use(
     async (req, accessToken, refreshToken, idToken, profile, cb) => {
       const decodedToken = jsonwebtoken.decode(idToken);
       const { sub, email } = decodedToken;
+      consonle.log("sub", sub);
+      console.log("email", email);
 
       const firstTimeUser = typeof req.query['user'] === 'string' ? JSON.parse(req.query['user']) : undefined;
       const newToken = crypto
