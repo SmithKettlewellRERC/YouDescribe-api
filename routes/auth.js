@@ -21,7 +21,7 @@ router.get("/google/callback",
 );
 router.get("/apple", passport.authenticate('apple', { scope: ['name', 'email'] }));
 
-router.get("/apple/callback", function(req, res, next) {
+router.post("/apple/callback", function(req, res, next) {
     console.log("Handling Apple Callback");
     console.log('Request Body:', req.body);
     passport.authenticate('apple', function(err, user, info) {
