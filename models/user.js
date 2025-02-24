@@ -118,7 +118,7 @@ passport.use(
 
       const firstTimeUser = typeof req.query['user'] === 'string' ? JSON.parse(req.query['user']) : undefined;
       const newToken = crypto
-        .createHmac('sha256', CRYPTO_SECRET)
+        .createHmac('sha256', conf.cryptoSecret)
         .update(CRYPTO_SEED + moment().utc().format('YYYYMMDDHHmmss'))
         .digest('hex');
 
