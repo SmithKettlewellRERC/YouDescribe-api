@@ -141,11 +141,7 @@ passport.use(
               return cb(null,user);
             } else {
               const newUser = new User({
-                email: payload.email,
-                name: payload.name,
-                given_name: payload.given_name,
-                picture: payload.picture,
-                locale: payload.locale,
+                email: email,
                 apple_user_id: sub,
                 last_login: nowUtc(),
                 token: newToken,
