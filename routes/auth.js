@@ -22,7 +22,7 @@ router.get("/google/callback",
 router.get("/apple", passport.authenticate('apple', { scope: ['name', 'email'] }));
 
 router.post("/apple/callback", 
-    passport.authenticate("google",
+    passport.authenticate("apple",
         {
             successRedirect: config.AppleRedirectUrl,
             failureRedirect: config.AppleRedirectUrl,
