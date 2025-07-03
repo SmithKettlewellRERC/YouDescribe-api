@@ -23,7 +23,7 @@ var now = null;
 setInterval(function () {
   now = moment().format("H:mm:ss");
   if (now === midnight) {
-    const youTubeApiKey = "AIzaSyBaJHiKgT4KW58WJ26tH4PIIQE6vbOvU8w"; // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
+    const youTubeApiKey = "AIzaSyBQFD0fJoEO2l8g0OIrqbtjj2qXXVNO__U"; // google cloud project: youdescribeadm@gmail.com -> youdescribe-0616
     Video.find({
       $or: [{ youtube_status: "" }, { youtube_status: { $exists: false } }],
     })
